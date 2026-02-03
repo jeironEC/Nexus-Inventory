@@ -6,7 +6,9 @@ dependencies = [
     "django>=6.0",
     "django-configurations",
     "django-extensions",
-    "djangorestframework"
+    "djangorestframework",
+    "drf-spectacular",
+    "drf-spectacular[sidecar]"
 ]
 
 [project.optional-dependencies]

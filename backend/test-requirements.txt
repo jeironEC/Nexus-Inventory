@@ -14,6 +14,10 @@ attrs==25.4.0 \
     # via
     #   jsonschema
     #   referencing
+certifi==2026.1.4 \
+    --hash=sha256:9943707519e4add1115f44c2bc244f782c0249876bf51b6599fee1ffbedd685c \
+    --hash=sha256:ac726dd470482006e014ad384921ed6438c457018f4b3d204aea4281258b2120
+    # via sentry-sdk
 coverage[toml]==7.13.2 \
     --hash=sha256:044c6951ec37146b72a50cc81ef02217d27d4c3640efd2640311393cbbf143d3 \
     --hash=sha256:060ebf6f2c51aff5ba38e1f43a2095e087389b1c69d559fde6049a4b0001320e \
@@ -118,9 +122,14 @@ django==6.0.1 \
     #   drf-spectacular
     #   drf-spectacular-sidecar
     #   nexus_inventory_backend (pyproject.toml)
+    #   sentry-sdk
 django-configurations==2.5.1 \
     --hash=sha256:6e5083757e2bbdf9bb7850567536b96a93515f6b17503d74928ff628db2e0e94 \
     --hash=sha256:ceb84858da2dac846b15e715c2fd936cfc4c7917c074aff8d31700564093955e
+    # via nexus_inventory_backend (pyproject.toml)
+django-environ==0.12.0 \
+    --hash=sha256:227dc891453dd5bde769c3449cf4a74b6f2ee8f7ab2361c93a07068f4179041a \
+    --hash=sha256:92fb346a158abda07ffe6eb23135ce92843af06ecf8753f43adf9d2366dcc0ca
     # via nexus_inventory_backend (pyproject.toml)
 django-extensions==4.1 \
     --hash=sha256:0699a7af28f2523bf8db309a80278519362cd4b6e1fd0a8cd4bf063e1e023336 \
@@ -385,6 +394,10 @@ rpds-py==0.30.0 \
     # via
     #   jsonschema
     #   referencing
+sentry-sdk[django]==2.52.0 \
+    --hash=sha256:931c8f86169fc6f2752cb5c4e6480f0d516112e78750c312e081ababecbaf2ed \
+    --hash=sha256:fa0bec872cfec0302970b2996825723d67390cdd5f0229fb9efed93bd5384899
+    # via nexus_inventory_backend (pyproject.toml)
 sqlparse==0.5.5 \
     --hash=sha256:12a08b3bf3eec877c519589833aed092e2444e68240a3577e8e26148acc7b1ba \
     --hash=sha256:e20d4a9b0b8585fdf63b10d30066c7c94c5d7a7ec47c889a2d83a3caa93ff28e
@@ -393,3 +406,7 @@ uritemplate==4.2.0 \
     --hash=sha256:480c2ed180878955863323eea31b0ede668795de182617fef9c6ca09e6ec9d0e \
     --hash=sha256:962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686
     # via drf-spectacular
+urllib3==2.6.3 \
+    --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed \
+    --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4
+    # via sentry-sdk

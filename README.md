@@ -180,3 +180,11 @@ python -m pytest
 ```bash
 python -m pytest tests/test_example.py
 ```
+
+### .env
+#### Crear el archivo .env
+Para usar sentry en el proyecto se debe crear el archivo .env y incluir la siguiente variable de entorno:
+
+```bash
+SENTRY_DSN="url_proporcionada_por_sentry"
+```

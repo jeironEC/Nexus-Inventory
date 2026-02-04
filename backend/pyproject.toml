@@ -11,6 +11,7 @@ dependencies = [
     "drf-spectacular[sidecar]",
     "sentry-sdk[django]",
     "django-environ",
+    "djangorestframework-simplejwt",
 ]
 
 [project.optional-dependencies]

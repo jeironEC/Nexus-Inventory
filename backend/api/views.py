@@ -21,6 +21,12 @@ from nexus_inventory_backend.db.models import User
 # Permissions
 from .permissions import CanCreateUsers
 
+# Rest framework
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+# Serializers
+from .serializers import EmailTokenObtainPairSerializer
+
 
 def healthcheck(request):
     """
@@ -63,3 +69,11 @@ class UserMeViewSet(viewsets.GenericViewSet):
         if request.method == "DELETE":
             request.user.soft_delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EmailTokenObtainPairViewSet(TokenObtainPairView):
+    """
+    ViewSet que permite obtener token usando el email
+    """
+
+    serializer_class = EmailTokenObtainPairSerializer

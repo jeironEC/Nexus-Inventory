@@ -15,5 +15,6 @@ router.register("users", UserMeViewSet, basename="user")
 urlpatterns = [
     path("health/", healthcheck, name="health"),  # Endpoint verifica estado del sistema
     path("", include("api.docs")),
+    path("auth/", include("api.auth")),
     *router.urls,
 ]

@@ -135,7 +135,7 @@ REST_FRAMEWORK = {
 
 
 sentry_sdk.init(
-    dsn=env("SENTRY_DSN"),
+    dsn=env("SENTRY_DSN", default=""),
     send_default_pii=True,
     integrations=[
         DjangoIntegration(

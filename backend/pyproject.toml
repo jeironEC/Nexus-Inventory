@@ -8,7 +8,9 @@ dependencies = [
     "django-extensions",
     "djangorestframework",
     "drf-spectacular",
-    "drf-spectacular[sidecar]"
+    "drf-spectacular[sidecar]",
+    "sentry-sdk[django]",
+    "django-environ",
 ]
 
 [project.optional-dependencies]

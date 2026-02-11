@@ -10,11 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+# Django environ
+import environ
+
+import sentry_sdk
+import django.db.models.signals
 from pathlib import Path
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env(DEBUG=(bool, False))
+
+environ.Env.read_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -123,3 +132,33 @@ STATIC_URL = "static/"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+
+sentry_sdk.init(
+    dsn=env("SENTRY_DSN", default=None),
+    environment=env("ENVIRONMENT", default="development"),
+    release=env("SENTRY_RELEASE", default=None),
+    send_default_pii=False,
+    traces_sample_rate=0.1,
+    integrations=[
+        DjangoIntegration(
+            transaction_style="url",
+            middleware_spans=True,
+            signals_spans=True,
+            signals_denylist=[
+                django.db.models.signals.pre_init,
+                django.db.models.signals.post_init,
+            ],
+            cache_spans=False,
+            http_methods_to_capture=(
+                "CONNECT",
+                "DELETE",
+                "GET",
+                "PATCH",
+                "POST",
+                "PUT",
+                "TRACE",
+            ),
+        ),
+    ],
+)

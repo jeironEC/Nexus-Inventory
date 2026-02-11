@@ -135,8 +135,11 @@ REST_FRAMEWORK = {
 
 
 sentry_sdk.init(
-    dsn=env("SENTRY_DSN", default=""),
-    send_default_pii=True,
+    dsn=env("SENTRY_DSN", default=None),
+    environment=env("ENVIRONMENT", default="development"),
+    release=env("SENTRY_RELEASE", default=None),
+    send_default_pii=False,
+    traces_sample_rate=0.1,
     integrations=[
         DjangoIntegration(
             transaction_style="url",
@@ -148,7 +151,7 @@ sentry_sdk.init(
             ],
             cache_spans=False,
             http_methods_to_capture=(
-                "CONNET",
+                "CONNECT",
                 "DELETE",
                 "GET",
                 "PATCH",

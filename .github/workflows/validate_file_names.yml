@@ -1,0 +1,28 @@
+name: Validate file names
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-file-names:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+
+        - name: Get changed files
+          id: files
+          uses: tj-actions/changed-files@v44
+
+        - name: Check for spaces in filenames
+          run: |
+            echo "Checking for files with spaces..."
+            for file in ${{ steps.files.outputs.all_changed_files }}; do
+                if [[ "$file" == *" "* ]]; then
+                    echo "❌ File with spaces detected: $file"
+                    exit 1
+                fi
+            done
+            echo "✅ No files with spaces detected."

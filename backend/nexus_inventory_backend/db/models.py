@@ -58,14 +58,20 @@ class User(AbstractUser):
 
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name="users")
 
-    updated_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS: list[str] = []
 
     objects = UserManager()
 
-    def delete(self, using=None, keep_parents=False):
+    def soft_delete(self):
         self.is_active = False
         self.deleted_at = timezone.now()
         self.save(update_fields=["is_active", "deleted_at"])
+
+    def save(self, *args, **kwargs):
+        if self.deleted_at and self.is_active:
+            raise ValueError("Deleted user cannot be active")
+        super().save(*args, **kwargs)

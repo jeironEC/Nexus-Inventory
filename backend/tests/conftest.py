@@ -73,3 +73,18 @@ def url_users_list():
 @pytest.fixture
 def url_user_me():
     return reverse("user-me")
+
+
+@pytest.fixture
+def url_token():
+    return reverse("token_obtain_pair")
+
+
+@pytest.fixture
+def url_token_refresh():
+    return reverse("token_refresh")
+
+
+@pytest.fixture
+def url_token_verify():
+    return reverse("token_verify")

@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
+from .serializers.token_pair import EmailTokenObtainPairSerializer
 
 # Models
 from nexus_inventory_backend.db.models import User
@@ -25,7 +26,6 @@ from .permissions import CanCreateUsers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Serializers
-from .serializers import EmailTokenObtainPairSerializer
 
 
 def healthcheck(request):

@@ -169,3 +169,62 @@ class CustomerPromotion(models.Model):
 
     def __str__(self):
         return f"{self.customer} - {self.promotion} - Applied: {self.applied}"
+
+
+class Invoice(models.Model):
+    class PaymentMethod(models.TextChoices):
+        CASH = "CASH", "Cash"
+        CARD = "CARD", "Card"
+        TRANSFER = "TRANSFER", "Transfer"
+
+    customer = models.ForeignKey(
+        Customer, on_delete=models.SET_NULL, related_name="invoices", null=True
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name="created_invoices", null=True
+    )
+    number_invoice = models.CharField(max_length=50, unique=True)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_method = models.CharField(
+        max_length=20, choices=PaymentMethod.choices, default=PaymentMethod.CASH
+    )
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    issue_date = models.DateTimeField(auto_now_add=True)
+    pdf_generated = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.number_invoice} - {self.issue_date}"
+
+
+class InventoryMovement(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="inventory_movements"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name="inventory_movements", null=True
+    )
+    quantity = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.name} - Quantity: {self.quantity}"
+
+
+class InvoiceDetail(models.Model):
+    invoice = models.ForeignKey(
+        Invoice, on_delete=models.CASCADE, related_name="details"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="invoice_details"
+    )
+    inventory_movement = models.OneToOneField(
+        InventoryMovement, on_delete=models.PROTECT, related_name="invoice_detail"
+    )
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.invoice.number_invoice} - {self.product.name}"

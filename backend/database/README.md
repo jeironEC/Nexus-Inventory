@@ -402,7 +402,7 @@ CREATE TABLE IF NOT EXISTS product (
 CREATE TABLE IF NOT EXISTS inventory (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT UNIQUE NOT NULl,
-    amount INT NOT NULL DEFAULT 0,
+    quantity INT NOT NULL DEFAULT 0,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id) REFERENCES product(id)
@@ -460,7 +460,7 @@ CREATE TABLE IF NOT EXISTS inventory_movement (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    amount INT NOT NULL,
+    quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id) REFERENCES product(id),
@@ -472,7 +472,7 @@ CREATE TABLE IF NOT EXISTS invoice_detail (
     invoice_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     inventory_movement_id BIGINT UNIQUE NOT NULL,
-    amount INT NOT NULL,
+    quantity INT NOT NULL,
     unit_price DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(12, 2) NOT NULL,
 
@@ -508,7 +508,7 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
     purchase_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     inventory_movement_id BIGINT UNIQUE NOT NULL,
-    amount INT NOT NULL,
+    quantity INT NOT NULL,
     unit_cost DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(12, 2) NOT NULL,
 

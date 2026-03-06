@@ -8,6 +8,9 @@ from .models import (
     Customer,
     Promotion,
     CustomerPromotion,
+    Invoice,
+    InventoryMovement,
+    InvoiceDetail,
 )
 
 admin.site.register(Role)
@@ -18,3 +21,6 @@ admin.site.register(Inventory)
 admin.site.register(Customer)
 admin.site.register(Promotion)
 admin.site.register(CustomerPromotion)
+admin.site.register(Invoice)
+admin.site.register(InventoryMovement)
+admin.site.register(InvoiceDetail)

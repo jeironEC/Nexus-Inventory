@@ -3,9 +3,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
 
+# Enums
+from .enums import State
+
+
 # Base model
-
-
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         """
@@ -75,3 +77,30 @@ class User(AbstractUser):
         if self.deleted_at and self.is_active:
             raise ValueError("Deleted user cannot be active")
         super().save(*args, **kwargs)
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Product(models.Model):
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, related_name="products", null=True
+    )
+    name = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    unique_code = models.CharField(max_length=50, unique=True)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

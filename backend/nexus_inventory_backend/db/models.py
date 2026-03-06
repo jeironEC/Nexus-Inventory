@@ -6,6 +6,12 @@ from django.utils import timezone
 # Enums
 from .enums import State
 
+"""
+auto_now_add=True -> Se asigna la fecha y hora solo al crear el registro (equivale a DEFAULT CURRENT_TIMESTAMP).
+
+auto_now=True -> Se actualiza la fecha y hora cada vez que se guarda el registro (equivale a ON UPDATE CURRENT_TIMESTAMP).
+"""
+
 
 # Base model
 class UserManager(BaseUserManager):
@@ -104,3 +110,14 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Inventory(models.Model):
+    product = models.OneToOneField(
+        Product, on_delete=models.PROTECT, related_name="inventory"
+    )
+    quantity = models.IntegerField(default=0)
+    last_update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.product.name} - Stock: {self.quantity}"

@@ -369,7 +369,7 @@ CREATE TABLE IF NOT EXISTS user (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(120) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    state ENUM('activo', 'inactivo') DEFAULT 'activo',
+    state ENUM('active', 'inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
 
@@ -380,7 +380,7 @@ CREATE TABLE IF NOT EXISTS category (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     description TEXT,
-    state ENUM('activa', 'inactiva') DEFAULT 'activa',
+    state ENUM('active', 'inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -447,8 +447,8 @@ CREATE TABLE IF NOT EXISTS invoice (
     subtotal DECIMAL(12, 2) NOT NULL,
     tax_amount DECIMAL(12, 2) DEFAULT 0,
     total_amount DECIMAL(12, 2) NOT NULL,
-    payment_method ENUM('efectivo', 'tarjeta', 'transferencia') DEFAULT 'efectivo',
-    state ENUM('emitida', 'cancelada') DEFAULT 'emitida',
+    payment_method ENUM('cash', 'card', 'transfer') DEFAULT 'cash',
+    state ENUM('issued', 'canceled') DEFAULT 'issued',
     issue_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     pdf_generated BOOLEAN DEFAULT FALSE,
 
@@ -487,7 +487,7 @@ CREATE TABLE IF NOT EXISTS supplier (
     email VARCHAR(120),
     number_phone VARCHAR(50),
     address TEXT,
-    state ENUM('activo', 'inactivo') DEFAULT 'activo',
+    state ENUM('active', 'inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -497,7 +497,7 @@ CREATE TABLE IF NOT EXISTS purchase (
     user_id BIGINT NOT NULL,
     total_amount DECIMAL(12, 2) NOT NULL,
     purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    state ENUM('completada', 'cancelada') DEFAULT 'completada',
+    state ENUM('completed', 'canceled') DEFAULT 'completed',
 
     FOREIGN KEY (supplier_id) REFERENCES supplier(id),
     FOREIGN KEY (user_id) REFERENCES user(id)

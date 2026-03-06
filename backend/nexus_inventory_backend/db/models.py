@@ -178,7 +178,11 @@ class Invoice(models.Model):
         TRANSFER = "TRANSFER", "Transfer"
 
     customer = models.ForeignKey(
-        Customer, on_delete=models.SET_NULL, related_name="invoices", null=True
+        Customer,
+        on_delete=models.SET_NULL,
+        related_name="invoices",
+        null=True,
+        blank=True,
     )
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, related_name="created_invoices", null=True
@@ -228,3 +232,54 @@ class InvoiceDetail(models.Model):
 
     def __str__(self):
         return f"{self.invoice.number_invoice} - {self.product.name}"
+
+
+class Supplier(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=120)
+    number_phone = models.CharField(max_length=50)
+    address = models.TextField(blank=True)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.email}"
+
+
+class Purchase(models.Model):
+    class StatePurchase(models.TextChoices):
+        COMPLETED = "COMPLETED", "Completed"
+        CANCELED = "CANCELED", "Canceled"
+
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.PROTECT, related_name="purchases"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name="purchases", null=True
+    )
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+    state = models.CharField(
+        max_length=20, choices=StatePurchase.choices, default=StatePurchase.COMPLETED
+    )
+
+    def __str__(self):
+        return f"{self.supplier.name} - {self.total_amount} - {self.purchase_date}"
+
+
+class PurchaseDetail(models.Model):
+    purchase = models.ForeignKey(
+        Purchase, on_delete=models.CASCADE, related_name="details"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="purchase_details"
+    )
+    inventory_movement = models.OneToOneField(
+        InventoryMovement, on_delete=models.PROTECT, related_name="purchase_detail"
+    )
+    quantity = models.IntegerField()
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.purchase.supplier.name} - {self.product.name} - {self.quantity}"

@@ -11,6 +11,9 @@ from .models import (
     Invoice,
     InventoryMovement,
     InvoiceDetail,
+    Supplier,
+    Purchase,
+    PurchaseDetail,
 )
 
 admin.site.register(Role)
@@ -24,3 +27,6 @@ admin.site.register(CustomerPromotion)
 admin.site.register(Invoice)
 admin.site.register(InventoryMovement)
 admin.site.register(InvoiceDetail)
+admin.site.register(Supplier)
+admin.site.register(Purchase)
+admin.site.register(PurchaseDetail)

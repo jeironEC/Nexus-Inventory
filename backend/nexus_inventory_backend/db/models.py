@@ -114,10 +114,58 @@ class Product(models.Model):
 
 class Inventory(models.Model):
     product = models.OneToOneField(
-        Product, on_delete=models.PROTECT, related_name="inventory"
+        Product, on_delete=models.PROTECT, related_name="inventories"
     )
     quantity = models.IntegerField(default=0)
     last_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.product.name} - Stock: {self.quantity}"
+
+
+class Customer(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=120)
+    number_phone = models.CharField(max_length=50)
+    address = models.TextField(blank=True)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}: {self.email}"
+
+
+class Promotion(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+
+    def __str__(self):
+        return f"{self.name} - Discount: {self.discount_percentage}%"
+
+
+class CustomerPromotion(models.Model):
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name="customer_promotions"
+    )
+    promotion = models.ForeignKey(
+        Promotion, on_delete=models.CASCADE, related_name="customer_promotions"
+    )
+    applied = models.BooleanField(default=False)
+    assignment_date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["customer", "promotion"], name="unique_customer_promotion"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.customer} - {self.promotion} - Applied: {self.applied}"

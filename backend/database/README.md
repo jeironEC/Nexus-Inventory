@@ -116,7 +116,7 @@ product (1) ─── (1) inventory
 Reglas de negocio:
 * Cada producto debe tener un único registro en inventario (product_id UNIQUE).
 * El producto es obligatorio para crear un registro de inventario (product_id NOT NULL).
-* La cantidad de inventario no puede ser nula (amount NOT NULL).
+* La cantidad de inventario no puede ser nula (quantity NOT NULL).
 * El stock inicial de un producto es 0 por defecto.
 * La fecha de última actualización se modifica automáticamente cuando cambia el stock (last_update).
 
@@ -240,7 +240,7 @@ inventory_movement (1) ─── (1) purchase_detail
 Reglas de negocio:
 * Cada movimiento debe estar asociado a un producto existente (product_id NOT NULL).
 * Cada movimiento debe registrar el usuario que realizó la operación (user_id NOT NULL).
-* El campo amount representa la cantidad de unidades movidas.
+* El campo quantity representa la cantidad de unidades movidas.
 * La fecha del movimiento se registra automáticamente mediante created_at.
 * Los movimientos no se crean manualmente, sino como resultado de:
 * una venta (factura) → salida de inventario
@@ -269,9 +269,9 @@ Reglas de negocio:
 * Si una factura se elimina, todos sus detalles se eliminan automáticamente (ON DELETE CASCADE).
 * Cada detalle debe referenciar un producto existente (product_id NOT NULL).
 * Cada detalle está vinculado a un único movimiento de inventario (inventory_movement_id UNIQUE).
-* La cantidad vendida se almacena en amount.
+* La cantidad vendida se almacena en quantity.
 * El precio unitario corresponde al precio del producto en el momento de la venta, no necesariamente al precio actual del producto.
-* El subtotal se calcula como amount × unit_price.
+* El subtotal se calcula como quantity × unit_price.
 * Cada línea de factura debe generar un movimiento de inventario de salida (regla de negocio a nivel de aplicación).
 
 ---
@@ -348,9 +348,9 @@ Reglas de negocio:
 * Si una compra se elimina, todos sus detalles se eliminan automáticamente (ON DELETE CASCADE).
 * Cada detalle debe referenciar un producto existente (product_id NOT NULL).
 * Cada detalle está vinculado a un único movimiento de inventario (inventory_movement_id UNIQUE).
-* La cantidad comprada se almacena en amount.
+* La cantidad comprada se almacena en quantity.
 * El costo unitario corresponde al precio de adquisición del producto en el momento de la compra (unit_cost).
-* El subtotal se calcula como amount × unit_cost.
+* El subtotal se calcula como quantity × unit_cost.
 * Cada línea de compra debe generar un movimiento de inventario de entrada (regla de negocio a nivel de aplicación).
 * Una compra cancelada no debería generar movimientos de inventario nuevos ni afectar el stock (regla de negocio a nivel de aplicación).
 
@@ -402,7 +402,7 @@ CREATE TABLE IF NOT EXISTS product (
 CREATE TABLE IF NOT EXISTS inventory (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT UNIQUE NOT NULl,
-    amount INT NOT NULL DEFAULT 0,
+    quantity INT NOT NULL DEFAULT 0,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id) REFERENCES product(id)
@@ -460,7 +460,7 @@ CREATE TABLE IF NOT EXISTS inventory_movement (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    amount INT NOT NULL,
+    quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (product_id) REFERENCES product(id),
@@ -472,7 +472,7 @@ CREATE TABLE IF NOT EXISTS invoice_detail (
     invoice_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     inventory_movement_id BIGINT UNIQUE NOT NULL,
-    amount INT NOT NULL,
+    quantity INT NOT NULL,
     unit_price DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(12, 2) NOT NULL,
 
@@ -508,7 +508,7 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
     purchase_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     inventory_movement_id BIGINT UNIQUE NOT NULL,
-    amount INT NOT NULL,
+    quantity INT NOT NULL,
     unit_cost DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(12, 2) NOT NULL,
 

@@ -1,4 +1,5 @@
 # Esquema base de datos (Nexus Inventory)
+Este esquema está diseñado utilizando tablas y campos en inglés para garantizar una mayor compatibilidad y escalabilidad.
 
 ## Proposito de cada tabla
 

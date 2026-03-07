@@ -1,6 +1,5 @@
 # Django
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 
 # Rest framework
 from rest_framework import mixins, status, viewsets
@@ -10,20 +9,24 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated
 
 # Serializers
+from .serializers.user_role import UserRoleSerializer
 from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
 from .serializers.token_pair import EmailTokenObtainPairSerializer
-from .serializers.user_role import UserRoleSerializer
+from .serializers.category import CategorySerializer
 
 # Models
-from nexus_inventory_backend.db.models import Role, User
+from nexus_inventory_backend.db.models import Role, User, Category
 
 # Permissions
 from .permissions import CanCreateUsers
 
 # Rest framework
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+# Enums
+from nexus_inventory_backend.db.enums import State
 
 
 def healthcheck(request):
@@ -38,11 +41,6 @@ class UserRoleViewSet(viewsets.ModelViewSet):
     serializer_class = UserRoleSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "patch", "delete"]
-
-    def destroy(self, request, *args, **kwargs):
-        role = get_object_or_404(Role, pk=kwargs["pk"])
-        role.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
@@ -87,3 +85,30 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     """
 
     serializer_class = EmailTokenObtainPairSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all().order_by("name")
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "post", "patch", "delete"]
+
+    @action(detail=True, methods=["patch"], serializer_class=None)
+    def activate(self, request, pk=None):
+        category = self.get_object()
+        category.state = State.ACTIVE
+        category.save()
+
+        return Response(
+            {"id": category.id, "state": category.state}, status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["patch"], serializer_class=None)
+    def deactivate(self, request, pk=None):
+        category = self.get_object()
+        category.state = State.INACTIVE
+        category.save()
+
+        return Response(
+            {"id": category.id, "state": category.state}, status=status.HTTP_200_OK
+        )

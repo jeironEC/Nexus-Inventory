@@ -7,19 +7,15 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import Role
 
-# Django
-
 
 @pytest.mark.django_db
-def test_get_role_by_id_returns_200(
-    api_client_auth, admin_user, role_detail_url, admin_role
-):
+def test_get_role_by_id_returns_200(api_client_auth, role_detail_url, admin_role):
     response = api_client_auth.get(role_detail_url(admin_role.pk))
     assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
-def test_get_list_roles_returns_200(api_client_auth, admin_user, roles_url):
+def test_get_list_roles_returns_200(api_client_auth, roles_url):
     response = api_client_auth.get(roles_url)
     assert response.status_code == status.HTTP_200_OK
 
@@ -31,7 +27,7 @@ def test_list_roles_ruturns_list(api_client_auth, roles_url, admin_role, cashier
 
 
 @pytest.mark.django_db
-def test_list_roles_fields_present(api_client_auth, admin_user, roles_url, admin_role):
+def test_list_roles_fields_present(api_client_auth, roles_url, admin_role):
     response = api_client_auth.get(roles_url)
     data = response.data[0]
     assert set(data.keys()) == {"id", "name", "description", "created_at"}
@@ -177,7 +173,7 @@ def test_delete_role_remove_from_db(api_client_auth, role_detail_url, cashier_ro
 
 
 @pytest.mark.django_db
-def test_delete_role_noexistent_role_returns_404(api_client_auth, role_detail_url):
+def test_delete_role_noexistent_returns_404(api_client_auth, role_detail_url):
     response = api_client_auth.delete(role_detail_url(999))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 

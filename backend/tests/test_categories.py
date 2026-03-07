@@ -45,6 +45,18 @@ def test_list_categories_unauthenticated_return_401(api_client, categories_url):
 
 
 @pytest.mark.django_db
+def test_returns_list_categories_actives(api_client_auth, categories_actives_url):
+    response = api_client_auth.get(categories_actives_url)
+    assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_returns_list_categories_inactives(api_client_auth, categories_inactives_url):
+    response = api_client_auth.get(categories_inactives_url)
+    assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
 def test_create_category_returns_201(api_client_auth, categories_url, payload_category):
     response = api_client_auth.post(categories_url, payload_category)
     assert response.status_code == status.HTTP_201_CREATED

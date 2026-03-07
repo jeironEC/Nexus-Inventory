@@ -136,6 +136,16 @@ def categories_url():
 
 
 @pytest.fixture
+def categories_actives_url():
+    return reverse("categories-active")
+
+
+@pytest.fixture
+def categories_inactives_url():
+    return reverse("categories-inactive")
+
+
+@pytest.fixture
 def category_detail_url():
     def _url(pk):
         return reverse("categories-detail", kwargs={"pk": pk})

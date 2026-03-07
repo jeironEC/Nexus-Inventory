@@ -93,6 +93,18 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "patch", "delete"]
 
+    @action(detail=False, methods=["get"])
+    def active(self, request):
+        categories = Category.objects.filter(state=State.ACTIVE)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"])
+    def inactive(self, request):
+        categories = Category.objects.filter(state=State.INACTIVE)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=["patch"], serializer_class=None)
     def activate(self, request, pk=None):
         category = self.get_object()

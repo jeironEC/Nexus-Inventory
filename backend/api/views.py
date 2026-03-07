@@ -1,7 +1,6 @@
 # Django
 from django.http import JsonResponse
-
-# HTTP
+from django.shortcuts import get_object_or_404
 
 # Rest framework
 from rest_framework import mixins, status, viewsets
@@ -15,9 +14,10 @@ from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
 from .serializers.token_pair import EmailTokenObtainPairSerializer
+from .serializers.user_role import UserRoleSerializer
 
 # Models
-from nexus_inventory_backend.db.models import User
+from nexus_inventory_backend.db.models import Role, User
 
 # Permissions
 from .permissions import CanCreateUsers
@@ -25,14 +25,24 @@ from .permissions import CanCreateUsers
 # Rest framework
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-# Serializers
-
 
 def healthcheck(request):
     """
     Vista para mostrar el estado correcto de la API
     """
     return JsonResponse({"health": "ok"}, status=200)
+
+
+class UserRoleViewSet(viewsets.ModelViewSet):
+    queryset = Role.objects.all().order_by("name")
+    serializer_class = UserRoleSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "post", "patch", "delete"]
+
+    def destroy(self, request, *args, **kwargs):
+        role = get_object_or_404(Role, pk=kwargs["pk"])
+        role.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):

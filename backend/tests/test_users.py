@@ -9,10 +9,8 @@ from nexus_inventory_backend.db.models import User
 
 
 @pytest.mark.django_db
-def test_admin_can_create_user(api_client, admin_user, url_users_list, payload_user):
-    api_client.force_authenticate(admin_user)
-
-    response = api_client.post(url_users_list, payload_user)
+def test_admin_can_create_user(api_client_auth, url_users_list, payload_user):
+    response = api_client_auth.post(url_users_list, payload_user)
 
     assert response.status_code == status.HTTP_201_CREATED
     assert User.objects.filter(email="new@test.com").exists()
@@ -41,12 +39,8 @@ def test_soft_delete_me(api_client, normal_user, url_user_me):
     assert normal_user.is_active is False
 
 
-def test_register_throttling(
-    api_client, admin_user, cashier_role, url_users_list, payload_user
-):
-    api_client.force_authenticate(admin_user)
-
+def test_register_throttling(api_client_auth, url_users_list, payload_user):
     for i in range(6):
-        response = api_client.post(url_users_list, payload_user)
+        response = api_client_auth.post(url_users_list, payload_user)
 
     assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS

@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.test import Client
 
 # Models
-from nexus_inventory_backend.db.models import User, Role
+from nexus_inventory_backend.db.models import User, Role, Category
 
 
 @pytest.fixture
@@ -128,3 +128,65 @@ def payload_role_no_description():
     return {
         "name": "Cajero",
     }
+
+
+@pytest.fixture
+def categories_url():
+    return reverse("categories-list")
+
+
+@pytest.fixture
+def category_detail_url():
+    def _url(pk):
+        return reverse("categories-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def category_activate_url():
+    def _url(pk):
+        return reverse("categories-activate", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def category_deactivate_url():
+    def _url(pk):
+        return reverse("categories-deactivate", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def category(db):
+    return Category.objects.create(
+        name="Electronics", description="An electronics products"
+    )
+
+
+@pytest.fixture
+def another_category(db):
+    return Category.objects.create(name="Shoes", description="A shoes products")
+
+
+@pytest.fixture
+def payload_category():
+    return {
+        "name": "Electronics",
+        "description": "An electronics products",
+    }
+
+
+@pytest.fixture
+def payload_another_category():
+    return {
+        "name": "Shoes",
+        "description": "A shoes products",
+    }
+
+
+@pytest.fixture
+def payload_category_no_name():
+    return {"description": "An electronics products"}

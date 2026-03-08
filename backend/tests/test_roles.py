@@ -40,6 +40,12 @@ def test_list_roles_unauthenticated_return_401(api_client, roles_url):
 
 
 @pytest.mark.django_db
+def test_search_roles(api_client_auth, admin_role):
+    response = api_client_auth.get(f"/v1/roles/?search={admin_role.name}")
+    assert len(response.data) >= 1
+
+
+@pytest.mark.django_db
 def test_create_role_returns_201(api_client_auth, roles_url, payload_role_cashier):
     response = api_client_auth.post(roles_url, payload_role_cashier)
     assert response.status_code == status.HTTP_201_CREATED

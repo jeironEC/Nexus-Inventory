@@ -57,6 +57,12 @@ def test_returns_list_categories_inactives(api_client_auth, categories_inactives
 
 
 @pytest.mark.django_db
+def test_search_categories(api_client_auth, category):
+    response = api_client_auth.get(f"/v1/categories/?search={category.name}")
+    assert len(response.data) >= 1
+
+
+@pytest.mark.django_db
 def test_create_category_returns_201(api_client_auth, categories_url, payload_category):
     response = api_client_auth.post(categories_url, payload_category)
     assert response.status_code == status.HTTP_201_CREATED
@@ -214,7 +220,7 @@ def test_deactivate_category_not_found_returns_404(
 
 
 @pytest.mark.django_db
-def test_delete_role_returns_204(api_client_auth, category_detail_url, category):
+def test_delete_category_returns_204(api_client_auth, category_detail_url, category):
     response = api_client_auth.delete(category_detail_url(category.pk))
     assert response.status_code == status.HTTP_204_NO_CONTENT
 

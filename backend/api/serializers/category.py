@@ -22,9 +22,6 @@ class CategorySerializer(serializers.ModelSerializer):
         ]
 
     def validate_name(self, value):
-        if not value or not value.strip():
-            raise serializers.ValidationError("Category name cannot be empty.")
-
         queryset = Category.objects.filter(name__iexact=value)
 
         if self.instance:

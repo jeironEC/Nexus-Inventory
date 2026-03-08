@@ -17,9 +17,10 @@ from .serializers.user_update import UserUpdateSerializer
 from .serializers.token_pair import EmailTokenObtainPairSerializer
 from .serializers.category import CategorySerializer
 from .serializers.product import ProductSerializer
+from .serializers.inventory import InventorySerializer
 
 # Models
-from nexus_inventory_backend.db.models import Role, User, Category, Product
+from nexus_inventory_backend.db.models import Role, User, Category, Product, Inventory
 
 # Permissions
 from .permissions import CanCreateUsers
@@ -29,6 +30,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Enums
 from nexus_inventory_backend.db.enums import State
+
+# Variables globales
+LOW_STOCK_THRESHOLD = 5
 
 
 def healthcheck(request):
@@ -48,10 +52,10 @@ class UserRoleViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+    queryset = User.objects.filter(deleted_at__isnull=True)
     serializer_class = UserCreateSerializer
     permission_classes = [IsAuthenticated, CanCreateUsers]
     throttle_classes = [UserRateThrottle]
-    queryset = User.objects.filter(deleted_at__isnull=True)
 
 
 class UserMeViewSet(viewsets.GenericViewSet):
@@ -179,3 +183,29 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(
             {"id": product.id, "state": product.state}, status=status.HTTP_200_OK
         )
+
+
+class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Inventory.objects.select_related("product").all()
+    serializer_class = InventorySerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["product"]
+    search_fields = ["product__name"]
+
+    @action(detail=False, methods=["get"], url_path="<int:product_id>")
+    def get_by_product(self, request, product_id=None):
+        try:
+            inventory = Inventory.objects.get(product_id=product_id)
+        except Inventory.DoesNotExist:
+            return Response(
+                {"detail": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.get_serializer(inventory)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="low-stock")
+    def low_stock(self, request):
+        inventory = Inventory.objects.filter(quantity__lte=LOW_STOCK_THRESHOLD)
+        serializer = self.get_serializer(inventory, many=True)
+        return Response(serializer.data)

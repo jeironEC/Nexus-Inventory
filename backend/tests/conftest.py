@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.test import Client
 
 # Models
-from nexus_inventory_backend.db.models import User, Role, Category, Product
+from nexus_inventory_backend.db.models import User, Role, Category, Product, Inventory
 
 
 @pytest.fixture
@@ -298,3 +298,44 @@ def payload_product_no_unique_code(category):
         "sale_price": 160.00,
         "purchase_price": 200.00,
     }
+
+
+@pytest.fixture
+def inventories_url():
+    return reverse("inventories-list")
+
+
+@pytest.fixture
+def inventory_detail_url():
+    def _url(pk):
+        return reverse("inventories-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def inventories_product_url():
+    def _url(pk):
+        return reverse("inventories-get-by-product", kwargs={"product_id": pk})
+
+    return _url
+
+
+@pytest.fixture
+def inventories_low_stock_url():
+    return reverse("inventories-low-stock")
+
+
+@pytest.fixture
+def inventory(db, product):
+    return Inventory.objects.create(product=product, quantity=10)
+
+
+@pytest.fixture
+def another_inventory(db, another_product):
+    return Inventory.objects.create(product=another_product, quantity=10)
+
+
+@pytest.fixture
+def low_inventory(db, another_product):
+    return Inventory.objects.create(product=another_product, quantity=4)

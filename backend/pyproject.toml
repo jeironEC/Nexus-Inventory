@@ -12,6 +12,7 @@ dependencies = [
     "sentry-sdk[django]",
     "django-environ",
     "djangorestframework-simplejwt",
+    "django-filter",
 ]
 
 [project.optional-dependencies]

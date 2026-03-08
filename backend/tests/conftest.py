@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.test import Client
 
 # Models
-from nexus_inventory_backend.db.models import User, Role, Category
+from nexus_inventory_backend.db.models import User, Role, Category, Product
 
 
 @pytest.fixture
@@ -200,3 +200,101 @@ def payload_another_category():
 @pytest.fixture
 def payload_category_no_name():
     return {"description": "An electronics products"}
+
+
+@pytest.fixture
+def products_url():
+    return reverse("products-list")
+
+
+@pytest.fixture
+def products_actives_url():
+    return reverse("products-active")
+
+
+@pytest.fixture
+def products_inactives_url():
+    return reverse("products-inactive")
+
+
+@pytest.fixture
+def product_detail_url():
+    def _url(pk):
+        return reverse("products-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def product_activate_url():
+    def _url(pk):
+        return reverse("products-activate", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def product_deactivate_url():
+    def _url(pk):
+        return reverse("products-deactivate", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def product(db, category):
+    return Product.objects.create(
+        category=category,
+        name="Laptop",
+        description="Huawei D16",
+        unique_code="1234abcd",
+        sale_price=400.00,
+        purchase_price=440.00,
+    )
+
+
+@pytest.fixture
+def another_product(db, another_category):
+    return Product.objects.create(
+        category=another_category,
+        name="Movil",
+        description="Samsung Galaxy S25 FE",
+        unique_code="4321abcd",
+        sale_price=650.00,
+        purchase_price=740.00,
+    )
+
+
+@pytest.fixture
+def payload_product(category):
+    return {
+        "category": category.pk,
+        "name": "Product",
+        "description": "Test product",
+        "unique_code": "1234abcd",
+        "sale_price": 160.00,
+        "purchase_price": 200.00,
+    }
+
+
+@pytest.fixture
+def payload_another_product(another_category):
+    return {
+        "category": another_category.pk,
+        "name": "Product 2",
+        "description": "Test product 2",
+        "unique_code": "4321dcba",
+        "sale_price": 230.00,
+        "purchase_price": 250.00,
+    }
+
+
+@pytest.fixture
+def payload_product_no_unique_code(category):
+    return {
+        "category": category.pk,
+        "name": "Product",
+        "description": "Test product",
+        "sale_price": 160.00,
+        "purchase_price": 200.00,
+    }

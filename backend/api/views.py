@@ -20,9 +20,11 @@ from .serializers.category import CategorySerializer
 from .serializers.product import ProductSerializer
 from .serializers.inventory import InventorySerializer
 from .serializers.inventory_movement import InventoryMovementSerializer
+from .serializers.customer import CustomerSerializer
 
 # Filters
-from .filters import InventoryMovementFilter
+from .filters.inventory_movements import InventoryMovementFilter
+from .filters.customer import CustomerFilter
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -32,6 +34,7 @@ from nexus_inventory_backend.db.models import (
     Product,
     Inventory,
     InventoryMovement,
+    Customer,
 )
 
 # Permissions
@@ -227,3 +230,12 @@ class InventoryMovementViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = InventoryMovementFilter
     http_method_names = ["get"]
+
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CustomerFilter
+    http_method_names = ["get", "post", "patch", "delete"]

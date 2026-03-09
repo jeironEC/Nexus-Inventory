@@ -124,8 +124,9 @@ class Inventory(models.Model):
 
 
 class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=120)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=120, unique=True)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)

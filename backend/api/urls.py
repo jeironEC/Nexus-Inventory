@@ -14,6 +14,7 @@ from .views import (
     ProductViewSet,
     InventoryViewSet,
     InventoryMovementViewSet,
+    CustomerViewSet,
 )
 
 router = SimpleRouter(use_regex_path=False)
@@ -27,6 +28,7 @@ router.register("inventories", InventoryViewSet, basename="inventories")
 router.register(
     "inventory_movements", InventoryMovementViewSet, basename="inventory_movements"
 )
+router.register("customers", CustomerViewSet, basename="customers")
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),  # Endpoint verifica estado del sistema

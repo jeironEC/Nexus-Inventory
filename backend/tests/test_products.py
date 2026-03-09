@@ -96,7 +96,6 @@ def test_create_product_response_contains_fields(
     api_client_auth, products_url, payload_product
 ):
     response = api_client_auth.post(products_url, payload_product)
-    print(f"\n\n\n {response.data}")
     assert response.data["name"] == "Product"
 
 

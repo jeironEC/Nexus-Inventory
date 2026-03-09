@@ -16,9 +16,13 @@ from nexus_inventory_backend.db.models import (
     Product,
     Inventory,
     InventoryMovement,
+    Customer,
 )
 
 
+# =============================================================================================================================================================================
+# CLIENTS
+# =============================================================================================================================================================================
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -29,6 +33,15 @@ def client():
     return Client()
 
 
+@pytest.fixture
+def api_client_auth(api_client, admin_user):
+    api_client.force_authenticate(user=admin_user)
+    return api_client
+
+
+# =============================================================================================================================================================================
+# OBJECTS DATABASE
+# =============================================================================================================================================================================
 @pytest.fixture
 def admin_role(db):
     return Role.objects.create(name="ADMIN", description="Administrador de usuarios")
@@ -61,18 +74,106 @@ def admin_user(db, admin_role):
 
 
 @pytest.fixture
-def api_client_auth(api_client, admin_user):
-    api_client.force_authenticate(user=admin_user)
-    return api_client
-
-
-@pytest.fixture
 def normal_user(db, cashier_role):
     return User.objects.create_user(
         email="user@test.com", password="StrongPass123!", role=cashier_role
     )
 
 
+@pytest.fixture
+def category(db):
+    return Category.objects.create(
+        name="Electronics", description="An electronics products"
+    )
+
+
+@pytest.fixture
+def another_category(db):
+    return Category.objects.create(name="Shoes", description="A shoes products")
+
+
+@pytest.fixture
+def product(db, category):
+    return Product.objects.create(
+        category=category,
+        name="Laptop",
+        description="Huawei D16",
+        unique_code="1234abcd",
+        sale_price=400.00,
+        purchase_price=440.00,
+    )
+
+
+@pytest.fixture
+def another_product(db, another_category):
+    return Product.objects.create(
+        category=another_category,
+        name="Movil",
+        description="Samsung Galaxy S25 FE",
+        unique_code="4321abcd",
+        sale_price=650.00,
+        purchase_price=740.00,
+    )
+
+
+@pytest.fixture
+def inventory(db, product):
+    return Inventory.objects.create(product=product, quantity=10)
+
+
+@pytest.fixture
+def another_inventory(db, another_product):
+    return Inventory.objects.create(product=another_product, quantity=10)
+
+
+@pytest.fixture
+def low_inventory(db, another_product):
+    return Inventory.objects.create(product=another_product, quantity=4)
+
+
+@pytest.fixture
+def inventory_movements(db, product, admin_user):
+    return InventoryMovement.objects.create(
+        product=product,
+        user=admin_user,
+        quantity=10,
+    )
+
+
+@pytest.fixture
+def another_inventory_movements(db, another_product):
+    return InventoryMovement.objects.create(
+        product=another_product,
+        user=None,
+        quantity=20,
+    )
+
+
+@pytest.fixture
+def customer(db):
+    return Customer.objects.create(
+        first_name="Eduardo",
+        last_name="Bonilla",
+        email="eduardobonilla@gmail.com",
+        number_phone="640664411",
+        address="Av. Espaillat 123, Bj 2",
+    )
+
+
+@pytest.fixture
+def another_customer(db):
+    return Customer.objects.create(
+        first_name="Rafael",
+        last_name="Estrella",
+        email="rafaelestrella@gmail.com",
+        number_phone="640443322",
+        address="Av. Argentina 12, Piso 4A",
+    )
+
+
+# =============================================================================================================================================================================
+# PAYLOADS
+# =============================================================================================================================================================================
 @pytest.fixture
 def payload_user(cashier_role):
     return {
@@ -82,6 +183,93 @@ def payload_user(cashier_role):
     }
 
 
+@pytest.fixture
+def payload_role_cashier():
+    return {"name": "Cajero", "description": "Realiza ventas a clientes"}
+
+
+@pytest.fixture
+def payload_role_no_name():
+    return {"description": "Realiza ventas a clientes"}
+
+
+@pytest.fixture
+def payload_role_no_description():
+    return {
+        "name": "Cajero",
+    }
+
+
+@pytest.fixture
+def payload_category():
+    return {
+        "name": "Electronics",
+        "description": "An electronics products",
+    }
+
+
+@pytest.fixture
+def payload_another_category():
+    return {
+        "name": "Shoes",
+        "description": "A shoes products",
+    }
+
+
+@pytest.fixture
+def payload_category_no_name():
+    return {"description": "An electronics products"}
+
+
+@pytest.fixture
+def payload_product(category):
+    return {
+        "category": category.pk,
+        "name": "Product",
+        "description": "Test product",
+        "unique_code": "1234abcd",
+        "sale_price": 160.00,
+        "purchase_price": 200.00,
+    }
+
+
+@pytest.fixture
+def payload_another_product(another_category):
+    return {
+        "category": another_category.pk,
+        "name": "Product 2",
+        "description": "Test product 2",
+        "unique_code": "4321dcba",
+        "sale_price": 230.00,
+        "purchase_price": 250.00,
+    }
+
+
+@pytest.fixture
+def payload_product_no_unique_code(category):
+    return {
+        "category": category.pk,
+        "name": "Product",
+        "description": "Test product",
+        "sale_price": 160.00,
+        "purchase_price": 200.00,
+    }
+
+
+@pytest.fixture
+def payload_customer():
+    return {
+        "first_name": "Abel",
+        "last_name": "Torres",
+        "email": "abeltorres@gmail.com",
+        "number_phone": "666313110",
+        "address": "Carrer De Albacete 54, Atico A",
+    }
+
+
+# =============================================================================================================================================================================
+# URLS
+# =============================================================================================================================================================================
 @pytest.fixture
 def url_users_list():
     return reverse("users-list")
@@ -118,23 +306,6 @@ def role_detail_url():
         return reverse("roles-detail", kwargs={"pk": pk})
 
     return _url
-
-
-@pytest.fixture
-def payload_role_cashier():
-    return {"name": "Cajero", "description": "Realiza ventas a clientes"}
-
-
-@pytest.fixture
-def payload_role_no_name():
-    return {"description": "Realiza ventas a clientes"}
-
-
-@pytest.fixture
-def payload_role_no_description():
-    return {
-        "name": "Cajero",
-    }
 
 
 @pytest.fixture
@@ -177,39 +348,6 @@ def category_deactivate_url():
 
 
 @pytest.fixture
-def category(db):
-    return Category.objects.create(
-        name="Electronics", description="An electronics products"
-    )
-
-
-@pytest.fixture
-def another_category(db):
-    return Category.objects.create(name="Shoes", description="A shoes products")
-
-
-@pytest.fixture
-def payload_category():
-    return {
-        "name": "Electronics",
-        "description": "An electronics products",
-    }
-
-
-@pytest.fixture
-def payload_another_category():
-    return {
-        "name": "Shoes",
-        "description": "A shoes products",
-    }
-
-
-@pytest.fixture
-def payload_category_no_name():
-    return {"description": "An electronics products"}
-
-
-@pytest.fixture
 def products_url():
     return reverse("products-list")
 
@@ -249,65 +387,6 @@ def product_deactivate_url():
 
 
 @pytest.fixture
-def product(db, category):
-    return Product.objects.create(
-        category=category,
-        name="Laptop",
-        description="Huawei D16",
-        unique_code="1234abcd",
-        sale_price=400.00,
-        purchase_price=440.00,
-    )
-
-
-@pytest.fixture
-def another_product(db, another_category):
-    return Product.objects.create(
-        category=another_category,
-        name="Movil",
-        description="Samsung Galaxy S25 FE",
-        unique_code="4321abcd",
-        sale_price=650.00,
-        purchase_price=740.00,
-    )
-
-
-@pytest.fixture
-def payload_product(category):
-    return {
-        "category": category.pk,
-        "name": "Product",
-        "description": "Test product",
-        "unique_code": "1234abcd",
-        "sale_price": 160.00,
-        "purchase_price": 200.00,
-    }
-
-
-@pytest.fixture
-def payload_another_product(another_category):
-    return {
-        "category": another_category.pk,
-        "name": "Product 2",
-        "description": "Test product 2",
-        "unique_code": "4321dcba",
-        "sale_price": 230.00,
-        "purchase_price": 250.00,
-    }
-
-
-@pytest.fixture
-def payload_product_no_unique_code(category):
-    return {
-        "category": category.pk,
-        "name": "Product",
-        "description": "Test product",
-        "sale_price": 160.00,
-        "purchase_price": 200.00,
-    }
-
-
-@pytest.fixture
 def inventories_url():
     return reverse("inventories-list")
 
@@ -334,21 +413,6 @@ def inventories_low_stock_url():
 
 
 @pytest.fixture
-def inventory(db, product):
-    return Inventory.objects.create(product=product, quantity=10)
-
-
-@pytest.fixture
-def another_inventory(db, another_product):
-    return Inventory.objects.create(product=another_product, quantity=10)
-
-
-@pytest.fixture
-def low_inventory(db, another_product):
-    return Inventory.objects.create(product=another_product, quantity=4)
-
-
-@pytest.fixture
 def inventory_movements_url():
     return reverse("inventory_movements-list")
 
@@ -362,18 +426,13 @@ def inventory_movements_detail_url():
 
 
 @pytest.fixture
-def inventory_movements(product, admin_user):
-    return InventoryMovement.objects.create(
-        product=product,
-        user=admin_user,
-        quantity=10,
-    )
+def customers_url():
+    return reverse("customers-list")
 
 
 @pytest.fixture
-def another_inventory_movements(another_product, admin_user):
-    return InventoryMovement.objects.create(
-        product=another_product,
-        user=None,
-        quantity=20,
-    )
+def customer_detail_url():
+    def _url(pk):
+        return reverse("customers-detail", kwargs={"pk": pk})
+
+    return _url

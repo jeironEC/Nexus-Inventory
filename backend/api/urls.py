@@ -13,6 +13,7 @@ from .views import (
     CategoryViewSet,
     ProductViewSet,
     InventoryViewSet,
+    InventoryMovementViewSet,
 )
 
 router = SimpleRouter(use_regex_path=False)
@@ -23,10 +24,13 @@ router.register("roles", UserRoleViewSet, basename="roles")
 router.register("categories", CategoryViewSet, basename="categories")
 router.register("products", ProductViewSet, basename="products")
 router.register("inventories", InventoryViewSet, basename="inventories")
+router.register(
+    "inventory_movements", InventoryMovementViewSet, basename="inventory_movements"
+)
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),  # Endpoint verifica estado del sistema
     path("", include("api.docs")),  # Endpoints de documentación
     path("auth/", include("api.auth")),  # Endpoints de autenticación
-    *router.urls,  # Endpoints de la API
+    *router.urls,  # Endpoints de los modelos
 ]

@@ -9,7 +9,14 @@ from django.urls import reverse
 from django.test import Client
 
 # Models
-from nexus_inventory_backend.db.models import User, Role, Category, Product, Inventory
+from nexus_inventory_backend.db.models import (
+    User,
+    Role,
+    Category,
+    Product,
+    Inventory,
+    InventoryMovement,
+)
 
 
 @pytest.fixture
@@ -339,3 +346,34 @@ def another_inventory(db, another_product):
 @pytest.fixture
 def low_inventory(db, another_product):
     return Inventory.objects.create(product=another_product, quantity=4)
+
+
+@pytest.fixture
+def inventory_movements_url():
+    return reverse("inventory_movements-list")
+
+
+@pytest.fixture
+def inventory_movements_detail_url():
+    def _url(pk):
+        return reverse("inventory_movements-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def inventory_movements(product, admin_user):
+    return InventoryMovement.objects.create(
+        product=product,
+        user=admin_user,
+        quantity=10,
+    )
+
+
+@pytest.fixture
+def another_inventory_movements(another_product, admin_user):
+    return InventoryMovement.objects.create(
+        product=another_product,
+        user=None,
+        quantity=20,
+    )

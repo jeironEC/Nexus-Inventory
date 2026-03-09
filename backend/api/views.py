@@ -2,12 +2,13 @@
 from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 
-# Rest framework
+# DRF
 from rest_framework import mixins, status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Serializers
 from .serializers.user_role import UserRoleSerializer
@@ -18,15 +19,23 @@ from .serializers.token_pair import EmailTokenObtainPairSerializer
 from .serializers.category import CategorySerializer
 from .serializers.product import ProductSerializer
 from .serializers.inventory import InventorySerializer
+from .serializers.inventory_movement import InventoryMovementSerializer
+
+# Filters
+from .filters import InventoryMovementFilter
 
 # Models
-from nexus_inventory_backend.db.models import Role, User, Category, Product, Inventory
+from nexus_inventory_backend.db.models import (
+    Role,
+    User,
+    Category,
+    Product,
+    Inventory,
+    InventoryMovement,
+)
 
 # Permissions
 from .permissions import CanCreateUsers
-
-# Rest framework
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Enums
 from nexus_inventory_backend.db.enums import State
@@ -209,3 +218,12 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         inventory = Inventory.objects.filter(quantity__lte=LOW_STOCK_THRESHOLD)
         serializer = self.get_serializer(inventory, many=True)
         return Response(serializer.data)
+
+
+class InventoryMovementViewSet(viewsets.ModelViewSet):
+    queryset = InventoryMovement.objects.all().order_by("-created_at")
+    serializer_class = InventoryMovementSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = InventoryMovementFilter
+    http_method_names = ["get"]

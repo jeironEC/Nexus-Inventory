@@ -4,8 +4,6 @@ import pytest
 # DRF
 from rest_framework import status
 
-# Models
-
 
 @pytest.mark.django_db
 def test_get_list_inventories_returns_200(api_client_auth, inventories_url):
@@ -25,6 +23,7 @@ def test_list_inventories_returns_list(
 def test_inventory_list_empty_returns_200(api_client_auth, inventories_url):
     response = api_client_auth.get(inventories_url)
     assert response.data == []
+    assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db

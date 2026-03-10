@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 # Django
 from django.urls import reverse
 from django.test import Client
+from django.utils import timezone
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -17,12 +18,16 @@ from nexus_inventory_backend.db.models import (
     Inventory,
     InventoryMovement,
     Customer,
+    Promotion,
 )
 
+# Datetime
+from datetime import timedelta
 
-# =============================================================================================================================================================================
+
+# ======================================================================================================================================================================
 # CLIENTS
-# =============================================================================================================================================================================
+# ======================================================================================================================================================================
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -39,9 +44,9 @@ def api_client_auth(api_client, admin_user):
     return api_client
 
 
-# =============================================================================================================================================================================
+# ======================================================================================================================================================================
 # OBJECTS DATABASE
-# =============================================================================================================================================================================
+# ======================================================================================================================================================================
 @pytest.fixture
 def admin_role(db):
     return Role.objects.create(name="ADMIN", description="Administrador de usuarios")
@@ -171,9 +176,31 @@ def another_customer(db):
     )
 
 
-# =============================================================================================================================================================================
+@pytest.fixture
+def promotion(db):
+    return Promotion.objects.create(
+        name="promotion 2027",
+        description="promotion description 2027",
+        discount_percentage=20,
+        start_date=timezone.now().date(),
+        end_date=(timezone.now() + timedelta(days=30)).date(),
+    )
+
+
+@pytest.fixture
+def another_promotion(db):
+    return Promotion.objects.create(
+        name="promotion 2028",
+        description="promotion description 2028",
+        discount_percentage=30,
+        start_date=timezone.now().date(),
+        end_date=(timezone.now() + timedelta(days=30)).date(),
+    )
+
+
+# ======================================================================================================================================================================
 # PAYLOADS
-# =============================================================================================================================================================================
+# ======================================================================================================================================================================
 @pytest.fixture
 def payload_user(cashier_role):
     return {
@@ -267,9 +294,31 @@ def payload_customer():
     }
 
 
-# =============================================================================================================================================================================
+@pytest.fixture
+def payload_promotion():
+    return {
+        "name": "promotion 2026",
+        "description": "promotion description",
+        "discount_percentage": 20,
+        "start_date": timezone.now().date(),
+        "end_date": (timezone.now() + timedelta(days=30)).date(),
+    }
+
+
+@pytest.fixture
+def another_payload_promotion():
+    return {
+        "name": "promotion 2028",
+        "description": "promotion description",
+        "discount_percentage": 20,
+        "start_date": timezone.now().date(),
+        "end_date": (timezone.now() + timedelta(days=30)).date(),
+    }
+
+
+# ======================================================================================================================================================================
 # URLS
-# =============================================================================================================================================================================
+# ======================================================================================================================================================================
 @pytest.fixture
 def url_users_list():
     return reverse("users-list")
@@ -434,5 +483,18 @@ def customers_url():
 def customer_detail_url():
     def _url(pk):
         return reverse("customers-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def promotions_url():
+    return reverse("promotions-list")
+
+
+@pytest.fixture
+def promotion_detail_url():
+    def _url(pk):
+        return reverse("promotions-detail", kwargs={"pk": pk})
 
     return _url

@@ -21,10 +21,12 @@ from .serializers.product import ProductSerializer
 from .serializers.inventory import InventorySerializer
 from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
+from .serializers.promotion import PromotionSerializer
 
 # Filters
 from .filters.inventory_movements import InventoryMovementFilter
 from .filters.customer import CustomerFilter
+from .filters.promotion import PromotionFilter
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -35,6 +37,7 @@ from nexus_inventory_backend.db.models import (
     Inventory,
     InventoryMovement,
     Customer,
+    Promotion,
 )
 
 # Permissions
@@ -238,4 +241,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CustomerFilter
+    http_method_names = ["get", "post", "patch", "delete"]
+
+
+class PromotionViewSet(viewsets.ModelViewSet):
+    queryset = Promotion.objects.all()
+    serializer_class = PromotionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PromotionFilter
     http_method_names = ["get", "post", "patch", "delete"]

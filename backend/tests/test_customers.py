@@ -71,6 +71,14 @@ def test_get_customer_by_id_returns_correct_customer(
 
 
 @pytest.mark.django_db
+def test_get_promotions_customer_returns_list(
+    api_client_auth, customer_list_promotions_url, customer_promotion, customer
+):
+    response = api_client_auth.get(customer_list_promotions_url(customer.pk))
+    assert len(response.data) >= 1
+
+
+@pytest.mark.django_db
 def test_get_customer_by_id_unauthenticated_returns_401(
     api_client, customer_detail_url, customer
 ):
@@ -116,6 +124,16 @@ def test_create_customer_unauthenticated_returns_401(
 ):
     response = api_client.post(customers_url, payload_customer)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_create_customer_promotion_returns_201(
+    api_client_auth, customer_promotion_assign_url, customer, promotion
+):
+    response = api_client_auth.post(
+        customer_promotion_assign_url(customer.pk), {"promotion": promotion.pk}
+    )
+    assert response.status_code == status.HTTP_201_CREATED
 
 
 @pytest.mark.django_db

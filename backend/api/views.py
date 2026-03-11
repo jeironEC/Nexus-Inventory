@@ -1,5 +1,6 @@
 # Django
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 # DRF
@@ -11,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Serializers
+from .serializers.empty import EmptySerializer
 from .serializers.user_role import UserRoleSerializer
 from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
@@ -22,11 +24,16 @@ from .serializers.inventory import InventorySerializer
 from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
 from .serializers.promotion import PromotionSerializer
+from .serializers.customer_promotion import (
+    CustomerPromotionSerializer,
+    CustomerPromotionCreateSerializer,
+)
 
 # Filters
 from .filters.inventory_movements import InventoryMovementFilter
 from .filters.customer import CustomerFilter
 from .filters.promotion import PromotionFilter
+from .filters.customer_promotions import CustomerPromotionFilter
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -38,6 +45,7 @@ from nexus_inventory_backend.db.models import (
     InventoryMovement,
     Customer,
     Promotion,
+    CustomerPromotion,
 )
 
 # Permissions
@@ -130,7 +138,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["patch"], serializer_class=None)
+    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
     def activate(self, request, pk=None):
         category = self.get_object()
         category.state = State.ACTIVE
@@ -140,7 +148,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             {"id": category.id, "state": category.state}, status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=["patch"], serializer_class=None)
+    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
     def deactivate(self, request, pk=None):
         category = self.get_object()
         category.state = State.INACTIVE
@@ -179,7 +187,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["patch"], serializer_class=None)
+    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
     def activate(self, request, pk=None):
         product = self.get_object()
         product.state = State.ACTIVE
@@ -189,7 +197,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             {"id": product.id, "state": product.state}, status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=["patch"], serializer_class=None)
+    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
     def deactivate(self, request, pk=None):
         product = self.get_object()
         product.state = State.INACTIVE
@@ -208,7 +216,7 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filterset_fields = ["product"]
     search_fields = ["product__name"]
 
-    @action(detail=False, methods=["get"], url_path="<int:product_id>")
+    @action(detail=False, methods=["get"], url_path="product/<int:product_id>")
     def get_by_product(self, request, product_id=None):
         try:
             inventory = Inventory.objects.get(product_id=product_id)
@@ -243,6 +251,48 @@ class CustomerViewSet(viewsets.ModelViewSet):
     filterset_class = CustomerFilter
     http_method_names = ["get", "post", "patch", "delete"]
 
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="list_promotions",
+        serializer_class=EmptySerializer,
+    )
+    def list_promotions(self, request, pk=None):
+        customer = self.get_object()
+
+        promotions = CustomerPromotion.objects.filter(customer=customer).select_related(
+            "promotion"
+        )
+
+        serializer = CustomerPromotionSerializer(promotions, many=True)
+        return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="promotions",
+        serializer_class=CustomerPromotionCreateSerializer,
+    )
+    def add_promotion(self, request, pk=None):
+        customer = self.get_object()
+
+        promotion_id = request.data.get("promotion")
+
+        promotion = get_object_or_404(Promotion, id=promotion_id)
+
+        customer_promotion, created = CustomerPromotion.objects.get_or_create(
+            customer=customer, promotion=promotion
+        )
+
+        if not created:
+            return Response(
+                {"detail": "Promotion already assigned"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = CustomerPromotionSerializer(customer_promotion)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class PromotionViewSet(viewsets.ModelViewSet):
     queryset = Promotion.objects.all()
@@ -251,3 +301,35 @@ class PromotionViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PromotionFilter
     http_method_names = ["get", "post", "patch", "delete"]
+
+
+class CustomerPromotionViewSet(viewsets.ModelViewSet):
+    queryset = CustomerPromotion.objects.select_related(
+        "customer",
+        "promotion",
+    ).all()
+    serializer_class = CustomerPromotionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CustomerPromotionFilter
+    http_method_names = ["get", "post", "patch", "delete"]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        customer = serializer.validated_data["customer"]
+        promotion = serializer.validated_data["promotion"]
+
+        obj, created = CustomerPromotion.objects.get_or_create(
+            customer=customer, promotion=promotion
+        )
+
+        if not created:
+            return Response(
+                {"detail": "Promotion already assigned"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

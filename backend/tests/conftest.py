@@ -19,6 +19,7 @@ from nexus_inventory_backend.db.models import (
     InventoryMovement,
     Customer,
     Promotion,
+    CustomerPromotion,
 )
 
 # Datetime
@@ -198,6 +199,24 @@ def another_promotion(db):
     )
 
 
+@pytest.fixture
+def customer_promotion(db, customer, promotion):
+    return CustomerPromotion.objects.create(
+        customer=customer,
+        promotion=promotion,
+        applied=True,
+    )
+
+
+@pytest.fixture
+def another_customer_promotion(db, another_customer, another_promotion):
+    return CustomerPromotion.objects.create(
+        customer=another_customer,
+        promotion=another_promotion,
+        applied=False,
+    )
+
+
 # ======================================================================================================================================================================
 # PAYLOADS
 # ======================================================================================================================================================================
@@ -313,6 +332,24 @@ def another_payload_promotion():
         "discount_percentage": 20,
         "start_date": timezone.now().date(),
         "end_date": (timezone.now() + timedelta(days=30)).date(),
+    }
+
+
+@pytest.fixture
+def payload_customer_promotion(db, customer, promotion):
+    return {
+        "customer": customer.pk,
+        "promotion": promotion.pk,
+        "applied": True,
+    }
+
+
+@pytest.fixture
+def payload_another_customer_promotion(db, another_customer, another_promotion):
+    return {
+        "customer": another_customer.pk,
+        "promotion": another_promotion.pk,
+        "applied": False,
     }
 
 
@@ -496,5 +533,34 @@ def promotions_url():
 def promotion_detail_url():
     def _url(pk):
         return reverse("promotions-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def customer_promotions_url():
+    return reverse("customer_promotions-list")
+
+
+@pytest.fixture
+def customer_promotion_detail_url():
+    def _url(pk):
+        return reverse("customer_promotions-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def customer_list_promotions_url():
+    def _url(pk):
+        return reverse("customers-list-promotions", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def customer_promotion_assign_url():
+    def _url(pk):
+        return reverse("customers-add-promotion", kwargs={"pk": pk})
 
     return _url

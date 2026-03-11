@@ -134,7 +134,7 @@ class Customer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.name}: {self.email}"
+        return f"{self.first_name}: {self.email}"
 
 
 class Promotion(models.Model):
@@ -158,7 +158,6 @@ class CustomerPromotion(models.Model):
     )
     applied = models.BooleanField(default=False)
     assignment_date = models.DateTimeField(auto_now_add=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

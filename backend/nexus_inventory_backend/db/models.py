@@ -3,23 +3,25 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
 
+# Base Models
+from .base import BaseModel, AuditModel
+
 # Enums
-from .enums import State
+from .enums import State, OperationState
 
 """
-auto_now_add=True -> Se asigna la fecha y hora solo al crear el registro (equivale a DEFAULT CURRENT_TIMESTAMP).
+NOTA:
+    · auto_now_add=True -> Se asigna la fecha y hora solo al crear el registro (equivale a DEFAULT CURRENT_TIMESTAMP).
 
-auto_now=True -> Se actualiza la fecha y hora cada vez que se guarda el registro (equivale a ON UPDATE CURRENT_TIMESTAMP).
+    · auto_now=True -> Se actualiza la fecha y hora cada vez que se guarda el registro (equivale a ON UPDATE CURRENT_TIMESTAMP).
 """
 
 
-# Base model
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL MANAGER
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
-        """
-        Create and saves a User with the given email and password.
-        """
-
         if not email:
             raise ValueError("User must have an email address")
 
@@ -30,10 +32,6 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        """
-        Creates and saves a superuser with the given email and password.
-        """
-
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -45,27 +43,30 @@ class UserManager(BaseUserManager):
         admin_role, _ = Role.objects.get_or_create(
             name="ADMIN", defaults={"description": "Administrator role"}
         )
-
         extra_fields.setdefault("role", admin_role)
-
         return self.create_user(email, password, **extra_fields)
 
 
-class Role(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL ROLE
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Role(BaseModel):
     name = models.CharField(max_length=30)
     description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
     def __str__(self):
         return self.name
 
 
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL USER
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
-
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name="users")
-
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
@@ -85,17 +86,22 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
-class Category(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL CATEGORY
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Category(BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
 
-class Product(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL PRODUCT
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Product(BaseModel):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name="products", null=True
     )
@@ -105,39 +111,43 @@ class Product(models.Model):
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
 
-class Inventory(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL INVENTORY
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Inventory(BaseModel):
     product = models.OneToOneField(
-        Product, on_delete=models.PROTECT, related_name="inventories"
+        Product, on_delete=models.PROTECT, related_name="inventory"
     )
     quantity = models.IntegerField(default=0)
-    last_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.product.name} - Stock: {self.quantity}"
 
 
-class Customer(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL CUSTOMER
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Customer(BaseModel):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=120, unique=True)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.first_name}: {self.email}"
 
 
-class Promotion(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL PROMOTION
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Promotion(BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -149,7 +159,10 @@ class Promotion(models.Model):
         return f"{self.name} - Discount: {self.discount_percentage}%"
 
 
-class CustomerPromotion(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL CUSTOMER PROMOTION
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class CustomerPromotion(BaseModel):
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name="customer_promotions"
     )
@@ -157,8 +170,6 @@ class CustomerPromotion(models.Model):
         Promotion, on_delete=models.CASCADE, related_name="customer_promotions"
     )
     applied = models.BooleanField(default=False)
-    assignment_date = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [
@@ -171,7 +182,10 @@ class CustomerPromotion(models.Model):
         return f"{self.customer} - {self.promotion} - Applied: {self.applied}"
 
 
-class Invoice(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL SALE
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Sale(AuditModel):
     class PaymentMethod(models.TextChoices):
         CASH = "CASH", "Cash"
         CARD = "CARD", "Card"
@@ -180,34 +194,62 @@ class Invoice(models.Model):
     customer = models.ForeignKey(
         Customer,
         on_delete=models.SET_NULL,
-        related_name="invoices",
+        related_name="sales",
         null=True,
         blank=True,
     )
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name="created_invoices", null=True
+        User, on_delete=models.SET_NULL, related_name="created_sales", null=True
     )
-    number_invoice = models.CharField(max_length=50, unique=True)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     payment_method = models.CharField(
         max_length=20, choices=PaymentMethod.choices, default=PaymentMethod.CASH
     )
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
-    issue_date = models.DateTimeField(auto_now_add=True)
-    pdf_generated = models.BooleanField(default=False)
+    state = models.CharField(
+        max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
+    )
 
     def __str__(self):
-        return f"{self.number_invoice} - {self.issue_date}"
+        return f"{self.total_amount} - {self.payment_method}"
 
 
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL INVOICE
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Invoice(BaseModel):
+    class InvoiceState(models.TextChoices):
+        ISSUED = "ISSUED", "Issued"
+        CANCELED = "CANCELED", "Canceled"
+
+    sale = models.OneToOneField(Sale, on_delete=models.PROTECT, related_name="invoice")
+    number_invoice = models.CharField(max_length=50, unique=True)
+    pdf_generated = models.BooleanField(default=False)
+    state = models.CharField(
+        max_length=20, choices=InvoiceState.choices, default=InvoiceState.ISSUED
+    )
+
+    def __str__(self):
+        return f"{self.number_invoice} - {self.state}"
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL INVENTORY MOVEMENT
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class InventoryMovement(models.Model):
+    class MovementType(models.TextChoices):
+        IN = "IN", "In"
+        OUT = "OUT", "Out"
+
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="inventory_movements"
     )
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, related_name="inventory_movements", null=True
+    )
+    movement_type = models.CharField(
+        max_length=10, choices=MovementType.choices, default=MovementType.IN
     )
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -216,41 +258,44 @@ class InventoryMovement(models.Model):
         return f"{self.product.name} - Quantity: {self.quantity}"
 
 
-class InvoiceDetail(models.Model):
-    invoice = models.ForeignKey(
-        Invoice, on_delete=models.CASCADE, related_name="details"
-    )
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL SALE DETAIL
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class SaleDetail(models.Model):
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="details")
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="invoice_details"
+        Product, on_delete=models.PROTECT, related_name="sale_details"
     )
     inventory_movement = models.OneToOneField(
-        InventoryMovement, on_delete=models.PROTECT, related_name="invoice_detail"
+        InventoryMovement, on_delete=models.PROTECT, related_name="sale_detail"
     )
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.invoice.number_invoice} - {self.product.name}"
+        return f"{self.sale.total_amount} - {self.product.name}"
 
 
-class Supplier(models.Model):
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL SUPPLIER
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Supplier(BaseModel):
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=120)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} - {self.email}"
 
 
-class Purchase(models.Model):
-    class StatePurchase(models.TextChoices):
-        COMPLETED = "COMPLETED", "Completed"
-        CANCELED = "CANCELED", "Canceled"
-
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL PURCHASE
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Purchase(AuditModel):
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, related_name="purchases"
     )
@@ -258,15 +303,17 @@ class Purchase(models.Model):
         User, on_delete=models.SET_NULL, related_name="purchases", null=True
     )
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    purchase_date = models.DateTimeField(auto_now_add=True)
     state = models.CharField(
-        max_length=20, choices=StatePurchase.choices, default=StatePurchase.COMPLETED
+        max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
     )
 
     def __str__(self):
-        return f"{self.supplier.name} - {self.total_amount} - {self.purchase_date}"
+        return f"{self.supplier.name} - {self.total_amount} - {self.created_at}"
 
 
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL PURCHASE DETAIL
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class PurchaseDetail(models.Model):
     purchase = models.ForeignKey(
         Purchase, on_delete=models.CASCADE, related_name="details"
@@ -280,6 +327,7 @@ class PurchaseDetail(models.Model):
     quantity = models.IntegerField()
     unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.purchase.supplier.name} - {self.product.name} - {self.quantity}"

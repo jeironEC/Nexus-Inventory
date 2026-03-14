@@ -13,12 +13,12 @@ class CustomerPromotionSerializer(serializers.ModelSerializer):
             "customer",
             "promotion",
             "applied",
-            "assignment_date",
+            "created_at",
             "updated_at",
         ]
         read_only_fields = [
             "id",
-            "assignment_date",
+            "created_at",
             "updated_at",
         ]
 

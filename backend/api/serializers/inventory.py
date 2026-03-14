@@ -17,11 +17,11 @@ class InventorySerializer(serializers.ModelSerializer):
             "id",
             "product",
             "quantity",
-            "last_update",
+            "updated_at",
         ]
         read_only_fields = [
             "id",
             "product",
             "quantity",
-            "last_update",
+            "updated_at",
         ]

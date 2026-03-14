@@ -45,7 +45,7 @@ def test_list_customer_promotions_fields_present(
         "customer",
         "promotion",
         "applied",
-        "assignment_date",
+        "created_at",
         "updated_at",
     }
 
@@ -111,7 +111,7 @@ def test_create_customer_promotion_response_contains_fields(
         "customer",
         "promotion",
         "applied",
-        "assignment_date",
+        "created_at",
         "updated_at",
     }
 

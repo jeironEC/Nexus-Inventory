@@ -13,7 +13,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Serializers
 from .serializers.empty import EmptySerializer
-from .serializers.user_role import UserRoleSerializer
+from .serializers.user_role import RoleSerializer
 from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
@@ -67,7 +67,7 @@ def healthcheck(request):
 
 class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = Role.objects.all().order_by("name")
-    serializer_class = UserRoleSerializer
+    serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ["name", "description"]

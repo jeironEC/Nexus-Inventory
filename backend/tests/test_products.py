@@ -46,6 +46,10 @@ def test_list_products_fields_present(api_client_auth, products_url, product):
         "state",
         "created_at",
         "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
     }
 
 

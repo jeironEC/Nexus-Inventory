@@ -270,7 +270,7 @@ def payload_category_no_name():
 @pytest.fixture
 def payload_product(category):
     return {
-        "category": category.pk,
+        "category_id": category.pk,
         "name": "Product",
         "description": "Test product",
         "unique_code": "1234abcd",
@@ -282,7 +282,7 @@ def payload_product(category):
 @pytest.fixture
 def payload_another_product(another_category):
     return {
-        "category": another_category.pk,
+        "category_id": another_category.pk,
         "name": "Product 2",
         "description": "Test product 2",
         "unique_code": "4321dcba",
@@ -338,8 +338,8 @@ def another_payload_promotion():
 @pytest.fixture
 def payload_customer_promotion(db, customer, promotion):
     return {
-        "customer": customer.pk,
-        "promotion": promotion.pk,
+        "customer_id": customer.pk,
+        "promotion_id": promotion.pk,
         "applied": True,
     }
 
@@ -347,8 +347,8 @@ def payload_customer_promotion(db, customer, promotion):
 @pytest.fixture
 def payload_another_customer_promotion(db, another_customer, another_promotion):
     return {
-        "customer": another_customer.pk,
-        "promotion": another_promotion.pk,
+        "customer_id": another_customer.pk,
+        "promotion_id": another_promotion.pk,
         "applied": False,
     }
 

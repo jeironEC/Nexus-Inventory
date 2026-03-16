@@ -35,7 +35,12 @@ def test_inventory_list_fields_present(api_client_auth, inventories_url, invento
         "id",
         "product",
         "quantity",
+        "created_at",
         "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
     }
 
 

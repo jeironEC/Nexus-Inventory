@@ -45,6 +45,12 @@ def test_list_promotions_fields_present(
         "start_date",
         "end_date",
         "state",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
     }
 
 

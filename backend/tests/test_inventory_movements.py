@@ -73,6 +73,10 @@ def test_inventory_movements_product_nested_fields(
         "state",
         "created_at",
         "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
     }
 
 
@@ -83,10 +87,14 @@ def test_inventory_movements_user_nested_fields(
     response = api_client_auth.get(inventory_movements_url)
     data = response.data[0]["user"]
     assert set(data.keys()) == {
+        "id",
         "first_name",
         "last_name",
         "email",
+        "role",
+        "created_at",
         "updated_at",
+        "deleted_at",
     }
 
 

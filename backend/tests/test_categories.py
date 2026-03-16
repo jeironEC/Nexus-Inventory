@@ -35,7 +35,18 @@ def test_list_categories_ruturns_list(
 def test_list_categories_fields_present(api_client_auth, categories_url, category):
     response = api_client_auth.get(categories_url)
     data = response.data[0]
-    assert set(data.keys()) == {"id", "name", "description", "state", "created_at"}
+    assert set(data.keys()) == {
+        "id",
+        "name",
+        "description",
+        "state",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
+    }
 
 
 @pytest.mark.django_db

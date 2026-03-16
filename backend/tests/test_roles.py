@@ -30,7 +30,18 @@ def test_list_roles_ruturns_list(api_client_auth, roles_url, admin_role, cashier
 def test_list_roles_fields_present(api_client_auth, roles_url, admin_role):
     response = api_client_auth.get(roles_url)
     data = response.data[0]
-    assert set(data.keys()) == {"id", "name", "description", "created_at"}
+    assert set(data.keys()) == {
+        "id",
+        "name",
+        "description",
+        "state",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
+    }
 
 
 @pytest.mark.django_db

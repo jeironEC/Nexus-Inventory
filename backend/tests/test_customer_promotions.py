@@ -47,6 +47,10 @@ def test_list_customer_promotions_fields_present(
         "applied",
         "created_at",
         "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
     }
 
 
@@ -96,7 +100,7 @@ def test_create_customer_promotion_persisted(
 ):
     api_client_auth.post(customer_promotions_url, payload_customer_promotion)
     assert CustomerPromotion.objects.filter(
-        customer=payload_customer_promotion["customer"]
+        customer_id=payload_customer_promotion["customer_id"]
     ).exists()
 
 
@@ -108,11 +112,15 @@ def test_create_customer_promotion_response_contains_fields(
     data = response.data
     assert set(data.keys()) == {
         "id",
-        "customer",
         "promotion",
+        "customer",
         "applied",
         "created_at",
         "updated_at",
+        "deleted_at",
+        "created_by",
+        "updated_by",
+        "deleted_by",
     }
 
 
@@ -139,9 +147,9 @@ def test_patch_customer_promotion_updates_customer(
 ):
     response = api_client_auth.patch(
         customer_promotion_detail_url(customer_promotion.pk),
-        {"customer": another_customer.pk},
+        {"customer_id": another_customer.pk},
     )
-    assert response.data["customer"] == another_customer.pk
+    assert response.data["customer"]["id"] == another_customer.pk
 
 
 @pytest.mark.django_db
@@ -150,7 +158,7 @@ def test_patch_customer_promotion_persists_changes(
 ):
     api_client_auth.patch(
         customer_promotion_detail_url(customer_promotion.pk),
-        {"customer": another_customer.pk},
+        {"customer_id": another_customer.pk},
     )
     customer_promotion.refresh_from_db()
     assert customer_promotion.customer.pk == another_customer.pk

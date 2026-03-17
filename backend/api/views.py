@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 # DRF
-from rest_framework import mixins, status, viewsets, filters
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -30,10 +30,21 @@ from .serializers.customer_promotion import (
 )
 
 # Filters
-from .filters.inventory_movements import InventoryMovementFilter
-from .filters.customer import CustomerFilter
-from .filters.promotion import PromotionFilter
-from .filters.customer_promotions import CustomerPromotionFilter
+from .filters.user_role import RoleAdminFilter, RoleFilter
+from .filters.user import UserAdminFilter, UserFilter
+from .filters.category import CategoryAdminFilter, CategoryFilter
+from .filters.product import ProductAdminFilter, ProductFilter
+from .filters.inventory import InventoryAdminFilter, InventoryFilter
+from .filters.inventory_movements import (
+    InventoryMovementAdminFilter,
+    InventoryMovementFilter,
+)
+from .filters.customer import CustomerAdminFilter, CustomerFilter
+from .filters.promotion import PromotionAdminFilter, PromotionFilter
+from .filters.customer_promotions import (
+    CustomerPromotionAdminFilter,
+    CustomerPromotionFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -54,6 +65,9 @@ from .permissions import CanCreateUsers
 # Enums
 from nexus_inventory_backend.db.enums import State
 
+# Mixins
+from .mixins import StrictFilterMixin
+
 # Variables globales
 LOW_STOCK_THRESHOLD = 5
 
@@ -65,20 +79,40 @@ def healthcheck(request):
     return JsonResponse({"health": "ok"}, status=200)
 
 
-class UserRoleViewSet(viewsets.ModelViewSet):
+class UserRoleViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = Role.objects.all().order_by("name")
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ["name", "description"]
+    filter_backends = [DjangoFilterBackend]
     http_method_names = ["get", "post", "patch", "delete"]
 
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return RoleAdminFilter
+        return RoleFilter
 
-class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+
+class UserViewSet(
+    StrictFilterMixin,
+    viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+):
     queryset = User.objects.filter(deleted_at__isnull=True)
-    serializer_class = UserCreateSerializer
     permission_classes = [IsAuthenticated, CanCreateUsers]
     throttle_classes = [UserRateThrottle]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserAdminFilter
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return UserCreateSerializer
+        return UserReadSerializer
+
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return UserAdminFilter
+        return UserFilter
 
 
 class UserMeViewSet(viewsets.GenericViewSet):
@@ -118,13 +152,18 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ["name", "description"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CategoryAdminFilter
     http_method_names = ["get", "post", "patch", "delete"]
+
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return CategoryAdminFilter
+        return CategoryFilter
 
     @action(detail=False, methods=["get"])
     def active(self, request):
@@ -159,21 +198,18 @@ class CategoryViewSet(viewsets.ModelViewSet):
         )
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by("name")
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = [
-        "category",
-        "state",
-    ]
-
-    search_fields = [
-        "name",
-        "description",
-    ]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductAdminFilter
     http_method_names = ["get", "post", "patch", "delete"]
+
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return ProductAdminFilter
+        return ProductFilter
 
     @action(detail=False, methods=["get"])
     def active(self, request):
@@ -208,13 +244,19 @@ class ProductViewSet(viewsets.ModelViewSet):
         )
 
 
-class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class InventoryViewSet(
+    StrictFilterMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
     queryset = Inventory.objects.select_related("product").all()
     serializer_class = InventorySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["product"]
-    search_fields = ["product__name"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = InventoryAdminFilter
+
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return InventoryAdminFilter
+        return InventoryFilter
 
     @action(detail=False, methods=["get"], url_path="product/<int:product_id>")
     def get_by_product(self, request, product_id=None):
@@ -234,22 +276,32 @@ class InventoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
-class InventoryMovementViewSet(viewsets.ModelViewSet):
+class InventoryMovementViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = InventoryMovement.objects.all().order_by("-created_at")
     serializer_class = InventoryMovementSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = InventoryMovementFilter
+    filterset_class = InventoryMovementAdminFilter
     http_method_names = ["get"]
 
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return InventoryMovementAdminFilter
+        return InventoryMovementFilter
 
-class CustomerViewSet(viewsets.ModelViewSet):
+
+class CustomerViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = CustomerFilter
+    filterset_class = CustomerAdminFilter
     http_method_names = ["get", "post", "patch", "delete"]
+
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return CustomerAdminFilter
+        return CustomerFilter
 
     @action(
         detail=True,
@@ -294,16 +346,21 @@ class CustomerViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class PromotionViewSet(viewsets.ModelViewSet):
+class PromotionViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = Promotion.objects.all()
     serializer_class = PromotionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = PromotionFilter
+    filterset_class = PromotionAdminFilter
     http_method_names = ["get", "post", "patch", "delete"]
 
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return PromotionAdminFilter
+        return PromotionFilter
 
-class CustomerPromotionViewSet(viewsets.ModelViewSet):
+
+class CustomerPromotionViewSet(StrictFilterMixin, viewsets.ModelViewSet):
     queryset = CustomerPromotion.objects.select_related(
         "customer",
         "promotion",
@@ -311,8 +368,13 @@ class CustomerPromotionViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerPromotionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = CustomerPromotionFilter
+    filterset_class = CustomerPromotionAdminFilter
     http_method_names = ["get", "post", "patch", "delete"]
+
+    def get_filterset_class(self):
+        if self.request.user.role == "ADMIN":
+            return CustomerPromotionAdminFilter
+        return CustomerPromotionFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

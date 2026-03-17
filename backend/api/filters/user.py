@@ -3,7 +3,7 @@ import django_filters
 from django.db.models import Q
 
 # Models
-from nexus_inventory_backend.db.models import Customer
+from nexus_inventory_backend.db.models import User
 
 # Enums
 from nexus_inventory_backend.db.enums import State
@@ -12,21 +12,17 @@ from nexus_inventory_backend.db.enums import State
 from .base import AuditFilter
 
 
-class CustomerFilter(django_filters.FilterSet):
+class UserFilter(django_filters.FilterSet):
     # Filters
+    role_id = django_filters.NumberFilter(field_name="role__id")
     state = django_filters.ChoiceFilter(field_name="state", choices=State.choices)
 
     # Searchs
     full_name = django_filters.CharFilter(method="filter_full_name")
-    email = django_filters.CharFilter(field_name="email", lookup_expr="icontains")
 
     # Rangs
-    date_from = django_filters.DateFilter(
-        field_name="created_at__date", lookup_expr="gte"
-    )
-    date_to = django_filters.DateFilter(
-        field_name="created_at__date", lookup_expr="lte"
-    )
+    date_from = django_filters.DateFilter(field_name="created_at", lookup_expr="gte")
+    date_to = django_filters.DateFilter(field_name="created_at", lookup_expr="lte")
 
     def filter_full_name(self, queryset, name, value):
         return queryset.filter(
@@ -34,16 +30,16 @@ class CustomerFilter(django_filters.FilterSet):
         )
 
     class Meta:
-        model = Customer
+        model = User
         fields = [
-            "state",
+            "role_id",
             "full_name",
-            "email",
+            "state",
             "date_from",
             "date_to",
         ]
 
 
-class CustomerAdminFilter(AuditFilter, CustomerFilter):
-    class Meta(CustomerFilter.Meta):
+class UserAdminFilter(AuditFilter, UserFilter):
+    class Meta(UserFilter.Meta):
         pass

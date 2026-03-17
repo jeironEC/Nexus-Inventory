@@ -16,3 +16,28 @@ class State(models.TextChoices):
 class OperationState(models.TextChoices):
     COMPLETED = "COMPLETED", "Completed"
     CANCELED = "CANCELED", "Canceled"
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# PAYMENT METHOD STATES
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class PaymentMethod(models.TextChoices):
+    CASH = "CASH", "Cash"
+    CARD = "CARD", "Card"
+    TRANSFER = "TRANSFER", "Transfer"
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# INVOICE STATES
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class InvoiceState(models.TextChoices):
+    ISSUED = "ISSUED", "Issued"
+    CANCELED = "CANCELED", "Canceled"
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MOVEMENT TYPE STATES
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class MovementType(models.TextChoices):
+    IN = "IN", "In"
+    OUT = "OUT", "Out"

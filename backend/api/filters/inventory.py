@@ -2,22 +2,15 @@
 import django_filters
 
 # Models
-from nexus_inventory_backend.db.models import InventoryMovement
-
-# Enums
-from nexus_inventory_backend.db.enums import MovementType
+from nexus_inventory_backend.db.models import Inventory
 
 # Filters
 from .base import AuditFilter
 
 
-class InventoryMovementFilter(django_filters.FilterSet):
+class InventoryFilter(django_filters.FilterSet):
     # Filters
     product_id = django_filters.NumberFilter(field_name="product_id")
-    user_id = django_filters.NumberFilter(field_name="user_id")
-    movement_type = django_filters.ChoiceFilter(
-        field_name="movement_type", choices=MovementType.choices
-    )
 
     # Searchs
     product_name = django_filters.CharFilter(
@@ -35,11 +28,9 @@ class InventoryMovementFilter(django_filters.FilterSet):
     quantity_max = django_filters.NumberFilter(field_name="quantity", lookup_expr="lte")
 
     class Meta:
-        model = InventoryMovement
+        model: Inventory
         fields = [
             "product_id",
-            "user_id",
-            "movement_type",
             "product_name",
             "date_from",
             "date_to",
@@ -48,6 +39,6 @@ class InventoryMovementFilter(django_filters.FilterSet):
         ]
 
 
-class InventoryMovementAdminFilter(AuditFilter, InventoryMovementFilter):
-    class Meta(InventoryMovementFilter.Meta):
+class InventoryAdminFilter(AuditFilter, InventoryFilter):
+    class Meta(InventoryFilter.Meta):
         pass

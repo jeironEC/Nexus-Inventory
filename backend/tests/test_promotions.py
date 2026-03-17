@@ -198,7 +198,7 @@ def test_promotions_filters_start_date_correctly(
     api_client_auth, promotions_url, promotion
 ):
     today = timezone.now().date()
-    response = api_client_auth.get(promotions_url, {"start_date": str(today)})
+    response = api_client_auth.get(promotions_url, {"date_from": str(today)})
     assert len(response.data) >= 1
 
 
@@ -207,7 +207,7 @@ def test_promotions_filters_start_date_future_returns_empty(
     api_client_auth, promotions_url, promotion
 ):
     future = (timezone.now() + timedelta(days=30)).date()
-    response = api_client_auth.get(promotions_url, {"start_date": str(future)})
+    response = api_client_auth.get(promotions_url, {"date_from": str(future)})
     assert response.data == []
 
 
@@ -216,7 +216,7 @@ def test_promotions_filters_end_date_correctly(
     api_client_auth, promotions_url, promotion
 ):
     future = (timezone.now() + timedelta(days=30)).date()
-    response = api_client_auth.get(promotions_url, {"end_date": str(future)})
+    response = api_client_auth.get(promotions_url, {"date_to": str(future)})
     assert len(response.data) >= 1
 
 
@@ -225,7 +225,7 @@ def test_promotions_filters_end_date_past_returns_empty(
     api_client_auth, promotions_url, promotion
 ):
     past = (timezone.now() - timedelta(days=30)).date()
-    response = api_client_auth.get(promotions_url, {"end_date": str(past)})
+    response = api_client_auth.get(promotions_url, {"date_to": str(past)})
     assert response.data == []
 
 
@@ -233,7 +233,7 @@ def test_promotions_filters_end_date_past_returns_empty(
 def test_promtions_filters_invalid_start_date_returns_400(
     api_client_auth, promotions_url, promotion
 ):
-    response = api_client_auth.get(promotions_url, {"start_date": "not-a-date"})
+    response = api_client_auth.get(promotions_url, {"date_to": "not-a-date"})
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -241,7 +241,7 @@ def test_promtions_filters_invalid_start_date_returns_400(
 def test_promotions_filters_invalid_end_date_returns_400(
     api_client_auth, promotions_url, promotion
 ):
-    response = api_client_auth.get(promotions_url, {"end_date": "not-a-date"})
+    response = api_client_auth.get(promotions_url, {"date_to": "not-a-date"})
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -252,7 +252,7 @@ def test_promotions_filters_date_range_combined(
     today = timezone.now().date()
     future = (timezone.now() + timedelta(days=30)).date()
     response = api_client_auth.get(
-        promotions_url, {"start_date": str(today), "end_date": str(future)}
+        promotions_url, {"start_date": str(today), "date_to": str(future)}
     )
     assert len(response.data) >= 1
 
@@ -266,7 +266,7 @@ def test_promotions_filters_state_and_date_from(
         promotions_url,
         {
             "state": State.ACTIVE,
-            "start_date": str(today),
+            "date_from": str(today),
         },
     )
     assert len(response.data) >= 1

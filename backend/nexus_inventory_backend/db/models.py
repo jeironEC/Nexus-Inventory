@@ -7,7 +7,7 @@ from django.utils import timezone
 from .base import BaseModel, AuditModel
 
 # Enums
-from .enums import State, OperationState
+from .enums import State, OperationState, PaymentMethod, InvoiceState, MovementType
 
 """
 NOTA:
@@ -186,11 +186,6 @@ class CustomerPromotion(BaseModel):
 # MODEL SALE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Sale(AuditModel):
-    class PaymentMethod(models.TextChoices):
-        CASH = "CASH", "Cash"
-        CARD = "CARD", "Card"
-        TRANSFER = "TRANSFER", "Transfer"
-
     customer = models.ForeignKey(
         Customer,
         on_delete=models.SET_NULL,
@@ -219,10 +214,6 @@ class Sale(AuditModel):
 # MODEL INVOICE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Invoice(BaseModel):
-    class InvoiceState(models.TextChoices):
-        ISSUED = "ISSUED", "Issued"
-        CANCELED = "CANCELED", "Canceled"
-
     sale = models.OneToOneField(Sale, on_delete=models.PROTECT, related_name="invoice")
     number_invoice = models.CharField(max_length=50, unique=True)
     pdf_generated = models.BooleanField(default=False)
@@ -238,10 +229,6 @@ class Invoice(BaseModel):
 # MODEL INVENTORY MOVEMENT
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class InventoryMovement(models.Model):
-    class MovementType(models.TextChoices):
-        IN = "IN", "In"
-        OUT = "OUT", "Out"
-
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="inventory_movements"
     )

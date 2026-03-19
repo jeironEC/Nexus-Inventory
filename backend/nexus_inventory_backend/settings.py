@@ -36,6 +36,7 @@ DEBUG = True
 
 ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost"]
 
+LOW_STOCK_THRESHOLD = env.int("LOW_STOCK_THRESHOLD", default=5)
 
 # Application definition
 
@@ -139,6 +140,9 @@ AUTHENTICATION_BACKENDS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+    ],
     "DEFAULT_THROTTLE_RATES": {
         "user": "5/min",
     },

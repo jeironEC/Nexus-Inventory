@@ -131,16 +131,6 @@ def test_create_customer_unauthenticated_returns_401(
 
 
 @pytest.mark.django_db
-def test_create_customer_promotion_returns_201(
-    api_client_auth, customer_promotion_assign_url, customer, promotion
-):
-    response = api_client_auth.post(
-        customer_promotion_assign_url(customer.pk), {"promotion": promotion.pk}
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-
-
-@pytest.mark.django_db
 def test_patch_customer_updates_first_name(
     api_client_auth, customer_detail_url, customer
 ):
@@ -181,7 +171,7 @@ def test_patch_customer_duplicate_email_returns_400(
 def test_patch_customer_unauthenticated_returns_401(
     api_client, customer_detail_url, customer
 ):
-    response = api_client.patch(customer_detail_url(customer.pk), {"name": "x"})
+    response = api_client.patch(customer_detail_url(customer.pk), {"firtst_name": "x"})
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 

@@ -1,22 +1,21 @@
-# Rest framework
+# DRF
 from rest_framework import serializers
 
 # Models
 from nexus_inventory_backend.db.models import Category, Product
 
 # Serializers
-from .user_read import UserReadSerializer
 from .category import CategorySerializer
 
+# Mixins
+from api.mixins.audit_fields import AuditFieldsMixin
 
-class ProductSerializer(serializers.ModelSerializer):
+
+class ProductSerializer(AuditFieldsMixin):
     category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), source="category", write_only=True
     )
-    created_by = UserReadSerializer(read_only=True)
-    updated_by = UserReadSerializer(read_only=True)
-    deleted_by = UserReadSerializer(read_only=True)
 
     class Meta:
         model = Product
@@ -45,24 +44,38 @@ class ProductSerializer(serializers.ModelSerializer):
             "deleted_at",
         ]
 
-    def validate_name(self, value):
-        queryset = Product.objects.filter(name__iexact=value)
+    def validate(self, data):
+        name = data.get("name")
 
-        if self.instance:
-            queryset = queryset.exclude(pk=self.instance.pk)
+        if name:
+            qs = Product.objects.filter(name__iexact=name)
 
-        if queryset.exists():
+            if self.instance:
+                qs = qs.exclude(id=self.instance.id)
+
+            if qs.exists():
+                raise serializers.ValidationError({"name": "Already exists"})
+
+        sale_price = data.get("sale_price")
+        purchase_price = data.get("purchase_price")
+
+        if sale_price is not None and sale_price < 0:
             raise serializers.ValidationError(
-                "A Product with this name already exists."
+                {"sale_price": "Sale price must be >= 0."}
             )
-        return value
 
-    def validate_sale_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Sale price must be greater than 0.")
-        return value
+        if purchase_price is not None and purchase_price < 0:
+            raise serializers.ValidationError(
+                {"purchase_price": "Purchase price must be >= 0."}
+            )
 
-    def validate_purchase_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Purchase price must be greater than 0.")
-        return value
+        if (
+            sale_price is not None
+            and purchase_price is not None
+            and purchase_price > sale_price
+        ):
+            raise serializers.ValidationError(
+                {"purchase_price": "Purchase price cannot exceed sale price."}
+            )
+
+        return data

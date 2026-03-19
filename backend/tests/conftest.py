@@ -27,6 +27,16 @@ from datetime import timedelta
 
 
 # ======================================================================================================================================================================
+# GLOBAL
+# ======================================================================================================================================================================
+@pytest.fixture(autouse=True)
+def disable_throttling(settings, request):
+    rf = getattr(settings, "REST_FRAMEWORK", {})
+    rf.update({"DEFAULT_THROTTLE_CLASSES": []})
+    settings.REST_FRAMEWORK = rf
+
+
+# ======================================================================================================================================================================
 # CLIENTS
 # ======================================================================================================================================================================
 @pytest.fixture
@@ -101,7 +111,7 @@ def another_category(db):
 @pytest.fixture
 def product(db, category):
     return Product.objects.create(
-        category=category,
+        category_id=category.pk,
         name="Laptop",
         description="Huawei D16",
         unique_code="1234abcd",
@@ -113,7 +123,7 @@ def product(db, category):
 @pytest.fixture
 def another_product(db, another_category):
     return Product.objects.create(
-        category=another_category,
+        category_id=another_category.pk,
         name="Movil",
         description="Samsung Galaxy S25 FE",
         unique_code="4321abcd",
@@ -274,7 +284,7 @@ def payload_product(category):
         "name": "Product",
         "description": "Test product",
         "unique_code": "1234abcd",
-        "sale_price": 160.00,
+        "sale_price": 260.00,
         "purchase_price": 200.00,
     }
 
@@ -286,7 +296,7 @@ def payload_another_product(another_category):
         "name": "Product 2",
         "description": "Test product 2",
         "unique_code": "4321dcba",
-        "sale_price": 230.00,
+        "sale_price": 330.00,
         "purchase_price": 250.00,
     }
 

@@ -1,20 +1,12 @@
 # Django
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.utils import timezone
 
 # Base Models
 from .base import BaseModel, AuditModel
 
 # Enums
 from .enums import State, OperationState, PaymentMethod, InvoiceState, MovementType
-
-"""
-NOTA:
-    · auto_now_add=True -> Se asigna la fecha y hora solo al crear el registro (equivale a DEFAULT CURRENT_TIMESTAMP).
-
-    · auto_now=True -> Se actualiza la fecha y hora cada vez que se guarda el registro (equivale a ON UPDATE CURRENT_TIMESTAMP).
-"""
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -62,7 +54,7 @@ class Role(BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL USER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class User(AbstractUser):
+class User(BaseModel, AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name="users")
@@ -74,11 +66,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS: list[str] = []
 
     objects = UserManager()
-
-    def soft_delete(self):
-        self.is_active = False
-        self.deleted_at = timezone.now()
-        self.save(update_fields=["is_active", "deleted_at"])
 
     def save(self, *args, **kwargs):
         if self.deleted_at and self.is_active:

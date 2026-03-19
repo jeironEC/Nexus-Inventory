@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS user (
 
     FOREIGN KEY (role_id)    REFERENCES role(id),
     FOREIGN KEY (created_by) REFERENCES user(id),
-    FOREIGN KEY (updated_by) REFERENCES user(id)
+    FOREIGN KEY (updated_by) REFERENCES user(id),
+    FOREIGN KEY (deleted_by) REFERENCES user(id)
 );
 
 -- ─────────────────────────────────────────

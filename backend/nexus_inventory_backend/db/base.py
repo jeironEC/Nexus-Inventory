@@ -7,9 +7,20 @@ from django.utils import timezone
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# CLASS SOFT DELETE
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class SoftDeleteQuerySet(models.QuerySet):
+    def alive(self):
+        return self.filter(deleted_at__isnull=True)
+
+    def deleted(self):
+        return self.filter(deleted_at__isnull=False)
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # CLASS MANAGER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class ActiveManager(models.Manager):
+class SoftDeleteManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
 
@@ -26,14 +37,18 @@ class TimestampModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
-    objects = ActiveManager()
-    all_objects = models.Manager()
+    objects = SoftDeleteManager()
+    all_objects = SoftDeleteQuerySet.as_manager()
 
     class Meta:
         abstract = True
 
     def soft_delete(self):
         self.deleted_at = timezone.now()
+        self.save(update_fields=["deleted_at", "updated_at"])
+
+    def restore(self):
+        self.deleted_at = None
         self.save(update_fields=["deleted_at", "updated_at"])
 
     @property
@@ -83,4 +98,11 @@ class BaseModel(AuditModel):
     def soft_delete(self, user=None):
         self.deleted_at = timezone.now()
         self.deleted_by = user
-        self.save(update_fields=["deleted_at", "deleted_by", "updated_at"])
+        self.is_active = False
+        self.save(update_fields=["deleted_at", "deleted_by", "updated_at", "is_active"])
+
+    def restore(self):
+        self.deleted_at = None
+        self.deleted_by = None
+        self.is_active = True
+        self.save(update_fields=["deleted_at", "deleted_by", "updated_at", "is_active"])

@@ -1,18 +1,17 @@
 # Django
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+from django.conf import settings
+from django.db import IntegrityError
 
 # DRF
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Serializers
-from .serializers.empty import EmptySerializer
 from .serializers.user_role import RoleSerializer
 from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
@@ -24,10 +23,7 @@ from .serializers.inventory import InventorySerializer
 from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
 from .serializers.promotion import PromotionSerializer
-from .serializers.customer_promotion import (
-    CustomerPromotionSerializer,
-    CustomerPromotionCreateSerializer,
-)
+from .serializers.customer_promotion import CustomerPromotionSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -62,60 +58,79 @@ from nexus_inventory_backend.db.models import (
 # Permissions
 from .permissions import CanCreateUsers
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Mixins
-from .mixins import StrictFilterMixin
-
-# Variables globales
-LOW_STOCK_THRESHOLD = 5
+from .mixins.filter import StrictFilterMixin
+from .mixins.state import StateMixin
+from .mixins.noput import NoPutMixin
+from .mixins.role_filter import RoleFilterMixin
+from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 
 
 def healthcheck(request):
     """
-    Vista para mostrar el estado correcto de la API
+    Muestra el estado de la API
     """
     return JsonResponse({"health": "ok"}, status=200)
 
 
-class UserRoleViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = Role.objects.all().order_by("name")
+class UserRoleViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los roles de usuario del sistema.
+    Solo los administradores pueden gestionar todo el sistema.
+    """
+
+    queryset = (
+        Role.objects.select_related("created_by", "updated_by", "deleted_by")
+        .all()
+        .order_by("name")
+    )
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    http_method_names = ["get", "post", "patch", "delete"]
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return RoleAdminFilter
-        return RoleFilter
+    admin_filterset_class = RoleAdminFilter
+    user_filterset_class = RoleFilter
 
 
 class UserViewSet(
     StrictFilterMixin,
-    viewsets.GenericViewSet,
+    RoleFilterMixin,
+    StateMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    viewsets.GenericViewSet,
 ):
-    queryset = User.objects.filter(deleted_at__isnull=True)
+    """
+    Gestiona los usuarios del sistema.
+    Solo permite creación y listado. La edición y eliminación se hace desde /me.
+    """
+
+    queryset = (
+        User.objects.select_related("created_by", "updated_by", "deleted_by")
+        .filter(deleted_at__isnull=True)
+        .order_by("created_at")
+    )
     permission_classes = [IsAuthenticated, CanCreateUsers]
-    throttle_classes = [UserRateThrottle]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = UserAdminFilter
+    admin_filterset_class = UserAdminFilter
+    user_filterset_class = UserFilter
 
     def get_serializer_class(self):
         if self.action == "create":
             return UserCreateSerializer
         return UserReadSerializer
 
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return UserAdminFilter
-        return UserFilter
 
+class UserMeViewSet(SoftDeleteQuerysetMixin, viewsets.GenericViewSet):
+    """
+    Expone el perfil del usuario autenticado.
+    Permite consultar, actualizar parcialmente y eliminar (soft delete) su propia cuenta.
+    """
 
-class UserMeViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -146,168 +161,152 @@ class UserMeViewSet(viewsets.GenericViewSet):
 
 class EmailTokenObtainPairViewSet(TokenObtainPairView):
     """
-    ViewSet que permite obtener token usando el email
+    Autenticación mediante email y contraseña.
+    Retorna un par de tokens JWT (access y refresh).
     """
 
     serializer_class = EmailTokenObtainPairSerializer
 
 
-class CategoryViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = Category.objects.all().order_by("name")
+class CategoryViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las categorías de productos.
+    Permite activar y desactivar categorías mediante los endpoints /activate y /deactivate.
+    """
+
+    queryset = (
+        Category.objects.select_related("created_by", "updated_by", "deleted_by")
+        .all()
+        .order_by("name")
+    )
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = CategoryAdminFilter
-    http_method_names = ["get", "post", "patch", "delete"]
+    admin_filterset_class = CategoryAdminFilter
+    user_filterset_class = CategoryFilter
 
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return CategoryAdminFilter
-        return CategoryFilter
 
-    @action(detail=False, methods=["get"])
-    def active(self, request):
-        categories = Category.objects.filter(state=State.ACTIVE)
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class ProductViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los productos del sistema.
+    Permite activar y desactivar productos mediante los endpoints /activate y /deactivate.
+    """
 
-    @action(detail=False, methods=["get"])
-    def inactive(self, request):
-        categories = Category.objects.filter(state=State.INACTIVE)
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
-    def activate(self, request, pk=None):
-        category = self.get_object()
-        category.state = State.ACTIVE
-        category.save()
-
-        return Response(
-            {"id": category.id, "state": category.state}, status=status.HTTP_200_OK
+    queryset = (
+        Product.objects.select_related(
+            "category", "created_by", "updated_by", "deleted_by"
         )
-
-    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
-    def deactivate(self, request, pk=None):
-        category = self.get_object()
-        category.state = State.INACTIVE
-        category.save()
-
-        return Response(
-            {"id": category.id, "state": category.state}, status=status.HTTP_200_OK
-        )
-
-
-class ProductViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = Product.objects.all().order_by("name")
+        .all()
+        .order_by("name")
+    )
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = ProductAdminFilter
-    http_method_names = ["get", "post", "patch", "delete"]
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return ProductAdminFilter
-        return ProductFilter
-
-    @action(detail=False, methods=["get"])
-    def active(self, request):
-        products = Product.objects.filter(state=State.ACTIVE)
-        serializer = self.get_serializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=["get"])
-    def inactive(self, request):
-        products = Product.objects.filter(state=State.INACTIVE)
-        serializer = self.get_serializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
-    def activate(self, request, pk=None):
-        product = self.get_object()
-        product.state = State.ACTIVE
-        product.save()
-
-        return Response(
-            {"id": product.id, "state": product.state}, status=status.HTTP_200_OK
-        )
-
-    @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
-    def deactivate(self, request, pk=None):
-        product = self.get_object()
-        product.state = State.INACTIVE
-        product.save()
-
-        return Response(
-            {"id": product.id, "state": product.state}, status=status.HTTP_200_OK
-        )
+    admin_filterset_class = ProductAdminFilter
+    user_filterset_class = ProductFilter
 
 
 class InventoryViewSet(
-    StrictFilterMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+    StrictFilterMixin,
+    RoleFilterMixin,
+    SoftDeleteQuerysetMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
 ):
-    queryset = Inventory.objects.select_related("product").all()
+    """
+    Expone el inventario actual de productos en modo lectura.
+    Incluye endpoints para consultar por producto y detectar stock bajo.
+    """
+
+    queryset = (
+        Inventory.objects.select_related(
+            "product", "created_by", "updated_by", "deleted_by"
+        )
+        .all()
+        .order_by("product__name")
+    )
     serializer_class = InventorySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = InventoryAdminFilter
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return InventoryAdminFilter
-        return InventoryFilter
+    admin_filterset_class = InventoryAdminFilter
+    user_filterset_class = InventoryFilter
 
     @action(detail=False, methods=["get"], url_path="product/<int:product_id>")
     def get_by_product(self, request, product_id=None):
-        try:
-            inventory = Inventory.objects.get(product_id=product_id)
-        except Inventory.DoesNotExist:
-            return Response(
-                {"detail": "Product not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+        inventory = get_object_or_404(self.get_queryset(), product_id=product_id)
         serializer = self.get_serializer(inventory)
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"], url_path="low-stock")
     def low_stock(self, request):
-        inventory = Inventory.objects.filter(quantity__lte=LOW_STOCK_THRESHOLD)
+        inventory = self.get_queryset().filter(
+            quantity__lte=settings.LOW_STOCK_THRESHOLD
+        )
         serializer = self.get_serializer(inventory, many=True)
         return Response(serializer.data)
 
 
-class InventoryMovementViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = InventoryMovement.objects.all().order_by("-created_at")
+class InventoryMovementViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    Expone los movimientos de inventario en modo lectura.
+    Los movimientos son generados por el sistema, no se crean ni modifican manualmente.
+    """
+
+    queryset = (
+        InventoryMovement.objects.select_related("product", "user")
+        .all()
+        .order_by("-created_at")
+    )
     serializer_class = InventoryMovementSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = InventoryMovementAdminFilter
-    http_method_names = ["get"]
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return InventoryMovementAdminFilter
-        return InventoryMovementFilter
+    admin_filterset_class = InventoryMovementAdminFilter
+    user_filterset_class = InventoryMovementFilter
 
 
-class CustomerViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = Customer.objects.all()
+class CustomerViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los clientes del sistema.
+    Permite consultar las promociones asignadas a un cliente específico.
+    """
+
+    queryset = (
+        Customer.objects.select_related("created_by", "updated_by", "deleted_by")
+        .all()
+        .order_by("first_name")
+    )
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = CustomerAdminFilter
-    http_method_names = ["get", "post", "patch", "delete"]
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return CustomerAdminFilter
-        return CustomerFilter
+    admin_filterset_class = CustomerAdminFilter
+    user_filterset_class = CustomerFilter
 
     @action(
         detail=True,
         methods=["get"],
-        url_path="list_promotions",
-        serializer_class=EmptySerializer,
+        url_path="list-promotions",
     )
     def list_promotions(self, request, pk=None):
         customer = self.get_object()
@@ -319,79 +318,67 @@ class CustomerViewSet(StrictFilterMixin, viewsets.ModelViewSet):
         serializer = CustomerPromotionSerializer(promotions, many=True)
         return Response(serializer.data)
 
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="promotions",
-        serializer_class=CustomerPromotionCreateSerializer,
+
+class PromotionViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las promociones del sistema.
+    """
+
+    queryset = (
+        Promotion.objects.select_related("created_by", "updated_by", "deleted_by")
+        .all()
+        .order_by("name")
     )
-    def add_promotion(self, request, pk=None):
-        customer = self.get_object()
-
-        promotion_id = request.data.get("promotion")
-
-        promotion = get_object_or_404(Promotion, id=promotion_id)
-
-        customer_promotion, created = CustomerPromotion.objects.get_or_create(
-            customer=customer, promotion=promotion
-        )
-
-        if not created:
-            return Response(
-                {"detail": "Promotion already assigned"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer = CustomerPromotionSerializer(customer_promotion)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class PromotionViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = Promotion.objects.all()
     serializer_class = PromotionSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = PromotionAdminFilter
-    http_method_names = ["get", "post", "patch", "delete"]
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return PromotionAdminFilter
-        return PromotionFilter
+    admin_filterset_class = PromotionAdminFilter
+    user_filterset_class = PromotionFilter
 
 
-class CustomerPromotionViewSet(StrictFilterMixin, viewsets.ModelViewSet):
-    queryset = CustomerPromotion.objects.select_related(
-        "customer",
-        "promotion",
-    ).all()
+class CustomerPromotionViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona la asignación de promociones a clientes.
+    Evita duplicados: si la promoción ya está asignada retorna 400.
+    """
+
+    queryset = (
+        CustomerPromotion.objects.select_related(
+            "customer", "promotion", "created_by", "updated_by", "deleted_by"
+        )
+        .all()
+        .order_by("customer__first_name", "promotion__name")
+    )
     serializer_class = CustomerPromotionSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = CustomerPromotionAdminFilter
-    http_method_names = ["get", "post", "patch", "delete"]
-
-    def get_filterset_class(self):
-        if self.request.user.role == "ADMIN":
-            return CustomerPromotionAdminFilter
-        return CustomerPromotionFilter
+    admin_filterset_class = CustomerPromotionAdminFilter
+    user_filterset_class = CustomerPromotionFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        customer = serializer.validated_data["customer"]
-        promotion = serializer.validated_data["promotion"]
-
-        obj, created = CustomerPromotion.objects.get_or_create(
-            customer=customer, promotion=promotion
-        )
-
-        if not created:
+        try:
+            self.perform_create(serializer)
+        except IntegrityError:
             return Response(
-                {"detail": "Promotion already assigned"},
+                {"detail": "This promotion is already assigned to the customer."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = self.get_serializer(obj)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )

@@ -1,18 +1,13 @@
 # DRF
-from rest_framework import serializers
 
 # Models
 from nexus_inventory_backend.db.models import Customer
 
-# Serializers
-from .user_read import UserReadSerializer
+# Mixins
+from api.mixins.audit_fields import AuditFieldsMixin
 
 
-class CustomerSerializer(serializers.ModelSerializer):
-    created_by = UserReadSerializer(read_only=True)
-    updated_by = UserReadSerializer(read_only=True)
-    deleted_by = UserReadSerializer(read_only=True)
-
+class CustomerSerializer(AuditFieldsMixin):
     class Meta:
         model = Customer
         fields = [

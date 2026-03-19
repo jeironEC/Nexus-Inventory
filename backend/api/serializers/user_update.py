@@ -1,4 +1,4 @@
-# Rest framework
+# DRF
 from rest_framework import serializers
 
 # Models
@@ -12,11 +12,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "email",
         ]
 
-        def validate_email(self, value):
-            user = (
-                User.objects.filter(email=value).exclude(id=self.instance.id).exists()
-            )
+    def validate_email(self, value):
+        user = User.objects.filter(email=value).exclude(id=self.instance.id).exists()
 
-            if user:
-                raise serializers.ValidationError("Email already in use.")
-            return value
+        if user:
+            raise serializers.ValidationError("Email already in use.")
+        return value

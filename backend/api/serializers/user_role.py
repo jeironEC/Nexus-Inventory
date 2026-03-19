@@ -4,15 +4,11 @@ from rest_framework import serializers
 # Models
 from nexus_inventory_backend.db.models import Role
 
-# Serializers
-from .user_read import UserReadSerializer
+# Mixins
+from api.mixins.audit_fields import AuditFieldsMixin
 
 
-class RoleSerializer(serializers.ModelSerializer):
-    created_by = UserReadSerializer(read_only=True)
-    updated_by = UserReadSerializer(read_only=True)
-    deleted_by = UserReadSerializer(read_only=True)
-
+class RoleSerializer(AuditFieldsMixin):
     class Meta:
         model = Role
         fields = [

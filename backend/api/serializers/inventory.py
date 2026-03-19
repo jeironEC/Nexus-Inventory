@@ -5,18 +5,17 @@ from rest_framework import serializers
 from nexus_inventory_backend.db.models import Product, Inventory
 
 # Serializers
-from .user_read import UserReadSerializer
 from .product import ProductSerializer
 
+# Mixins
+from api.mixins.audit_fields import AuditFieldsMixin
 
-class InventorySerializer(serializers.ModelSerializer):
+
+class InventorySerializer(AuditFieldsMixin):
     product = ProductSerializer(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), source="product", write_only=True
     )
-    created_by = UserReadSerializer(read_only=True)
-    updated_by = UserReadSerializer(read_only=True)
-    deleted_by = UserReadSerializer(read_only=True)
 
     class Meta:
         model = Inventory

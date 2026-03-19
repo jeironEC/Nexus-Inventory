@@ -37,10 +37,3 @@ def test_soft_delete_me(api_client, normal_user, url_user_me):
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert normal_user.deleted_at is not None
     assert normal_user.is_active is False
-
-
-def test_register_throttling(api_client_auth, url_users_list, payload_user):
-    for i in range(6):
-        response = api_client_auth.post(url_users_list, payload_user)
-
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS

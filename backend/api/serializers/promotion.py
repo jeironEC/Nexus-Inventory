@@ -1,18 +1,13 @@
 # DRF
-from rest_framework import serializers
 
 # Models
 from nexus_inventory_backend.db.models import Promotion
 
-# Serializers
-from .user_read import UserReadSerializer
+# Mixins
+from api.mixins.audit_fields import AuditFieldsMixin
 
 
-class PromotionSerializer(serializers.ModelSerializer):
-    created_by = UserReadSerializer(read_only=True)
-    updated_by = UserReadSerializer(read_only=True)
-    deleted_by = UserReadSerializer(read_only=True)
-
+class PromotionSerializer(AuditFieldsMixin):
     class Meta:
         model = Promotion
         fields = [

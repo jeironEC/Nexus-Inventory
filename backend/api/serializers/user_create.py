@@ -1,9 +1,9 @@
+# DRF
+from rest_framework import serializers
+
 # Django
 from django.db import transaction
 from django.contrib.auth.password_validation import validate_password
-
-# Rest framework
-from rest_framework import serializers
 
 # Models
 from nexus_inventory_backend.db.models import User

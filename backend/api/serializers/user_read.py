@@ -22,11 +22,8 @@ class UserReadSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "deleted_at",
+            "created_by",
+            "updated_by",
+            "deleted_by",
         ]
-
-    def get_fields(self):
-        fields = super().get_fields()
-
-        for field in fields.values():
-            field.read_only = True
-        return fields
+        read_only_fields = fields

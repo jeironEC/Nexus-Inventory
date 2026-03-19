@@ -1,6 +1,11 @@
+# Internal
 import pytest
-from http import HTTPStatus
+
+# Django
 from django.urls import reverse
+
+# HTTP
+from http import HTTPStatus
 
 
 @pytest.mark.django_db

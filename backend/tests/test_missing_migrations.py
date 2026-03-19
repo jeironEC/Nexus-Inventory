@@ -1,4 +1,7 @@
+# Internal
 import pytest
+
+# Django
 from django.core.management import call_command
 
 

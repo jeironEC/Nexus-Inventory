@@ -1,4 +1,7 @@
+# Internal
 import pytest
+
+# HTTP
 from http import HTTPStatus
 
 

@@ -4,9 +4,7 @@ import pytest
 # HTTP
 from http import HTTPStatus
 
-# Django
-
-# Rest framework
+# DRF
 from rest_framework_simplejwt.tokens import RefreshToken
 
 

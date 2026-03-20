@@ -9,7 +9,7 @@ from api.serializers.user_read import UserReadSerializer
 from api.serializers.customer import CustomerSerializer
 
 
-class SaleSerializer(serializers.ModelSerializer):
+class SaleReadSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer(read_only=True)
     customer_id = serializers.PrimaryKeyRelatedField(
         queryset=Customer.objects.all(),

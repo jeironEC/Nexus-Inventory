@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.exceptions import NotFound
 
 # Serializers
 from .serializers.empty import EmptySerializer
@@ -25,7 +26,9 @@ from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
 from .serializers.promotion import PromotionSerializer
 from .serializers.customer_promotion import CustomerPromotionSerializer
-from .serializers.sale import SaleSerializer
+from .serializers.sale_read import SaleReadSerializer
+from .serializers.sale_create import SaleCreateSerializer
+from .serializers.sale_detail_read import SaleDetailReadSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -47,6 +50,10 @@ from .filters.sale import (
     SaleAdminFilter,
     SaleFilter,
 )
+from .filters.sale_detail import (
+    SaleDetailAdminFilter,
+    SaleDetailFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -60,6 +67,7 @@ from nexus_inventory_backend.db.models import (
     Promotion,
     CustomerPromotion,
     Sale,
+    SaleDetail,
 )
 
 # Permissions
@@ -71,7 +79,6 @@ from .mixins.state import StateMixin
 from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
-from .mixins.operation_state import OperationStateMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState
@@ -253,7 +260,7 @@ class InventoryViewSet(
     admin_filterset_class = InventoryAdminFilter
     user_filterset_class = InventoryFilter
 
-    @action(detail=False, methods=["get"], url_path="product/<int:product_id>")
+    @action(detail=False, methods=["get"], url_path=r"product/(?P<product_id>\d+)")
     def get_by_product(self, request, product_id=None):
         inventory = get_object_or_404(self.get_queryset(), product_id=product_id)
         serializer = self.get_serializer(inventory)
@@ -398,15 +405,19 @@ class CustomerPromotionViewSet(
 class SaleViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
+    StateMixin,
     NoPutMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
     """
-    Gestiona las ventas del sistma.
+    Gestiona las ventas del sistema.
     Permite cancelar ventas mediante el endpoint /cancel.
     """
+
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = SaleAdminFilter
+    user_filterset_class = SaleFilter
 
     queryset = (
         Sale.objects.select_related(
@@ -418,10 +429,13 @@ class SaleViewSet(
         .all()
         .order_by("-created_at")
     )
-    serializer_class = SaleSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = SaleAdminFilter
-    user_filterset_class = SaleFilter
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return SaleCreateSerializer
+        if self.action == "cancel":
+            return EmptySerializer
+        return SaleReadSerializer
 
     @action(
         detail=True,
@@ -442,5 +456,40 @@ class SaleViewSet(
         sale.updated_by = request.user
         sale.save(update_fields=["state", "updated_by", "updated_at"])
 
-        serializer = SaleSerializer(sale, context={"request": request})
+        serializer = SaleReadSerializer(sale, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SaleDetailViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los detalles de una venta.
+    Al crear un detalle se genera automáticamente un InventoryMovement de tipo 'out'.
+    """
+
+    serializer_class = SaleDetailReadSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = SaleDetailAdminFilter
+    user_filterset_class = SaleDetailFilter
+    http_method_names = ["get"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return SaleDetail.objects.none()
+
+        sale_pk = self.kwargs.get("sales_pk")
+        if not Sale.objects.filter(pk=sale_pk).exists():
+            raise NotFound(f"Sale {sale_pk} not found.")
+
+        return (
+            SaleDetail.objects.select_related(
+                "product",
+                "product__category",
+                "inventory_movement",
+            )
+            .filter(sale__id=sale_pk)
+            .order_by("created_at")
+        )

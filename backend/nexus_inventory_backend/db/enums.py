@@ -1,6 +1,9 @@
 # Django
 from django.db import models
 
+# Python
+from decimal import Decimal
+
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # GLOBAL STATE
@@ -41,3 +44,10 @@ class InvoiceState(models.TextChoices):
 class MovementType(models.TextChoices):
     IN = "IN", "In"
     OUT = "OUT", "Out"
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# TAX RATES
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class TaxRate(Decimal, models.Choices):
+    ESP = Decimal("0.21"), "21% IVA (España)"

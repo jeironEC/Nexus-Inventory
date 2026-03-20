@@ -22,6 +22,7 @@ from .views import (
     CustomerPromotionViewSet,
     SaleViewSet,
     SaleDetailViewSet,
+    InvoiceViewSet,
 )
 
 router = SimpleRouter()
@@ -45,6 +46,7 @@ router.register("sales", SaleViewSet, basename="sales")
 
 sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")
 sale_router.register("details", SaleDetailViewSet, basename="sale-detail")
+router.register("invoices", InvoiceViewSet, basename="invoices")
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),

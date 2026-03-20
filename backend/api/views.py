@@ -29,6 +29,7 @@ from .serializers.customer_promotion import CustomerPromotionSerializer
 from .serializers.sale_read import SaleReadSerializer
 from .serializers.sale_create import SaleCreateSerializer
 from .serializers.sale_detail_read import SaleDetailReadSerializer
+from .serializers.invoice import InvoiceSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -54,6 +55,10 @@ from .filters.sale_detail import (
     SaleDetailAdminFilter,
     SaleDetailFilter,
 )
+from .filters.invoice import (
+    InvoiceAdminFilter,
+    InvoiceFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -68,6 +73,7 @@ from nexus_inventory_backend.db.models import (
     CustomerPromotion,
     Sale,
     SaleDetail,
+    Invoice,
 )
 
 # Permissions
@@ -81,7 +87,7 @@ from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 
 # Enums
-from nexus_inventory_backend.db.enums import OperationState
+from nexus_inventory_backend.db.enums import OperationState, InvoiceState
 
 
 def healthcheck(request):
@@ -493,3 +499,60 @@ class SaleDetailViewSet(
             .filter(sale__id=sale_pk)
             .order_by("created_at")
         )
+
+
+class InvoiceViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ReadOnlyModelViewSet,
+):
+    """
+    Gestiona las facturas del sistema.
+    Las facturas se generan automáticamente al crear una venta.
+    Permite cancelar facturas mediante el endpoint /cancel.
+    """
+
+    serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = InvoiceAdminFilter
+    user_filterset_class = InvoiceFilter
+
+    queryset = (
+        Invoice.objects.select_related(
+            "sale",
+            "sale__customer",
+            "sale__user",
+            "sale__updated_by",
+            "sale__deleted_by",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+
+    def get_serializer_class(self):
+        if self.action == "cancel":
+            return EmptySerializer
+        return InvoiceSerializer
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_name="cancel",
+        serializer_class=EmptySerializer,
+    )
+    def cancel(self, request, pk=None):
+        invoice = self.get_object()
+
+        if invoice.state == InvoiceState.CANCELED:
+            return Response(
+                {"detail": "Invoice is already canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        invoice.state = InvoiceState.CANCELED
+        invoice.updated_by = request.user
+        invoice.save(update_fields=["state", "updated_by", "updated_at"])
+
+        serializer = InvoiceSerializer(invoice, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

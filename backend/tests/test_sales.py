@@ -8,7 +8,7 @@ from rest_framework import status
 from django.utils import timezone
 
 # Models
-from nexus_inventory_backend.db.models import Sale, SaleDetail
+from nexus_inventory_backend.db.models import Sale, SaleDetail, Invoice
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState
@@ -79,16 +79,17 @@ class TestPostSale:
 
     def test_create_sale_persisted(self, api_client_auth, sales_url, payload_sale):
         api_client_auth.post(sales_url, payload_sale, format="json")
-        # Subtotal 200, Tax 42 (assuming ESP tax is 21%), Total 242.00 check logic roughly inside the API
+
         assert Sale.objects.count() == 1
         assert SaleDetail.objects.count() == 1
+        assert Invoice.objects.count() == 1
 
     def test_create_sale_response_contains_fields(
         self, api_client_auth, sales_url, payload_sale
     ):
         response = api_client_auth.post(sales_url, payload_sale, format="json")
         data = response.data
-        # Uses SaleCreateSerializer for output due to Action override
+
         assert set(data.keys()) == {"customer_id", "payment_method", "details"}
         assert data["payment_method"] == payload_sale["payment_method"]
 
@@ -111,8 +112,6 @@ class TestPatchSale:
     def test_patch_sale_updates_payment_method(
         self, api_client_auth, sale_detail_url, sale
     ):
-        # PATCH does partial updates.
-        # Even with nested details, supplying just payment method updates just that field.
         response = api_client_auth.patch(
             sale_detail_url(sale.pk), {"payment_method": "CARD"}, format="json"
         )
@@ -168,7 +167,6 @@ class TestStateSale:
         sale.refresh_from_db()
         assert response.status_code == status.HTTP_200_OK
         assert sale.state == OperationState.CANCELED
-        # the cancel action uses SaleReadSerializer so response is full read serializer
         assert response.data["state"] == "CANCELED"
 
     def test_cancel_already_canceled_returns_400(

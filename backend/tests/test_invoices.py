@@ -1,0 +1,165 @@
+# Internal
+import pytest
+
+# DRF
+from rest_framework import status
+
+# Django
+from django.utils import timezone
+
+# Models
+
+# Enums
+from nexus_inventory_backend.db.enums import InvoiceState
+
+# Datetime
+from datetime import timedelta
+
+
+@pytest.mark.django_db
+class TestGetInvoice:
+    def test_list_invoices_returns_200(self, api_client_auth, invoices_url):
+        response = api_client_auth.get(invoices_url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_list_invoices_returns_list(
+        self, api_client_auth, invoices_url, invoice, another_invoice
+    ):
+        response = api_client_auth.get(invoices_url)
+        assert len(response.data) == 2
+
+    def test_list_invoices_fields_present(self, api_client_auth, invoices_url, invoice):
+        response = api_client_auth.get(invoices_url)
+        data = response.data[0]
+        assert set(data.keys()) == {
+            "id",
+            "sale",
+            "number_invoice",
+            "pdf_generated",
+            "state",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+        }
+
+    def test_list_invoices_sale_nested_fields(
+        self, api_client_auth, invoices_url, invoice
+    ):
+        response = api_client_auth.get(invoices_url)
+        data = response.data[0]["sale"]
+        assert set(data.keys()) == {
+            "id",
+            "customer",
+            "user",
+            "subtotal",
+            "tax_amount",
+            "total_amount",
+            "payment_method",
+            "state",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+            "updated_by",
+            "deleted_by",
+        }
+
+    def test_list_invoices_unauthenticated_returns_401(self, api_client, invoices_url):
+        response = api_client.get(invoices_url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_get_invoice_by_id_returns_200(
+        self, api_client_auth, invoice_detail_url, invoice
+    ):
+        response = api_client_auth.get(invoice_detail_url(invoice.pk))
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_get_invoice_by_id_returns_correct_invoice(
+        self, api_client_auth, invoice_detail_url, invoice
+    ):
+        response = api_client_auth.get(invoice_detail_url(invoice.pk))
+        assert response.data["id"] == invoice.pk
+
+    def test_get_invoice_by_id_unauthenticated_returns_401(
+        self, api_client, invoice_detail_url, invoice
+    ):
+        response = api_client.get(invoice_detail_url(invoice.pk))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+class TestInvoicePostAndPutRestricted:
+    def test_post_invoice_returns_405(self, api_client_auth, invoices_url):
+        # InvoiceViewSet is ReadOnlyModelViewSet except for cancel, so post should not be allowed
+        response = api_client_auth.post(invoices_url, {})
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+    def test_put_invoice_returns_405(
+        self, api_client_auth, invoice_detail_url, invoice
+    ):
+        response = api_client_auth.put(invoice_detail_url(invoice.pk), {})
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+    def test_patch_invoice_returns_405_if_not_cancel(
+        self, api_client_auth, invoice_detail_url, invoice
+    ):
+        # ReadOnlyModelViewSet doesn't allow standard patch
+        response = api_client_auth.patch(
+            invoice_detail_url(invoice.pk), {"state": "some"}
+        )
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+    def test_delete_invoice_returns_405(
+        self, api_client_auth, invoice_detail_url, invoice
+    ):
+        # ReadOnlyModelViewSet doesn't allow standard delete
+        response = api_client_auth.delete(invoice_detail_url(invoice.pk))
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+
+@pytest.mark.django_db
+class TestStateInvoice:
+    def test_cancel_invoice_returns_200(
+        self, api_client_auth, invoice_cancel_url, invoice
+    ):
+        response = api_client_auth.patch(invoice_cancel_url(invoice.pk))
+        invoice.refresh_from_db()
+        assert response.status_code == status.HTTP_200_OK
+        assert invoice.state == InvoiceState.CANCELED
+        assert response.data["state"] == "CANCELED"
+
+    def test_cancel_already_canceled_returns_400(
+        self, api_client_auth, invoice_cancel_url, invoice
+    ):
+        invoice.state = InvoiceState.CANCELED
+        invoice.save()
+        response = api_client_auth.patch(invoice_cancel_url(invoice.pk))
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_cancel_unauthenticated_returns_401(
+        self, api_client, invoice_cancel_url, invoice
+    ):
+        response = api_client.patch(invoice_cancel_url(invoice.pk))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+class TestFiltersInvoice:
+    def test_invoices_filters_by_state(
+        self, api_client_auth, invoices_url, invoice, another_invoice
+    ):
+        response = api_client_auth.get(invoices_url, {"state": InvoiceState.ISSUED})
+        assert len(response.data) == 2
+
+    def test_invoices_filters_date_from_correctly(
+        self, api_client_auth, invoices_url, invoice
+    ):
+        today = timezone.now().date()
+        response = api_client_auth.get(invoices_url, {"date_from": str(today)})
+        assert len(response.data) >= 1
+
+    def test_invoices_filters_date_from_future_returns_empty(
+        self, api_client_auth, invoices_url, invoice
+    ):
+        future = (timezone.now() + timedelta(days=30)).date()
+        response = api_client_auth.get(invoices_url, {"date_from": str(future)})
+        assert response.data == []

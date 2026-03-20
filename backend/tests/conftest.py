@@ -22,6 +22,7 @@ from nexus_inventory_backend.db.models import (
     CustomerPromotion,
     Sale,
     Invoice,
+    Supplier,
 )
 
 # Datetime
@@ -307,6 +308,26 @@ def another_invoice(db, another_sale, normal_user):
     )
 
 
+@pytest.fixture
+def supplier(db):
+    return Supplier.objects.create(
+        name="Tech Supplies Inc",
+        email="contact@techsupplies.com",
+        number_phone="5551234567",
+        address="123 Tech Lane, Silicon Valley",
+    )
+
+
+@pytest.fixture
+def another_supplier(db):
+    return Supplier.objects.create(
+        name="Global Gadgets",
+        email="sales@globalgadgets.net",
+        number_phone="5559876543",
+        address="456 Gadget Blvd, New York",
+    )
+
+
 # ======================================================================================================================================================================
 # PAYLOADS
 # ======================================================================================================================================================================
@@ -460,6 +481,25 @@ def payload_another_sale(another_customer, another_product):
         "details": [
             {"product_id": another_product.pk, "quantity": 1, "unit_price": "50.00"}
         ],
+    }
+
+
+@pytest.fixture
+def payload_supplier():
+    return {
+        "name": "New Tech Supplier",
+        "email": "new@techsupplies.com",
+        "number_phone": "5551112233",
+        "address": "789 Tech Road",
+    }
+
+
+@pytest.fixture
+def payload_supplier_no_email():
+    return {
+        "name": "New Tech Supplier 2",
+        "number_phone": "5551112233",
+        "address": "789 Tech Road",
     }
 
 
@@ -730,5 +770,18 @@ def invoice_detail_url():
 def invoice_cancel_url():
     def _url(pk):
         return reverse("invoices-cancel", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def suppliers_url():
+    return reverse("suppliers-list")
+
+
+@pytest.fixture
+def supplier_detail_url():
+    def _url(pk):
+        return reverse("suppliers-detail", kwargs={"pk": pk})
 
     return _url

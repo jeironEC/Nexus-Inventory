@@ -30,6 +30,7 @@ from .serializers.sale_read import SaleReadSerializer
 from .serializers.sale_create import SaleCreateSerializer
 from .serializers.sale_detail_read import SaleDetailReadSerializer
 from .serializers.invoice import InvoiceSerializer
+from .serializers.supplier import SupplierSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -59,6 +60,10 @@ from .filters.invoice import (
     InvoiceAdminFilter,
     InvoiceFilter,
 )
+from .filters.supplier import (
+    SupplierAdminFilter,
+    SupplierFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -74,6 +79,7 @@ from nexus_inventory_backend.db.models import (
     Sale,
     SaleDetail,
     Invoice,
+    Supplier,
 )
 
 # Permissions
@@ -556,3 +562,26 @@ class InvoiceViewSet(
 
         serializer = InvoiceSerializer(invoice, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SupplierViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los suplidores del sistema.
+    """
+
+    queryset = (
+        Supplier.objects.select_related("created_by", "updated_by", "deleted_by")
+        .all()
+        .order_by("name")
+    )
+    serializer_class = SupplierSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = SupplierAdminFilter
+    user_filterset_class = SupplierFilter

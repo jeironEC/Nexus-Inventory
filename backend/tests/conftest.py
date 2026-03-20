@@ -254,6 +254,34 @@ def another_sale(db, another_customer, normal_user):
     )
 
 
+@pytest.fixture
+def sale_detail(db, sale, product, inventory_movements):
+    from nexus_inventory_backend.db.models import SaleDetail
+
+    return SaleDetail.objects.create(
+        sale=sale,
+        product=product,
+        inventory_movement=inventory_movements,
+        quantity=2,
+        unit_price=50.00,
+        subtotal=100.00,
+    )
+
+
+@pytest.fixture
+def another_sale_detail(db, another_sale, another_product, another_inventory_movements):
+    from nexus_inventory_backend.db.models import SaleDetail
+
+    return SaleDetail.objects.create(
+        sale=another_sale,
+        product=another_product,
+        inventory_movement=another_inventory_movements,
+        quantity=4,
+        unit_price=50.00,
+        subtotal=200.00,
+    )
+
+
 # ======================================================================================================================================================================
 # PAYLOADS
 # ======================================================================================================================================================================
@@ -391,26 +419,22 @@ def payload_another_customer_promotion(db, another_customer, another_promotion):
 
 
 @pytest.fixture
-def payload_sale(customer, admin_user):
+def payload_sale(customer, product):
     return {
         "customer_id": customer.pk,
-        "user_id": admin_user.pk,
-        "subtotal": 50.00,
-        "tax_amount": 10.50,
-        "total_amount": 60.50,
         "payment_method": "CASH",
+        "details": [{"product_id": product.pk, "quantity": 2, "unit_price": "100.00"}],
     }
 
 
 @pytest.fixture
-def payload_another_sale(another_customer, normal_user):
+def payload_another_sale(another_customer, another_product):
     return {
         "customer_id": another_customer.pk,
-        "user_id": normal_user.pk,
-        "subtotal": 150.00,
-        "tax_amount": 31.50,
-        "total_amount": 181.50,
         "payment_method": "CARD",
+        "details": [
+            {"product_id": another_product.pk, "quantity": 1, "unit_price": "50.00"}
+        ],
     }
 
 
@@ -644,5 +668,21 @@ def sale_detail_url():
 def sale_cancel_url():
     def _url(pk):
         return reverse("sales-cancel", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_details_url():
+    def _url(sale_pk):
+        return reverse("sale-detail-list", kwargs={"sales_pk": sale_pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_detail_item_url():
+    def _url(sale_pk, pk):
+        return reverse("sale-detail-detail", kwargs={"sales_pk": sale_pk, "pk": pk})
 
     return _url

@@ -13,6 +13,7 @@ dependencies = [
     "django-environ",
     "djangorestframework-simplejwt",
     "django-filter",
+    "drf-nested-routers",
 ]
 
 [project.optional-dependencies]

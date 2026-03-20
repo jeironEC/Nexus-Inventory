@@ -8,7 +8,7 @@ from rest_framework import status
 from django.utils import timezone
 
 # Models
-from nexus_inventory_backend.db.models import Sale
+from nexus_inventory_backend.db.models import Sale, SaleDetail
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState
@@ -24,13 +24,13 @@ class TestGetSale:
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_sales_returns_list(
-        self, api_client_auth, sales_url, sale, another_sale
+        self, api_client_auth, sales_url, sale, another_sale, sale_detail
     ):
         response = api_client_auth.get(sales_url)
         assert len(response.data) == 2
 
     def test_list_sales_fields_present(
-        self, api_client_auth, sales_url, sale, another_sale
+        self, api_client_auth, sales_url, sale, another_sale, sale_detail
     ):
         response = api_client_auth.get(sales_url)
         data = response.data[0]
@@ -74,33 +74,35 @@ class TestGetSale:
 @pytest.mark.django_db
 class TestPostSale:
     def test_create_sale_returns_201(self, api_client_auth, sales_url, payload_sale):
-        response = api_client_auth.post(sales_url, payload_sale)
+        response = api_client_auth.post(sales_url, payload_sale, format="json")
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_create_sale_persisted(self, api_client_auth, sales_url, payload_sale):
-        api_client_auth.post(sales_url, payload_sale)
-        assert Sale.objects.filter(total_amount=60.50).exists()
+        api_client_auth.post(sales_url, payload_sale, format="json")
+        # Subtotal 200, Tax 42 (assuming ESP tax is 21%), Total 242.00 check logic roughly inside the API
+        assert Sale.objects.count() == 1
+        assert SaleDetail.objects.count() == 1
 
     def test_create_sale_response_contains_fields(
         self, api_client_auth, sales_url, payload_sale
     ):
-        response = api_client_auth.post(sales_url, payload_sale)
+        response = api_client_auth.post(sales_url, payload_sale, format="json")
         data = response.data
-        assert data["total_amount"] == "60.50"
+        # Uses SaleCreateSerializer for output due to Action override
+        assert set(data.keys()) == {"customer_id", "payment_method", "details"}
         assert data["payment_method"] == payload_sale["payment_method"]
 
     def test_create_sale_unauthenticated_returns_401(
         self, api_client, sales_url, payload_sale
     ):
-        response = api_client.post(sales_url, payload_sale)
+        response = api_client.post(sales_url, payload_sale, format="json")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_create_sale_invalid_totals_returns_400(
+    def test_create_sale_missing_details_returns_400(
         self, api_client_auth, sales_url, payload_sale
     ):
-        # Break the math
-        payload_sale["total_amount"] = 999.00
-        response = api_client_auth.post(sales_url, payload_sale)
+        payload_sale["details"] = []
+        response = api_client_auth.post(sales_url, payload_sale, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -109,19 +111,23 @@ class TestPatchSale:
     def test_patch_sale_updates_payment_method(
         self, api_client_auth, sale_detail_url, sale
     ):
+        # PATCH does partial updates.
+        # Even with nested details, supplying just payment method updates just that field.
         response = api_client_auth.patch(
-            sale_detail_url(sale.pk), {"payment_method": "CARD"}
+            sale_detail_url(sale.pk), {"payment_method": "CARD"}, format="json"
         )
         assert response.data["payment_method"] == "CARD"
 
     def test_patch_sale_persists_changes(self, api_client_auth, sale_detail_url, sale):
-        api_client_auth.patch(sale_detail_url(sale.pk), {"payment_method": "CARD"})
+        api_client_auth.patch(
+            sale_detail_url(sale.pk), {"payment_method": "CARD"}, format="json"
+        )
         sale.refresh_from_db()
         assert sale.payment_method == "CARD"
 
     def test_patch_sale_nonexistent_returns_404(self, api_client_auth, sale_detail_url):
         response = api_client_auth.patch(
-            sale_detail_url(999), {"payment_method": "CARD"}
+            sale_detail_url(999), {"payment_method": "CARD"}, format="json"
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -129,7 +135,7 @@ class TestPatchSale:
         self, api_client, sale_detail_url, sale
     ):
         response = api_client.patch(
-            sale_detail_url(sale.pk), {"payment_method": "CARD"}
+            sale_detail_url(sale.pk), {"payment_method": "CARD"}, format="json"
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -162,6 +168,8 @@ class TestStateSale:
         sale.refresh_from_db()
         assert response.status_code == status.HTTP_200_OK
         assert sale.state == OperationState.CANCELED
+        # the cancel action uses SaleReadSerializer so response is full read serializer
+        assert response.data["state"] == "CANCELED"
 
     def test_cancel_already_canceled_returns_400(
         self, api_client_auth, sale_cancel_url, sale

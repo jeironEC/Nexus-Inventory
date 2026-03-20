@@ -4,6 +4,9 @@ from django.urls import path, include
 # Rest framework
 from rest_framework.routers import SimpleRouter
 
+# DRF Nested Routers
+from rest_framework_nested import routers
+
 # Views
 from .views import (
     healthcheck,
@@ -18,9 +21,10 @@ from .views import (
     PromotionViewSet,
     CustomerPromotionViewSet,
     SaleViewSet,
+    SaleDetailViewSet,
 )
 
-router = SimpleRouter(use_regex_path=False)
+router = SimpleRouter()
 
 router.register("users", UserViewSet, basename="users")
 router.register("users", UserMeViewSet, basename="user")
@@ -38,9 +42,14 @@ router.register(
 )
 router.register("sales", SaleViewSet, basename="sales")
 
+
+sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")
+sale_router.register("details", SaleDetailViewSet, basename="sale-detail")
+
 urlpatterns = [
-    path("health/", healthcheck, name="health"),  # Endpoint verifica estado del sistema
-    path("", include("api.docs")),  # Endpoints de documentación
-    path("auth/", include("api.auth")),  # Endpoints de autenticación
-    *router.urls,  # Endpoints de los modelos
+    path("health/", healthcheck, name="health"),
+    path("", include("api.docs")),
+    path("auth/", include("api.auth")),
+    *router.urls,
+    *sale_router.urls,
 ]

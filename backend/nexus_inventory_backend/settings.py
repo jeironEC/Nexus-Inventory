@@ -152,7 +152,6 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
-
 sentry_sdk.init(
     dsn=env("SENTRY_DSN", default=None),
     environment=env("ENVIRONMENT", default="development"),

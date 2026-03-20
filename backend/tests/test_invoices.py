@@ -89,7 +89,6 @@ class TestGetInvoice:
 @pytest.mark.django_db
 class TestInvoicePostAndPutRestricted:
     def test_post_invoice_returns_405(self, api_client_auth, invoices_url):
-        # InvoiceViewSet is ReadOnlyModelViewSet except for cancel, so post should not be allowed
         response = api_client_auth.post(invoices_url, {})
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -102,7 +101,6 @@ class TestInvoicePostAndPutRestricted:
     def test_patch_invoice_returns_405_if_not_cancel(
         self, api_client_auth, invoice_detail_url, invoice
     ):
-        # ReadOnlyModelViewSet doesn't allow standard patch
         response = api_client_auth.patch(
             invoice_detail_url(invoice.pk), {"state": "some"}
         )
@@ -111,7 +109,6 @@ class TestInvoicePostAndPutRestricted:
     def test_delete_invoice_returns_405(
         self, api_client_auth, invoice_detail_url, invoice
     ):
-        # ReadOnlyModelViewSet doesn't allow standard delete
         response = api_client_auth.delete(invoice_detail_url(invoice.pk))
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 

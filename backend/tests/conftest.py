@@ -20,6 +20,7 @@ from nexus_inventory_backend.db.models import (
     Customer,
     Promotion,
     CustomerPromotion,
+    Sale,
 )
 
 # Datetime
@@ -227,6 +228,32 @@ def another_customer_promotion(db, another_customer, another_promotion):
     )
 
 
+@pytest.fixture
+def sale(db, customer, admin_user):
+    return Sale.objects.create(
+        customer=customer,
+        user=admin_user,
+        subtotal=100.00,
+        tax_amount=21.00,
+        total_amount=121.00,
+        payment_method="CASH",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
+def another_sale(db, another_customer, normal_user):
+    return Sale.objects.create(
+        customer=another_customer,
+        user=normal_user,
+        subtotal=200.00,
+        tax_amount=42.00,
+        total_amount=242.00,
+        payment_method="CARD",
+        state="COMPLETED",
+    )
+
+
 # ======================================================================================================================================================================
 # PAYLOADS
 # ======================================================================================================================================================================
@@ -360,6 +387,30 @@ def payload_another_customer_promotion(db, another_customer, another_promotion):
         "customer_id": another_customer.pk,
         "promotion_id": another_promotion.pk,
         "applied": False,
+    }
+
+
+@pytest.fixture
+def payload_sale(customer, admin_user):
+    return {
+        "customer_id": customer.pk,
+        "user_id": admin_user.pk,
+        "subtotal": 50.00,
+        "tax_amount": 10.50,
+        "total_amount": 60.50,
+        "payment_method": "CASH",
+    }
+
+
+@pytest.fixture
+def payload_another_sale(another_customer, normal_user):
+    return {
+        "customer_id": another_customer.pk,
+        "user_id": normal_user.pk,
+        "subtotal": 150.00,
+        "tax_amount": 31.50,
+        "total_amount": 181.50,
+        "payment_method": "CARD",
     }
 
 
@@ -572,5 +623,26 @@ def customer_list_promotions_url():
 def customer_promotion_assign_url():
     def _url(pk):
         return reverse("customers-add-promotion", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sales_url():
+    return reverse("sales-list")
+
+
+@pytest.fixture
+def sale_detail_url():
+    def _url(pk):
+        return reverse("sales-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_cancel_url():
+    def _url(pk):
+        return reverse("sales-cancel", kwargs={"pk": pk})
 
     return _url

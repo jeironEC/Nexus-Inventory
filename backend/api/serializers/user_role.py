@@ -25,7 +25,6 @@ class RoleSerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
-            "state",
             "created_at",
             "updated_at",
             "deleted_at",

@@ -21,6 +21,7 @@ from nexus_inventory_backend.db.models import (
     Promotion,
     CustomerPromotion,
     Sale,
+    Invoice,
 )
 
 # Datetime
@@ -279,6 +280,30 @@ def another_sale_detail(db, another_sale, another_product, another_inventory_mov
         quantity=4,
         unit_price=50.00,
         subtotal=200.00,
+    )
+
+
+@pytest.fixture
+def invoice(db, sale, admin_user):
+    from nexus_inventory_backend.db.enums import InvoiceState
+
+    return Invoice.objects.create(
+        sale=sale,
+        number_invoice=f"INV-{sale.pk:08d}",
+        state=InvoiceState.ISSUED,
+        created_by=admin_user,
+    )
+
+
+@pytest.fixture
+def another_invoice(db, another_sale, normal_user):
+    from nexus_inventory_backend.db.enums import InvoiceState
+
+    return Invoice.objects.create(
+        sale=another_sale,
+        number_invoice=f"INV-{another_sale.pk:08d}",
+        state=InvoiceState.ISSUED,
+        created_by=normal_user,
     )
 
 
@@ -684,5 +709,26 @@ def sale_details_url():
 def sale_detail_item_url():
     def _url(sale_pk, pk):
         return reverse("sale-detail-detail", kwargs={"sales_pk": sale_pk, "pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def invoices_url():
+    return reverse("invoices-list")
+
+
+@pytest.fixture
+def invoice_detail_url():
+    def _url(pk):
+        return reverse("invoices-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def invoice_cancel_url():
+    def _url(pk):
+        return reverse("invoices-cancel", kwargs={"pk": pk})
 
     return _url

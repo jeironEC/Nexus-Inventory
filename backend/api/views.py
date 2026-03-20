@@ -260,7 +260,7 @@ class InventoryViewSet(
     admin_filterset_class = InventoryAdminFilter
     user_filterset_class = InventoryFilter
 
-    @action(detail=False, methods=["get"], url_path="product/<int:product_id>")
+    @action(detail=False, methods=["get"], url_path=r"product/(?P<product_id>\d+)")
     def get_by_product(self, request, product_id=None):
         inventory = get_object_or_404(self.get_queryset(), product_id=product_id)
         serializer = self.get_serializer(inventory)

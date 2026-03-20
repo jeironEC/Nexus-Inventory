@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # Serializers
+from .serializers.empty import EmptySerializer
 from .serializers.user_role import RoleSerializer
 from .serializers.user_read import UserReadSerializer
 from .serializers.user_create import UserCreateSerializer
@@ -24,6 +25,7 @@ from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
 from .serializers.promotion import PromotionSerializer
 from .serializers.customer_promotion import CustomerPromotionSerializer
+from .serializers.sale import SaleSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -41,6 +43,10 @@ from .filters.customer_promotions import (
     CustomerPromotionAdminFilter,
     CustomerPromotionFilter,
 )
+from .filters.sale import (
+    SaleAdminFilter,
+    SaleFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -53,6 +59,7 @@ from nexus_inventory_backend.db.models import (
     Customer,
     Promotion,
     CustomerPromotion,
+    Sale,
 )
 
 # Permissions
@@ -64,6 +71,10 @@ from .mixins.state import StateMixin
 from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
+from .mixins.operation_state import OperationStateMixin
+
+# Enums
+from nexus_inventory_backend.db.enums import OperationState
 
 
 def healthcheck(request):
@@ -382,3 +393,54 @@ class CustomerPromotionViewSet(
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+
+class SaleViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    OperationStateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las ventas del sistma.
+    Permite cancelar ventas mediante el endpoint /cancel.
+    """
+
+    queryset = (
+        Sale.objects.select_related(
+            "customer",
+            "user",
+            "updated_by",
+            "deleted_by",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+    serializer_class = SaleSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = SaleAdminFilter
+    user_filterset_class = SaleFilter
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_name="cancel",
+        serializer_class=EmptySerializer,
+    )
+    def cancel(self, request, pk=None):
+        sale = self.get_object()
+
+        if sale.state == OperationState.CANCELED:
+            return Response(
+                {"detail": "Sale is already canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        sale.state = OperationState.CANCELED
+        sale.updated_by = request.user
+        sale.save(update_fields=["state", "updated_by", "updated_at"])
+
+        serializer = SaleSerializer(sale, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -139,6 +139,7 @@ from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 from .mixins.operation_state import OperationStateMixin
 from .mixins.report_filter import ReportFilterMixin
+from .mixins.audit_fields import AuditUserMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState, InvoiceState
@@ -159,6 +160,7 @@ class UserRoleViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -182,6 +184,7 @@ class UserViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
     StateMixin,
+    AuditUserMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
@@ -254,6 +257,7 @@ class CategoryViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -278,6 +282,7 @@ class ProductViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -303,6 +308,7 @@ class InventoryViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
     SoftDeleteQuerysetMixin,
+    AuditUserMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
@@ -366,6 +372,7 @@ class CustomerViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -405,6 +412,7 @@ class PromotionViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -427,6 +435,7 @@ class CustomerPromotionViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -470,6 +479,7 @@ class SaleViewSet(
     RoleFilterMixin,
     OperationStateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -499,6 +509,9 @@ class SaleViewSet(
         if self.action == "cancel":
             return EmptySerializer
         return SaleReadSerializer
+
+    def perform_create(self, serializer):
+        pass
 
     @action(
         detail=True,
@@ -632,6 +645,7 @@ class SupplierViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -655,6 +669,7 @@ class PurchaseViewSet(
     RoleFilterMixin,
     OperationStateMixin,
     NoPutMixin,
+    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -684,6 +699,9 @@ class PurchaseViewSet(
         if self.action == "cancel":
             return EmptySerializer
         return PurchaseReadSerializer
+
+    def perform_create(self, serializer):
+        pass
 
     @action(
         detail=True,

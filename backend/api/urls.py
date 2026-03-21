@@ -26,6 +26,12 @@ from .views import (
     SupplierViewSet,
     PurchaseViewSet,
     PurchaseDetailViewSet,
+    SaleReportViewSet,
+    PurchaseReportViewSet,
+    InventoryReportViewSet,
+    ProductReportViewSet,
+    CustomerReportViewSet,
+    InvoiceReportViewSet,
 )
 
 router = SimpleRouter()
@@ -52,6 +58,12 @@ router.register("suppliers", SupplierViewSet, basename="suppliers")
 router.register("purchases", PurchaseViewSet, basename="purchases")
 purchase_router = routers.NestedSimpleRouter(router, "purchases", lookup="purchases")
 purchase_router.register("details", PurchaseDetailViewSet, basename="purchase-detail")
+router.register("reports", SaleReportViewSet, basename="sale-reports")
+router.register("reports", PurchaseReportViewSet, basename="purchase-reports")
+router.register("reports", InventoryReportViewSet, basename="inventory-reports")
+router.register("reports", ProductReportViewSet, basename="product-reports")
+router.register("reports", CustomerReportViewSet, basename="customer-reports")
+router.register("reports", InvoiceReportViewSet, basename="invoice-reports")
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),

@@ -31,6 +31,8 @@ from .serializers.sale_create import SaleCreateSerializer
 from .serializers.sale_detail_read import SaleDetailReadSerializer
 from .serializers.invoice import InvoiceSerializer
 from .serializers.supplier import SupplierSerializer
+from .serializers.purchase_read import PurchaseReadSerializer
+from .serializers.purchase_create import PurchaseCreateSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -64,6 +66,10 @@ from .filters.supplier import (
     SupplierAdminFilter,
     SupplierFilter,
 )
+from .filters.purchase import (
+    PurchaseAdminFilter,
+    PurchaseFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -80,6 +86,7 @@ from nexus_inventory_backend.db.models import (
     SaleDetail,
     Invoice,
     Supplier,
+    Purchase,
 )
 
 # Permissions
@@ -91,6 +98,7 @@ from .mixins.state import StateMixin
 from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
+from .mixins.operation_state import OperationStateMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState, InvoiceState
@@ -417,7 +425,7 @@ class CustomerPromotionViewSet(
 class SaleViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    StateMixin,
+    OperationStateMixin,
     NoPutMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
@@ -585,3 +593,61 @@ class SupplierViewSet(
     permission_classes = [IsAuthenticated]
     admin_filterset_class = SupplierAdminFilter
     user_filterset_class = SupplierFilter
+
+
+class PurchaseViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    OperationStateMixin,
+    NoPutMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las compras del sistema.
+    Permite cancelar compras mediante el endpoint /cancel.
+    """
+
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = PurchaseAdminFilter
+    user_filterset_class = PurchaseFilter
+
+    queryset = (
+        Purchase.objects.select_related(
+            "supplier",
+            "user",
+            "updated_by",
+            "deleted_by",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return PurchaseCreateSerializer
+        if self.action == "cancel":
+            return EmptySerializer
+        return PurchaseReadSerializer
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_name="cancel",
+        serializer_class=EmptySerializer,
+    )
+    def cancel(self, request, pk=None):
+        purchase = self.get_object()
+
+        if purchase.state == OperationState.CANCELED:
+            return Response(
+                {"detail": "Purchase is already canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        purchase.state = OperationState.CANCELED
+        purchase.updated_by = request.user
+        purchase.save(update_fields=["state", "updated_by", "updated_at"])
+
+        serializer = PurchaseReadSerializer(purchase, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

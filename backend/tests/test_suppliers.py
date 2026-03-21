@@ -4,8 +4,6 @@ import pytest
 # DRF
 from rest_framework import status
 
-# Django
-
 # Models
 from nexus_inventory_backend.db.models import Supplier
 

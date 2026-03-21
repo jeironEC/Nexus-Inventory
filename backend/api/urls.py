@@ -25,6 +25,7 @@ from .views import (
     InvoiceViewSet,
     SupplierViewSet,
     PurchaseViewSet,
+    PurchaseDetailViewSet,
 )
 
 router = SimpleRouter()
@@ -44,13 +45,13 @@ router.register(
     "customer_promotions", CustomerPromotionViewSet, basename="customer_promotions"
 )
 router.register("sales", SaleViewSet, basename="sales")
-
-
 sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")
 sale_router.register("details", SaleDetailViewSet, basename="sale-detail")
 router.register("invoices", InvoiceViewSet, basename="invoices")
 router.register("suppliers", SupplierViewSet, basename="suppliers")
 router.register("purchases", PurchaseViewSet, basename="purchases")
+purchase_router = routers.NestedSimpleRouter(router, "purchases", lookup="purchases")
+purchase_router.register("details", PurchaseDetailViewSet, basename="purchase-detail")
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),
@@ -58,4 +59,5 @@ urlpatterns = [
     path("auth/", include("api.auth")),
     *router.urls,
     *sale_router.urls,
+    *purchase_router.urls,
 ]

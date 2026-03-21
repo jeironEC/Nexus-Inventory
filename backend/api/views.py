@@ -33,6 +33,7 @@ from .serializers.invoice import InvoiceSerializer
 from .serializers.supplier import SupplierSerializer
 from .serializers.purchase_read import PurchaseReadSerializer
 from .serializers.purchase_create import PurchaseCreateSerializer
+from .serializers.purchase_detail_read import PurchaseDetailReadSerializer
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -70,6 +71,10 @@ from .filters.purchase import (
     PurchaseAdminFilter,
     PurchaseFilter,
 )
+from .filters.purchase_detail import (
+    PurchaseDetailAdminFilter,
+    PurchaseDetailFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -87,6 +92,7 @@ from nexus_inventory_backend.db.models import (
     Invoice,
     Supplier,
     Purchase,
+    PurchaseDetail,
 )
 
 # Permissions
@@ -487,7 +493,7 @@ class SaleDetailViewSet(
 ):
     """
     Gestiona los detalles de una venta.
-    Al crear un detalle se genera automáticamente un InventoryMovement de tipo 'out'.
+    Al crear un detalle se genera automáticamente un InventoryMovement de tipo 'out' y su respectiva factura.
     """
 
     serializer_class = SaleDetailReadSerializer
@@ -651,3 +657,38 @@ class PurchaseViewSet(
 
         serializer = PurchaseReadSerializer(purchase, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PurchaseDetailViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los detalles de una compra.
+    Al crear un detalle se genera automáticamente un InventoryMovement de tipo 'in'.
+    """
+
+    serializer_class = PurchaseDetailReadSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = PurchaseDetailAdminFilter
+    user_filterset_class = PurchaseDetailFilter
+    http_method_names = ["get"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return PurchaseDetail.objects.none()
+
+        purchase_pk = self.kwargs.get("purchases_pk")
+        if not Purchase.objects.filter(pk=purchase_pk).exists():
+            raise NotFound(f"Purchase {purchase_pk} not found.")
+
+        return (
+            PurchaseDetail.objects.select_related(
+                "product",
+                "product__category",
+                "inventory_movement",
+            )
+            .filter(purchase__id=purchase_pk)
+            .order_by("created_at")
+        )

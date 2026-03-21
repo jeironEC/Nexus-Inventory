@@ -111,7 +111,6 @@ class TestPostPurchase:
         self, api_client_auth, purchases_url, payload_purchase
     ):
         api_client_auth.post(purchases_url, payload_purchase, format="json")
-        # quantity=2, unit_cost=100.00 => total_amount=200.00
         purchase = Purchase.objects.first()
         assert purchase.total_amount == 200.00
 
@@ -120,7 +119,6 @@ class TestPostPurchase:
     ):
         response = api_client_auth.post(purchases_url, payload_purchase, format="json")
         data = response.data
-        # PurchaseCreateSerializer output
         assert set(data.keys()) == {"supplier_id", "details"}
 
     def test_create_purchase_unauthenticated_returns_401(
@@ -159,7 +157,6 @@ class TestPutPurchaseRestricted:
     def test_put_purchase_returns_405(
         self, api_client_auth, purchase_detail_url, purchase, payload_purchase
     ):
-        # NoPutMixin restricts PUT method
         response = api_client_auth.put(
             purchase_detail_url(purchase.pk), payload_purchase, format="json"
         )

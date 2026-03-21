@@ -845,3 +845,21 @@ def purchase_cancel_url():
         return reverse("purchases-cancel", kwargs={"pk": pk})
 
     return _url
+
+
+@pytest.fixture
+def purchase_details_url():
+    def _url(purchase_pk):
+        return reverse("purchase-detail-list", kwargs={"purchases_pk": purchase_pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchase_detail_item_url():
+    def _url(purchase_pk, pk):
+        return reverse(
+            "purchase-detail-detail", kwargs={"purchases_pk": purchase_pk, "pk": pk}
+        )
+
+    return _url

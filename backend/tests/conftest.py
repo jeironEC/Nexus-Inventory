@@ -23,6 +23,7 @@ from nexus_inventory_backend.db.models import (
     Sale,
     Invoice,
     Supplier,
+    Purchase,
 )
 
 # Datetime
@@ -503,6 +504,44 @@ def payload_supplier_no_email():
     }
 
 
+@pytest.fixture
+def purchase(db, supplier, admin_user, product):
+    return Purchase.objects.create(
+        supplier=supplier,
+        user=admin_user,
+        total_amount="200.00",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
+def another_purchase(db, another_supplier, normal_user, another_product):
+    return Purchase.objects.create(
+        supplier=another_supplier,
+        user=normal_user,
+        total_amount="500.00",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
+def payload_purchase(supplier, product):
+    return {
+        "supplier_id": supplier.pk,
+        "details": [{"product_id": product.pk, "quantity": 2, "unit_cost": "100.00"}],
+    }
+
+
+@pytest.fixture
+def payload_another_purchase(another_supplier, another_product):
+    return {
+        "supplier_id": another_supplier.pk,
+        "details": [
+            {"product_id": another_product.pk, "quantity": 1, "unit_cost": "250.00"}
+        ],
+    }
+
+
 # ======================================================================================================================================================================
 # URLS
 # ======================================================================================================================================================================
@@ -783,5 +822,26 @@ def suppliers_url():
 def supplier_detail_url():
     def _url(pk):
         return reverse("suppliers-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchases_url():
+    return reverse("purchases-list")
+
+
+@pytest.fixture
+def purchase_detail_url():
+    def _url(pk):
+        return reverse("purchases-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchase_cancel_url():
+    def _url(pk):
+        return reverse("purchases-cancel", kwargs={"pk": pk})
 
     return _url

@@ -37,6 +37,7 @@ DEBUG = True
 ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost"]
 
 LOW_STOCK_THRESHOLD = env.int("LOW_STOCK_THRESHOLD", default=5)
+DEFAULT_LIMIT = env.int("DEFAULT_LIMIT", default=10)
 
 # Application definition
 
@@ -150,6 +151,14 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+}
+
+SPECTACULAR_SETTINGS = {
+    "ENUM_NAME_OVERRIDES": {
+        "StateEnum": "nexus_inventory_backend.db.enums.State",
+        "OperationStateEnum": "nexus_inventory_backend.db.enums.OperationState",
+        "InvoiceStateEnum": "nexus_inventory_backend.db.enums.InvoiceState",
+    },
 }
 
 sentry_sdk.init(

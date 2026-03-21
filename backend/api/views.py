@@ -1,8 +1,11 @@
+# Internal
+
 # Django
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.db import IntegrityError
+from django.db.models import Sum, Count, Avg, Q
 
 # DRF
 from rest_framework import mixins, status, viewsets
@@ -11,6 +14,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import NotFound
+
+# DRF Spectacular
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 
 # Serializers
 from .serializers.empty import EmptySerializer
@@ -34,6 +40,25 @@ from .serializers.supplier import SupplierSerializer
 from .serializers.purchase_read import PurchaseReadSerializer
 from .serializers.purchase_create import PurchaseCreateSerializer
 from .serializers.purchase_detail_read import PurchaseDetailReadSerializer
+from .serializers.reports import (
+    SaleReportSerializer,
+    SaleByCustomerSerializer,
+    SaleByPaymentMethodSerializer,
+    SaleByPeriodSerializer,
+    PurchaseReportSerializer,
+    PurchaseBySupplierSerializer,
+    PurchaseByPeriodSerializer,
+    InventoryReportSerializer,
+    InventoryLowStockSerializer,
+    InventoryMovementReportSerializer,
+    ProductTopSellingSerializer,
+    ProductLowSellingSerializer,
+    ProductMostPurchasedSerializer,
+    ProductByCategorySerializer,
+    CustomerTopSerializer,
+    CustomerPromotionReportSerializer,
+    InvoiceReportSerializer,
+)
 
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
@@ -75,6 +100,14 @@ from .filters.purchase_detail import (
     PurchaseDetailAdminFilter,
     PurchaseDetailFilter,
 )
+from .filters.reports import (
+    SaleReportFilter,
+    PurchaseReportFilter,
+    InventoryReportFilter,
+    ProductReportFilter,
+    CustomerReportFilter,
+    InvoiceReportFilter,
+)
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -105,9 +138,13 @@ from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 from .mixins.operation_state import OperationStateMixin
+from .mixins.report_filter import ReportFilterMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState, InvoiceState
+
+# Utils
+from api.utils import get_trunc_func
 
 
 def healthcheck(request):
@@ -486,6 +523,18 @@ class SaleViewSet(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(name="sales_pk", type=int, location=OpenApiParameter.PATH)
+        ]
+    ),
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(name="sales_pk", type=int, location=OpenApiParameter.PATH)
+        ]
+    ),
+)
 class SaleDetailViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -659,6 +708,22 @@ class PurchaseViewSet(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="purchases_pk", type=int, location=OpenApiParameter.PATH
+            )
+        ]
+    ),
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="purchases_pk", type=int, location=OpenApiParameter.PATH
+            )
+        ]
+    ),
+)
 class PurchaseDetailViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -692,3 +757,466 @@ class PurchaseDetailViewSet(
             .filter(purchase__id=purchase_pk)
             .order_by("created_at")
         )
+
+
+class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
+    """
+    Expone reportes relacionados con las ventas del sistema.
+    Incluye resumen general, agrupación por cliente, método de pago y periodo (day, week, month).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=SaleReportSerializer)
+    @action(detail=False, methods=["get"], url_path="sales")
+    def sales(self, request):
+        qs = self.get_filtered_queryset(Sale.objects.all(), SaleReportFilter)
+        data = qs.aggregate(
+            total_sales=Count("id", filter=Q(state=OperationState.COMPLETED)),
+            total_revenue=Sum("total_amount", filter=Q(state=OperationState.COMPLETED)),
+            total_tax=Sum("tax_amount", filter=Q(state=OperationState.COMPLETED)),
+            average_ticket=Avg(
+                "total_amount", filter=Q(state=OperationState.COMPLETED)
+            ),
+            canceled_sales=Count("id", filter=Q(state=OperationState.CANCELED)),
+        )
+        serializer = SaleReportSerializer(data)
+        return Response(serializer.data)
+
+    @extend_schema(responses=SaleByCustomerSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="sales/by-customer")
+    def sales_by_customer(self, request):
+        qs = self.get_filtered_queryset(
+            Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
+        )
+        data = (
+            qs.values("customer__id", "customer__first_name", "customer__last_name")
+            .annotate(total_sales=Count("id"), total_revenue=Sum("total_amount"))
+            .order_by("-total_revenue")
+        )
+        result = [
+            {
+                "customer_id": r["customer__id"],
+                "customer_name": f"{r['customer__first_name'] or ''} {r['customer__last_name'] or ''}".strip()
+                or "Anonymous",
+                "total_sales": r["total_sales"],
+                "total_revenue": r["total_revenue"],
+            }
+            for r in data
+        ]
+        serializer = SaleByCustomerSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=SaleByPaymentMethodSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="sales/by-payment-method")
+    def sales_by_payment_method(self, request):
+        qs = self.get_filtered_queryset(
+            Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
+        )
+        data = (
+            qs.values("payment_method")
+            .annotate(total_sales=Count("id"), total_revenue=Sum("total_amount"))
+            .order_by("-total_revenue")
+        )
+        result = [
+            {
+                "payment_method": r["payment_method"],
+                "total_sales": r["total_sales"],
+                "total_revenue": r["total_revenue"],
+            }
+            for r in data
+        ]
+        serializer = SaleByPaymentMethodSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=SaleByPeriodSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="sales/by-period")
+    def sales_by_period(self, request):
+        period = request.query_params.get("period", "month")
+        trunc_func = get_trunc_func(period)
+        qs = self.get_filtered_queryset(
+            Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
+        )
+        data = (
+            qs.annotate(period=trunc_func("created_at"))
+            .values("period")
+            .annotate(total_sales=Count("id"), total_revenue=Sum("total_amount"))
+            .order_by("period")
+        )
+        result = [
+            {
+                "period": r["period"].strftime("%Y-%m-%d") if r["period"] else None,
+                "total_sales": r["total_sales"],
+                "total_revenue": r["total_revenue"],
+            }
+            for r in data
+        ]
+        serializer = SaleByPeriodSerializer(result, many=True)
+        return Response(serializer.data)
+
+
+class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
+    """
+    Expone reportes relacionados con las compras del sistema.
+    Incluye resumen general, agrupación por proveedor y periodo (day, week, month).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=PurchaseReportSerializer)
+    @action(detail=False, methods=["get"], url_path="purchases")
+    def purchases(self, request):
+        qs = self.get_filtered_queryset(Purchase.objects.all(), PurchaseReportFilter)
+        data = qs.aggregate(
+            total_purchases=Count("id", filter=Q(state=OperationState.COMPLETED)),
+            total_spent=Sum("total_amount", filter=Q(state=OperationState.COMPLETED)),
+            average_purchase=Avg(
+                "total_amount", filter=Q(state=OperationState.COMPLETED)
+            ),
+            canceled_purchases=Count("id", filter=Q(state=OperationState.CANCELED)),
+        )
+        serializer = PurchaseReportSerializer(data)
+        return Response(serializer.data)
+
+    @extend_schema(responses=PurchaseBySupplierSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="purchases/by-supplier")
+    def purchases_by_supplier(self, request):
+        qs = self.get_filtered_queryset(
+            Purchase.objects.filter(state=OperationState.COMPLETED),
+            PurchaseReportFilter,
+        )
+        data = (
+            qs.values("supplier__id", "supplier__name")
+            .annotate(total_purchases=Count("id"), total_spent=Sum("total_amount"))
+            .order_by("-total_spent")
+        )
+        result = [
+            {
+                "supplier_id": r["supplier__id"],
+                "supplier_name": r["supplier__name"],
+                "total_purchases": r["total_purchases"],
+                "total_spent": r["total_spent"],
+            }
+            for r in data
+        ]
+        serializer = PurchaseBySupplierSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=PurchaseByPeriodSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="purchases/by-period")
+    def purchases_by_period(self, request):
+        period = request.query_params.get("period", "month")
+        trunc_func = get_trunc_func(period)
+        qs = self.get_filtered_queryset(
+            Purchase.objects.filter(state=OperationState.COMPLETED),
+            PurchaseReportFilter,
+        )
+        data = (
+            qs.annotate(period=trunc_func("created_at"))
+            .values("period")
+            .annotate(total_purchases=Count("id"), total_spent=Sum("total_amount"))
+            .order_by("period")
+        )
+        result = [
+            {
+                "period": r["period"].strftime("%Y-%m-%d") if r["period"] else None,
+                "total_purchases": r["total_purchases"],
+                "total_spent": r["total_spent"],
+            }
+            for r in data
+        ]
+        serializer = PurchaseByPeriodSerializer(result, many=True)
+        return Response(serializer.data)
+
+
+class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
+    """
+    Expone reportes relacionados con el inventario del sistema.
+    Incluye stock actual por producto, productos con stock bajo un umbral configurable
+    y historial de movimientos de inventario (entradas y salidas).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=InventoryReportSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="inventory")
+    def inventory(self, request):
+        qs = self.get_filtered_queryset(
+            Inventory.objects.select_related("product", "product__category").all(),
+            InventoryReportFilter,
+        )
+        result = [
+            {
+                "product_id": inv.product.id,
+                "product_name": inv.product.name,
+                "category": inv.product.category.name,
+                "quantity": inv.quantity,
+                "sale_price": inv.product.sale_price,
+                "stock_value": inv.quantity * inv.product.sale_price,
+            }
+            for inv in qs
+        ]
+        serializer = InventoryReportSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=InventoryLowStockSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="inventory/low-stock")
+    def low_stock(self, request):
+        threshold = int(
+            request.query_params.get(
+                "low_stock_threshold", settings.LOW_STOCK_THRESHOLD
+            )
+        )
+        qs = self.get_filtered_queryset(
+            Inventory.objects.select_related("product", "product__category").filter(
+                quantity__lte=threshold
+            ),
+            InventoryReportFilter,
+        )
+        result = [
+            {
+                "product_id": inv.product.id,
+                "product_name": inv.product.name,
+                "category": inv.product.category.name,
+                "quantity": inv.quantity,
+                "threshold": threshold,
+            }
+            for inv in qs
+        ]
+        serializer = InventoryLowStockSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=InventoryMovementReportSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="inventory/movements")
+    def movements(self, request):
+        qs = self.get_filtered_queryset(
+            InventoryMovement.objects.select_related("product", "user").all(),
+            InventoryReportFilter,
+        )
+        result = [
+            {
+                "product_id": m.product.id,
+                "product_name": m.product.name,
+                "movement_type": m.movement_type,
+                "quantity": m.quantity,
+                "user": (
+                    f"{m.user.first_name} {m.user.last_name}" if m.user else "Unknown"
+                ),
+                "created_at": m.created_at,
+            }
+            for m in qs
+        ]
+        serializer = InventoryMovementReportSerializer(result, many=True)
+        return Response(serializer.data)
+
+
+class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
+    """
+    Expone reportes relacionados con los productos del sistema.
+    Incluye productos más vendidos, menos vendidos, más comprados a proveedores
+    y agrupación de ventas por categoría.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def _base_sale_detail_qs(self):
+        return self.get_filtered_queryset(
+            SaleDetail.objects.select_related(
+                "product", "product__category", "sale"
+            ).filter(sale__state=OperationState.COMPLETED),
+            ProductReportFilter,
+        )
+
+    @extend_schema(responses=ProductTopSellingSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="products/top-selling")
+    def top_selling(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        data = (
+            self._base_sale_detail_qs()
+            .values("product__id", "product__name", "product__category__name")
+            .annotate(
+                total_quantity_sold=Sum("quantity"), total_revenue=Sum("subtotal")
+            )
+            .order_by("-total_quantity_sold")[:limit]
+        )
+        result = [
+            {
+                "product_id": r["product__id"],
+                "product_name": r["product__name"],
+                "category": r["product__category__name"],
+                "total_quantity_sold": r["total_quantity_sold"],
+                "total_revenue": r["total_revenue"],
+            }
+            for r in data
+        ]
+        serializer = ProductTopSellingSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=ProductLowSellingSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="products/low-selling")
+    def low_selling(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        data = (
+            self._base_sale_detail_qs()
+            .values("product__id", "product__name", "product__category__name")
+            .annotate(
+                total_quantity_sold=Sum("quantity"), total_revenue=Sum("subtotal")
+            )
+            .order_by("total_quantity_sold")[:limit]
+        )
+        result = [
+            {
+                "product_id": r["product__id"],
+                "product_name": r["product__name"],
+                "category": r["product__category__name"],
+                "total_quantity_sold": r["total_quantity_sold"],
+                "total_revenue": r["total_revenue"],
+            }
+            for r in data
+        ]
+        serializer = ProductLowSellingSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=ProductMostPurchasedSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="products/most-purchased")
+    def most_purchased(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        qs = self.get_filtered_queryset(
+            PurchaseDetail.objects.select_related(
+                "product", "product__category", "purchase"
+            ).filter(purchase__state=OperationState.COMPLETED),
+            ProductReportFilter,
+        )
+        data = (
+            qs.values("product__id", "product__name", "product__category__name")
+            .annotate(
+                total_quantity_purchased=Sum("quantity"), total_spent=Sum("subtotal")
+            )
+            .order_by("-total_quantity_purchased")[:limit]
+        )
+        result = [
+            {
+                "product_id": r["product__id"],
+                "product_name": r["product__name"],
+                "category": r["product__category__name"],
+                "total_quantity_purchased": r["total_quantity_purchased"],
+                "total_spent": r["total_spent"],
+            }
+            for r in data
+        ]
+        serializer = ProductMostPurchasedSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=ProductByCategorySerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="products/by-category")
+    def by_category(self, request):
+        data = (
+            self._base_sale_detail_qs()
+            .values("product__category__id", "product__category__name")
+            .annotate(
+                total_products=Count("product__id", distinct=True),
+                total_quantity_sold=Sum("quantity"),
+                total_revenue=Sum("subtotal"),
+            )
+            .order_by("-total_revenue")
+        )
+        result = [
+            {
+                "category_id": r["product__category__id"],
+                "category_name": r["product__category__name"],
+                "total_products": r["total_products"],
+                "total_quantity_sold": r["total_quantity_sold"],
+                "total_revenue": r["total_revenue"],
+            }
+            for r in data
+        ]
+        serializer = ProductByCategorySerializer(result, many=True)
+        return Response(serializer.data)
+
+
+class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
+    """
+    Expone reportes relacionados con los clientes del sistema.
+    Incluye ranking de clientes por gasto total y uso de promociones por cliente.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=CustomerTopSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="customers/top")
+    def top_customers(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        qs = self.get_filtered_queryset(
+            Customer.objects.filter(sales__state=OperationState.COMPLETED),
+            CustomerReportFilter,
+        )
+        data = (
+            qs.values("id", "first_name", "last_name")
+            .annotate(
+                total_purchases=Count("sales__id", distinct=True),
+                total_spent=Sum("sales__total_amount"),
+            )
+            .order_by("-total_spent")[:limit]
+        )
+        result = [
+            {
+                "customer_id": r["id"],
+                "customer_name": f"{r['first_name']} {r['last_name']}",
+                "total_purchases": r["total_purchases"],
+                "total_spent": r["total_spent"],
+            }
+            for r in data
+        ]
+        serializer = CustomerTopSerializer(result, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses=CustomerPromotionReportSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="customers/promotions")
+    def customer_promotions(self, request):
+        from nexus_inventory_backend.db.models import CustomerPromotion
+
+        qs = self.get_filtered_queryset(
+            CustomerPromotion.objects.select_related("customer").all(),
+            CustomerReportFilter,
+        )
+        data = (
+            qs.values("customer__id", "customer__first_name", "customer__last_name")
+            .annotate(
+                total_promotions=Count("id"),
+                applied_promotions=Count("id", filter=Q(applied=True)),
+            )
+            .order_by("-total_promotions")
+        )
+        result = [
+            {
+                "customer_id": r["customer__id"],
+                "customer_name": f"{r['customer__first_name']} {r['customer__last_name']}",
+                "total_promotions": r["total_promotions"],
+                "applied_promotions": r["applied_promotions"],
+            }
+            for r in data
+        ]
+        serializer = CustomerPromotionReportSerializer(result, many=True)
+        return Response(serializer.data)
+
+
+class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
+    """
+    Expone reportes relacionados con las facturas del sistema.
+    Incluye resumen de facturas emitidas, canceladas y con PDF generado.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=InvoiceReportSerializer)
+    @action(detail=False, methods=["get"], url_path="invoices")
+    def invoices(self, request):
+        qs = self.get_filtered_queryset(Invoice.objects.all(), InvoiceReportFilter)
+        data = qs.aggregate(
+            total_invoices=Count("id"),
+            issued_invoices=Count("id", filter=Q(state=InvoiceState.ISSUED)),
+            canceled_invoices=Count("id", filter=Q(state=InvoiceState.CANCELED)),
+            pdf_generated=Count("id", filter=Q(pdf_generated=True)),
+        )
+        serializer = InvoiceReportSerializer(data)
+        return Response(serializer.data)

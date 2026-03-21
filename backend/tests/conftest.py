@@ -197,8 +197,8 @@ def promotion(db):
         name="promotion 2027",
         description="promotion description 2027",
         discount_percentage=20,
-        start_date=timezone.now().date(),
-        end_date=(timezone.now() + timedelta(days=30)).date(),
+        start_date=timezone.now().date().isoformat(),
+        end_date=(timezone.now() + timedelta(days=30)).date().isoformat(),
     )
 
 
@@ -208,8 +208,8 @@ def another_promotion(db):
         name="promotion 2028",
         description="promotion description 2028",
         discount_percentage=30,
-        start_date=timezone.now().date(),
-        end_date=(timezone.now() + timedelta(days=30)).date(),
+        start_date=timezone.now().date().isoformat(),
+        end_date=(timezone.now() + timedelta(days=30)).date().isoformat(),
     )
 
 
@@ -431,8 +431,8 @@ def payload_promotion():
         "name": "promotion 2026",
         "description": "promotion description",
         "discount_percentage": 20,
-        "start_date": timezone.now().date(),
-        "end_date": (timezone.now() + timedelta(days=30)).date(),
+        "start_date": timezone.now().date().isoformat(),
+        "end_date": (timezone.now() + timedelta(days=30)).date().isoformat(),
     }
 
 
@@ -442,8 +442,8 @@ def another_payload_promotion():
         "name": "promotion 2028",
         "description": "promotion description",
         "discount_percentage": 20,
-        "start_date": timezone.now().date(),
-        "end_date": (timezone.now() + timedelta(days=30)).date(),
+        "start_date": timezone.now().date().isoformat(),
+        "end_date": (timezone.now() + timedelta(days=30)).date().isoformat(),
     }
 
 
@@ -863,3 +863,88 @@ def purchase_detail_item_url():
         )
 
     return _url
+
+
+@pytest.fixture
+def url_reports_sales():
+    return reverse("sale-reports-sales")
+
+
+@pytest.fixture
+def url_reports_sales_by_customer():
+    return reverse("sale-reports-sales-by-customer")
+
+
+@pytest.fixture
+def url_reports_sales_by_payment_method():
+    return reverse("sale-reports-sales-by-payment-method")
+
+
+@pytest.fixture
+def url_reports_sales_by_period():
+    return reverse("sale-reports-sales-by-period")
+
+
+@pytest.fixture
+def url_reports_purchases():
+    return reverse("purchase-reports-purchases")
+
+
+@pytest.fixture
+def url_reports_purchases_by_supplier():
+    return reverse("purchase-reports-purchases-by-supplier")
+
+
+@pytest.fixture
+def url_reports_purchases_by_period():
+    return reverse("purchase-reports-purchases-by-period")
+
+
+@pytest.fixture
+def url_reports_inventory():
+    return reverse("inventory-reports-inventory")
+
+
+@pytest.fixture
+def url_reports_inventory_low_stock():
+    return reverse("inventory-reports-low-stock")
+
+
+@pytest.fixture
+def url_reports_inventory_movements():
+    return reverse("inventory-reports-movements")
+
+
+@pytest.fixture
+def url_reports_products_top_selling():
+    return reverse("product-reports-top-selling")
+
+
+@pytest.fixture
+def url_reports_products_low_selling():
+    return reverse("product-reports-low-selling")
+
+
+@pytest.fixture
+def url_reports_products_most_purchased():
+    return reverse("product-reports-most-purchased")
+
+
+@pytest.fixture
+def url_reports_products_by_category():
+    return reverse("product-reports-by-category")
+
+
+@pytest.fixture
+def url_reports_customers_top():
+    return reverse("customer-reports-top-customers")
+
+
+@pytest.fixture
+def url_reports_customers_promotions():
+    return reverse("customer-reports-customer-promotions")
+
+
+@pytest.fixture
+def url_reports_invoices():
+    return reverse("invoice-reports-invoices")

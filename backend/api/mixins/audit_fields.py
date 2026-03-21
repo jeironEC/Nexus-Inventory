@@ -33,3 +33,17 @@ class AuditUserMixin:
         instance.deleted_by = self.request.user
         instance.deleted_at = timezone.now()
         instance.save(update_fields=["deleted_by", "deleted_at", "updated_at"])
+
+
+class AuditOperationUserMixin:
+    """
+    Asignar el usuario que actualiza o elimina un registro en las tablas que tienen los campos de auditoria.
+    """
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        instance.deleted_by = self.request.user
+        instance.deleted_at = timezone.now()
+        instance.save(update_fields=["deleted_by", "deleted_at", "updated_at"])

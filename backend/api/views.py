@@ -139,7 +139,7 @@ from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 from .mixins.operation_state import OperationStateMixin
 from .mixins.report_filter import ReportFilterMixin
-from .mixins.audit_fields import AuditUserMixin
+from .mixins.audit_fields import AuditUserMixin, AuditOperationUserMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState, InvoiceState
@@ -479,7 +479,7 @@ class SaleViewSet(
     RoleFilterMixin,
     OperationStateMixin,
     NoPutMixin,
-    AuditUserMixin,
+    AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -509,9 +509,6 @@ class SaleViewSet(
         if self.action == "cancel":
             return EmptySerializer
         return SaleReadSerializer
-
-    def perform_create(self, serializer):
-        pass
 
     @action(
         detail=True,
@@ -669,7 +666,7 @@ class PurchaseViewSet(
     RoleFilterMixin,
     OperationStateMixin,
     NoPutMixin,
-    AuditUserMixin,
+    AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -699,9 +696,6 @@ class PurchaseViewSet(
         if self.action == "cancel":
             return EmptySerializer
         return PurchaseReadSerializer
-
-    def perform_create(self, serializer):
-        pass
 
     @action(
         detail=True,

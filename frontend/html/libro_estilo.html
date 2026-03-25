@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../assets/Nexus_Inventory_Logo.png" type="image/x-icon">
+    <title>Nexus Inventory - Libro de Estilo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/libro_estilo.css">
+</head>
+<body>
+    <!-- NAV DOTS -->
+    <nav class="nav-dots">
+        <a href="#hero" class="nav-dot active" title="Inicio"></a>
+        <a href="#colores" class="nav-dot" title="Colores"></a>
+        <a href="#tipografia" class="nav-dot" title="Tipografía"></a>
+        <a href="#componentes" class="nav-dot" title="Componentes"></a>
+        <a href="#gradientes" class="nav-dot" title="Gradientes"></a>
+        <a href="#espaciado" class="nav-dot" title="Espaciado"></a>
+    </nav>
+    <!-- HERO -->
+    <div class="hero" id="hero">
+        <div class="hero-left">
+            <h1>Nexus<br><em>Inventory</em></h1>
+            <div class="hero-sub">Libro de Estilo</div>
+            <p class="hero-desc">
+                Guía visual y funcional del sistema de gestión de inventario, ventas, compras y reportes. Referencia de
+                diseño para el equipo de desarrollo.
+            </p>
+            <div class="hero-modules">
+                <span class="module-chip">Usuarios</span>
+                <span class="module-chip">Productos</span>
+                <span class="module-chip">Inventario</span>
+                <span class="module-chip">Ventas</span>
+                <span class="module-chip">Compras</span>
+                <span class="module-chip">Reportes</span>
+                <span class="module-chip">Clientes</span>
+                <span class="module-chip">Proveedores</span>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="grid-overlay"></div>
+            <div class="hero-mockup">
+                <div class="mockup-window">
+                    <div class="mockup-bar">
+                        <div class="mockup-dots">
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                            <div class="mockup-dot"></div>
+                        </div>
+                        <div class="mockup-title">nexus-inventory · dashboard</div>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-kpi-row">
+                            <div class="mockup-kpi">
+                                <div class="mockup-kpi-val">1,284</div>
+                                <div class="mockup-kpi-lbl">Productos</div>
+                            </div>
+                            <div class="mockup-kpi">
+                                <div class="mockup-kpi-val">€48.2K</div>
+                                <div class="mockup-kpi-lbl">Ventas mes</div>
+                            </div>
+                            <div class="mockup-kpi">
+                                <div class="mockup-kpi-val">37</div>
+                                <div class="mockup-kpi-lbl">Stock bajo</div>
+                            </div>
+                        </div>
+                        <div class="mockup-inventory-label">
+                            Inventario reciente</div>
+                        <div class="mockup-table-row">
+                            <div class="mockup-dot-badge dot-green"></div>
+                            <div class="mockup-prod">Cable HDMI 2m</div>
+                            <div class="mockup-stock">248</div>
+                            <div class="mockup-badge-sm mb-ok">OK</div>
+                        </div>
+                        <div class="mockup-table-row">
+                            <div class="mockup-dot-badge dot-yellow"></div>
+                            <div class="mockup-prod">Teclado inalámbrico</div>
+                            <div class="mockup-stock">12</div>
+                            <div class="mockup-badge-sm mb-low">Bajo</div>
+                        </div>
+                        <div class="mockup-table-row">
+                            <div class="mockup-dot-badge dot-red"></div>
+                            <div class="mockup-prod">Monitor 27" 4K</div>
+                            <div class="mockup-stock">0</div>
+                            <div class="mockup-badge-sm mb-out">Agotado</div>
+                        </div>
+                        <div class="mockup-table-row">
+                            <div class="mockup-dot-badge dot-green"></div>
+                            <div class="mockup-prod">Webcam Full HD</div>
+                            <div class="mockup-stock">74</div>
+                            <div class="mockup-badge-sm mb-ok">OK</div>
+                        </div>
+                        <div class="mockup-table-row">
+                            <div class="mockup-dot-badge dot-yellow"></div>
+                            <div class="mockup-prod">Disco SSD 1TB</div>
+                            <div class="mockup-stock">8</div>
+                            <div class="mockup-badge-sm mb-low">Bajo</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <!-- COLORES -->
+    <section id="colores">
+        <div class="section-label">01 — Paleta de Color</div>
+        <h2 class="section-title">Colores del Sistema</h2>
+
+        <div class="color-grid">
+            <div class="color-swatch">
+                <div class="swatch-block swatch-midnight">
+                    <div></div>
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Midnight</div>
+                    <div class="swatch-hex">#010D26</div>
+                    <div class="swatch-rgb">rgb(1, 13, 38)</div>
+                    <div class="swatch-role">Fondo principal</div>
+                </div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch-block swatch-navy">
+                    <div></div>
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Navy</div>
+                    <div class="swatch-hex">#022859</div>
+                    <div class="swatch-rgb">rgb(2, 40, 89)</div>
+                    <div class="swatch-role">Superficies, sidebar</div>
+                </div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch-block swatch-royal">
+                    <div></div>
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Royal</div>
+                    <div class="swatch-hex">#0455BF</div>
+                    <div class="swatch-rgb">rgb(4, 85, 191)</div>
+                    <div class="swatch-role">Acción primaria, botones</div>
+                </div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch-block swatch-sky">
+                    <div></div>
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Sky</div>
+                    <div class="swatch-hex">#0487D9</div>
+                    <div class="swatch-rgb">rgb(4, 135, 217)</div>
+                    <div class="swatch-role">Highlights, links, KPIs</div>
+                </div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch-block light swatch-ice">
+                    <div></div>
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Ice</div>
+                    <div class="swatch-hex">#CEE8F2</div>
+                    <div class="swatch-rgb">rgb(206, 232, 242)</div>
+                    <div class="swatch-role">Texto secundario, labels</div>
+                </div>
+            </div>
+            <div class="color-swatch">
+                <div class="swatch-block light swatch-white">
+                    <div></div>
+                </div>
+                <div class="swatch-info">
+                    <div class="swatch-name">White</div>
+                    <div class="swatch-hex">#FFFFFF</div>
+                    <div class="swatch-rgb">rgb(255, 255, 255)</div>
+                    <div class="swatch-role">Texto principal, iconos</div>
+                </div>
+            </div>
+        </div>
+        <!-- Colores de estado -->
+        <div class="colores-estado">
+            <div class="type-tag type-tag-sub">Colores de estado del inventario</div>
+            <div class="estado-grid">
+                <div class="estado-card estado-card-ok">
+                    <div class="estado-label estado-label-ok">STOCK OK
+                    </div>
+                    <div class="estado-desc">Producto con stock suficiente. Sin acción
+                        requerida.</div>
+                    <div class="estado-hex">#10b981 · #6ee7b7</div>
+                </div>
+                <div class="estado-card estado-card-bajo">
+                    <div class="estado-label estado-label-bajo">STOCK BAJO
+                    </div>
+                    <div class="estado-desc">Cantidad mínima alcanzada. Reponer pronto.
+                    </div>
+                    <div class="estado-hex">#f59e0b · #fcd34d</div>
+                </div>
+                <div class="estado-card estado-card-agotado">
+                    <div class="estado-label estado-label-agotado">AGOTADO
+                    </div>
+                    <div class="estado-desc">Stock en cero. Requiere compra inmediata.
+                    </div>
+                    <div class="estado-hex">#ef4444 · #fca5a5</div>
+                </div>
+                <div class="estado-card estado-card-inactivo">
+                    <div class="estado-label estado-label-inactivo">INACTIVO</div>
+                    <div class="estado-desc">Producto desactivado o archivado del
+                        sistema.</div>
+                    <div class="estado-hex">Neutral · #CEE8F2</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="divider"></div>
+    <!-- TIPOGRAFÍA -->
+    <section id="tipografia">
+        <div class="section-label">02 — Tipografía</div>
+        <h2 class="section-title">Sistema Tipográfico</h2>
+
+        <div class="type-showcase">
+            <div class="type-card">
+                <div class="type-tag">Display · Lexend</div>
+                <div class="display-sample">Nexus<br><em>Inventory</em></div>
+                <p class="type-desc">
+                    Tipografía de titulares con personalidad. Usada en logos, encabezados de sección, KPIs y elementos
+                    héroe.
+                </p>
+                <div class="type-meta">Lexend · 300 / 600 / 700 / 900 · Sans-serif</div>
+            </div>
+            <div class="type-card">
+                <div class="type-tag">Body · DM Sans</div>
+                <div class="type-body-sample">
+                    Gestión centralizada de productos, inventario, ventas y compras en un solo sistema.
+                </div>
+                <p class="type-desc">
+                    Tipografía funcional para todo el contenido de interfaz. Ligera, legible y moderna.
+                </p>
+                <div class="type-meta">DM Sans · 300 / 400 / 500 · Sans-serif</div>
+            </div>
+        </div>
+        <div class="type-scale">
+            <div class="type-tag type-tag-sub">Escala tipográfica del sistema</div>
+            <div class="scale-row">
+                <span class="scale-label">HERO / 88px</span>
+                <span class="scale-sample-hero">Nexus</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">H1 / 48px</span>
+                <span class="scale-sample-h1">Panel
+                    de Inventario</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">H2 / 36px</span>
+                <span class="scale-sample-h2">Módulo de Ventas</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">H3 / 24px</span>
+                <span class="scale-sample-h3">Registro de Compra</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">BODY-LG / 16px</span>
+                <span class="scale-sample-body-lg">Seleccione el proveedor y los productos para registrar la
+                    compra en el sistema.</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">BODY / 14px</span>
+                <span class="scale-sample-body">El inventario se actualiza automáticamente al
+                    confirmar la operación.</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">CAPTION / 12px</span>
+                <span class="scale-sample-caption">Última actualización: hoy, 14:32 · Por
+                    Encargado de Compras</span>
+            </div>
+            <div class="scale-row">
+                <span class="scale-label">MONO / 11px</span>
+                <span class="scale-sample-mono">SKU-00482
+                    · PROD-CATEGORIA-A · STOCK: 248</span>
+            </div>
+        </div>
+    </section>
+    <div class="divider"></div>
+    <div class="divider"></div>
+    <!-- COMPONENTES -->
+    <section id="componentes">
+        <div class="section-label">03 — Componentes UI</div>
+        <h2 class="section-title">Librería de Interfaz</h2>
+        <div class="components-grid">
+            <!-- Botones -->
+            <div class="comp-card">
+                <div class="comp-title">Botones de acción</div>
+                <div class="btn-row btn-row-gap">
+                    <button class="btn btn-primary">Nueva venta</button>
+                    <button class="btn btn-secondary">Exportar</button>
+                    <button class="btn btn-ghost">Ver más →</button>
+                </div>
+                <div class="btn-row btn-row-gap">
+                    <button class="btn btn-primary btn-sm">Guardar</button>
+                    <button class="btn btn-secondary btn-sm">Cancelar</button>
+                    <button class="btn btn-danger btn-sm">Eliminar</button>
+                    <button class="btn btn-success btn-sm">Confirmar</button>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-primary btn-lg">Registrar compra</button>
+                </div>
+            </div>
+            <!-- Inputs -->
+            <div class="comp-card">
+                <div class="comp-title">Campos de formulario</div>
+                <div class="input-group">
+                    <div class="field">
+                        <label>Nombre del producto</label>
+                        <input type="text" placeholder="Ej: Cable HDMI 2m">
+                        <span class="field-hint">Nombre completo como aparecerá en el sistema</span>
+                    </div>
+                    <div class="field">
+                        <label>Categoría</label>
+                        <select>
+                            <option>Periféricos</option>
+                            <option>Almacenamiento</option>
+                            <option>Audio</option>
+                        </select>
+                    </div>
+                    <div class="field error">
+                        <label>Stock mínimo</label>
+                        <input type="number" value="-5">
+                        <span class="field-error">El stock mínimo no puede ser negativo</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Badges de inventario -->
+            <div class="comp-card">
+                <div class="comp-title">Badges de estado</div>
+                <div class="badge-row">
+                    <span class="badge badge-success"><span class="badge-dot"></span> En stock</span>
+                    <span class="badge badge-warning"><span class="badge-dot"></span> Stock bajo</span>
+                    <span class="badge badge-danger"><span class="badge-dot"></span> Agotado</span>
+                    <span class="badge badge-neutral">Inactivo</span>
+                </div>
+                <div class="badge-row">
+                    <span class="badge badge-primary">Electrónica</span>
+                    <span class="badge badge-primary">Periféricos</span>
+                    <span class="badge badge-primary">Almacenamiento</span>
+                    <span class="badge badge-neutral">Archivado</span>
+                </div>
+                <div class="badge-row">
+                    <span class="badge badge-success">Factura emitida</span>
+                    <span class="badge badge-warning">Pendiente</span>
+                    <span class="badge badge-danger">Rechazado</span>
+                </div>
+            </div>
+            <!-- KPIs -->
+            <div class="comp-card">
+                <div class="comp-title">Tarjetas KPI</div>
+                <div class="card-row">
+                    <div class="ui-card ui-card-elevated">
+                        <div class="card-kpi">€48.2K</div>
+                        <div class="card-kpi-label">Ventas del mes</div>
+                        <div class="card-kpi-trend">▲ +18.4% vs mes anterior</div>
+                    </div>
+                    <div class="ui-card ui-card-filled">
+                        <div class="card-kpi card-kpi-ice">1,284</div>
+                        <div class="card-kpi-label">Productos activos</div>
+                        <div class="card-kpi-trend">▲ 12 nuevos esta semana</div>
+                    </div>
+                    <div class="ui-card ui-card-outlined">
+                        <div class="card-kpi card-kpi-warning">37</div>
+                        <div class="card-kpi-label">Stock bajo</div>
+                        <div class="card-kpi-trend card-kpi-warning">◆ Requiere atención</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Alertas del sistema -->
+            <div class="comp-card">
+                <div class="comp-title">Notificaciones del sistema</div>
+                <div class="alert-stack">
+                    <div class="alert alert-info">
+                        <span class="alert-icon">ℹ</span>
+                        <div class="alert-body">
+                            <div class="alert-title">Nueva compra registrada</div>
+                            <div class="alert-msg">Se han añadido 150 unidades de Cable HDMI al inventario.</div>
+                        </div>
+                    </div>
+                    <div class="alert alert-success">
+                        <span class="alert-icon">✓</span>
+                        <div class="alert-body">
+                            <div class="alert-title">Factura #4821 emitida</div>
+                            <div class="alert-msg">Venta completada. Inventario actualizado correctamente.</div>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <span class="alert-icon">⚠</span>
+                        <div class="alert-body">
+                            <div class="alert-title">Stock bajo detectado</div>
+                            <div class="alert-msg">Teclado inalámbrico: quedan solo 12 unidades disponibles.</div>
+                        </div>
+                    </div>
+                    <div class="alert alert-error">
+                        <span class="alert-icon">✕</span>
+                        <div class="alert-body">
+                            <div class="alert-title">Producto agotado</div>
+                            <div class="alert-msg">Monitor 27" 4K sin stock. No se puede completar la venta.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tabla de inventario -->
+            <div class="comp-card">
+                <div class="comp-title">Tabla de inventario</div>
+                <table class="ui-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>SKU</th>
+                            <th>Stock</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Cable HDMI 2m</td>
+                            <td class="table-sku">CAB-001
+                            </td>
+                            <td>248</td>
+                            <td><span class="badge badge-success badge-sm">En stock</span></td>
+                        </tr>
+                        <tr>
+                            <td>Teclado inalámbrico</td>
+                            <td class="table-sku">TEC-042
+                            </td>
+                            <td class="stock-low">12</td>
+                            <td><span class="badge badge-warning badge-sm">Stock bajo</span></td>
+                        </tr>
+                        <tr>
+                            <td>Monitor 27" 4K</td>
+                            <td class="table-sku">MON-017
+                            </td>
+                            <td class="stock-out">0</td>
+                            <td><span class="badge badge-danger badge-sm">Agotado</span></td>
+                        </tr>
+                        <tr>
+                            <td>Webcam Full HD</td>
+                            <td class="table-sku">CAM-008
+                            </td>
+                            <td>74</td>
+                            <td><span class="badge badge-success badge-sm">En stock</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <div class="divider"></div>
+    <div class="divider"></div>
+    <!-- GRADIENTES -->
+    <section id="gradientes">
+        <div class="section-label">04 — Recursos Visuales</div>
+        <h2 class="section-title">Gradientes del Sistema</h2>
+
+        <div class="gradient-grid">
+            <div class="gradient-card gradient-card-1">
+                <span class="gradient-label">Midnight → Navy</span>
+            </div>
+            <div class="gradient-card gradient-card-2">
+                <span class="gradient-label">Royal → Sky</span>
+            </div>
+            <div class="gradient-card gradient-card-3">
+                <span class="gradient-label">Tonal Completo</span>
+            </div>
+            <div class="gradient-card gradient-card-4">
+                <span class="gradient-label">Sky → Ice</span>
+            </div>
+            <div class="gradient-card gradient-card-5">
+                <span class="gradient-label">Radial Brand</span>
+            </div>
+            <div class="gradient-card gradient-card-6">
+                <span class="gradient-label">Navy → Midnight</span>
+            </div>
+            <div class="gradient-card gradient-card-7">
+                <span class="gradient-label">Cónico</span>
+            </div>
+            <div class="gradient-card gradient-card-8">
+                <span class="gradient-label gradient-label-light">Ice →
+                    White</span>
+            </div>
+        </div>
+        <!-- Iconografía del sistema -->
+        <div class="icon-section">
+            <div class="type-tag type-tag-sub">Iconografía del sistema</div>
+            <div class="icon-grid">
+                <div class="icon-item"><span class="icon-svg">📦</span><span class="icon-name">Producto</span></div>
+                <div class="icon-item"><span class="icon-svg">🗄️</span><span class="icon-name">Inventario</span></div>
+                <div class="icon-item"><span class="icon-svg">🧾</span><span class="icon-name">Factura</span></div>
+                <div class="icon-item"><span class="icon-svg">🛒</span><span class="icon-name">Compra</span></div>
+                <div class="icon-item"><span class="icon-svg">📊</span><span class="icon-name">Reporte</span></div>
+                <div class="icon-item"><span class="icon-svg">🤝</span><span class="icon-name">Cliente</span></div>
+                <div class="icon-item"><span class="icon-svg">🏭</span><span class="icon-name">Proveedor</span></div>
+                <div class="icon-item"><span class="icon-svg">👤</span><span class="icon-name">Usuario</span></div>
+                <div class="icon-item"><span class="icon-svg">🛡️</span><span class="icon-name">Admin</span></div>
+                <div class="icon-item"><span class="icon-svg">⚠️</span><span class="icon-name">Alerta</span></div>
+                <div class="icon-item"><span class="icon-svg">✅</span><span class="icon-name">Confirmado</span></div>
+                <div class="icon-item"><span class="icon-svg">❌</span><span class="icon-name">Rechazado</span></div>
+                <div class="icon-item"><span class="icon-svg">🔍</span><span class="icon-name">Buscar</span></div>
+                <div class="icon-item"><span class="icon-svg">📝</span><span class="icon-name">Editar</span></div>
+                <div class="icon-item"><span class="icon-svg">🗑️</span><span class="icon-name">Eliminar</span></div>
+                <div class="icon-item"><span class="icon-svg">📤</span><span class="icon-name">Exportar</span></div>
+            </div>
+        </div>
+    </section>
+    <div class="divider"></div>
+    <!-- ESPACIADO -->
+    <section id="espaciado">
+        <div class="section-label">05 — Espaciado & Radios</div>
+        <h2 class="section-title">Tokens de Espacio</h2>
+
+        <div class="espaciado-grid">
+            <div class="espaciado-col">
+                <div class="type-tag type-tag-sub">Escala de espaciado</div>
+                <div class="spacing-showcase">
+                    <div class="spacing-row"><span class="spacing-label">space-1</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-1"></div><span class="spacing-val">4px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-2</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-2"></div><span class="spacing-val">8px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-3</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-3"></div><span class="spacing-val">12px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-4</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-4"></div><span class="spacing-val">16px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-5</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-5"></div><span class="spacing-val">24px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-6</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-6"></div><span class="spacing-val">32px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-8</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-8"></div><span class="spacing-val">48px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-10</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-10"></div><span class="spacing-val">64px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-12</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-12"></div><span class="spacing-val">80px</span>
+                        </div>
+                    </div>
+                    <div class="spacing-row"><span class="spacing-label">space-16</span>
+                        <div class="spacing-bar-wrap">
+                            <div class="spacing-bar spacing-bar-16"></div><span class="spacing-val">120px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="type-tag type-tag-sub">Radios de borde</div>
+                <div class="radius-showcase">
+                    <div class="radius-row">
+                        <div class="radius-box radius-box-0"></div>
+                        <div>
+                            <div class="radius-name">radius-none</div>
+                            <div class="radius-desc">0px — Divisores, separadores</div>
+                        </div>
+                    </div>
+                    <div class="radius-row">
+                        <div class="radius-box radius-box-sm"></div>
+                        <div>
+                            <div class="radius-name">radius-sm</div>
+                            <div class="radius-desc">4px — Botones, inputs, badges</div>
+                        </div>
+                    </div>
+                    <div class="radius-row">
+                        <div class="radius-box radius-box-md"></div>
+                        <div>
+                            <div class="radius-name">radius-md</div>
+                            <div class="radius-desc">8px — Alertas, tooltips, chips
+                            </div>
+                        </div>
+                    </div>
+                    <div class="radius-row">
+                        <div class="radius-box radius-box-lg"></div>
+                        <div>
+                            <div class="radius-name">radius-lg</div>
+                            <div class="radius-desc">12px — Cards, modales, paneles
+                            </div>
+                        </div>
+                    </div>
+                    <div class="radius-row">
+                        <div class="radius-box radius-box-full"></div>
+                        <div>
+                            <div class="radius-name">radius-full</div>
+                            <div class="radius-desc">999px — Pills, avatares de usuario
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- FOOTER -->
+    <footer class="style-footer">
+        <div class="footer-brand">Nexus <em>Inventory</em></div>
+        <div class="footer-meta">
+            Libro de Estilo · v1.0<br>
+            Sistema de Gestión de Inventario<br>
+            © 2026 Nexus Inventory — Uso interno
+        </div>
+    </footer>
+    <script>
+        const dots = document.querySelectorAll('.nav-dot');
+        const targets = ['hero', 'colores', 'tipografia', 'componentes', 'gradientes', 'espaciado'];
+
+        window.addEventListener('scroll', () => {
+            let current = 0;
+            targets.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= window.innerHeight / 2) current = i;
+            });
+            dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        });
+    </script>
+</body>
+
+</html>

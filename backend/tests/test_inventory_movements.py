@@ -79,6 +79,7 @@ class TestGetInventoryMovement:
         data = response.data[0]["user"]
         assert set(data.keys()) == {
             "id",
+            "avatar",
             "first_name",
             "last_name",
             "email",

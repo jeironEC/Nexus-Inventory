@@ -10,6 +10,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "email",
+            "avatar",
         ]
 
     def validate_email(self, value):

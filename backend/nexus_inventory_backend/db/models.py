@@ -2,11 +2,21 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
+# DRF
+from rest_framework.exceptions import ValidationError
+
 # Base Models
 from .base import BaseModel, AuditModel
 
 # Enums
-from .enums import State, OperationState, PaymentMethod, InvoiceState, MovementType
+from .enums import (
+    State,
+    OperationState,
+    PaymentMethod,
+    InvoiceState,
+    MovementType,
+    InvoiceType,
+)
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -199,21 +209,6 @@ class Sale(AuditModel):
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# MODEL INVOICE
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Invoice(BaseModel):
-    sale = models.OneToOneField(Sale, on_delete=models.PROTECT, related_name="invoice")
-    number_invoice = models.CharField(max_length=50, unique=True)
-    pdf_generated = models.BooleanField(default=False)
-    state = models.CharField(
-        max_length=20, choices=InvoiceState.choices, default=InvoiceState.ISSUED
-    )
-
-    def __str__(self):
-        return f"{self.number_invoice} - {self.state}"
-
-
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVENTORY MOVEMENT
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class InventoryMovement(models.Model):
@@ -306,3 +301,38 @@ class PurchaseDetail(models.Model):
 
     def __str__(self):
         return f"{self.purchase.supplier.name} - {self.product.name} - {self.quantity}"
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL INVOICE
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Invoice(BaseModel):
+    sale = models.OneToOneField(
+        Sale, on_delete=models.PROTECT, related_name="invoice", null=True, blank=True
+    )
+    purchase = models.OneToOneField(
+        Purchase,
+        on_delete=models.PROTECT,
+        related_name="invoice",
+        null=True,
+        blank=True,
+    )
+    number_invoice = models.CharField(max_length=50, unique=True)
+    pdf_generated = models.BooleanField(default=False)
+    invoice_type = models.CharField(max_length=10, choices=InvoiceType.choices)
+    state = models.CharField(
+        max_length=20, choices=InvoiceState.choices, default=InvoiceState.ISSUED
+    )
+
+    def clean(self):
+        if self.sale and self.purchase:
+            raise ValidationError(
+                "Invoice cannot be linked to both a sale and a purchase."
+            )
+        if not self.sale and not self.purchase:
+            raise ValidationError(
+                "Invoice must be linked to either a sale or a purchase."
+            )
+
+    def __str__(self):
+        return f"{self.number_invoice} - {self.state}"

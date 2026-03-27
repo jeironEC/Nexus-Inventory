@@ -13,10 +13,11 @@ from nexus_inventory_backend.db.models import (
     PurchaseDetail,
     InventoryMovement,
     Supplier,
+    Invoice,
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import MovementType
+from nexus_inventory_backend.db.enums import MovementType, InvoiceType, InvoiceState
 
 # Serializers
 # DRF
@@ -90,6 +91,14 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
                 quantity=quantity,
                 unit_cost=unit_cost,
                 subtotal=quantity * unit_cost,
+            )
+
+            Invoice.objects.create(
+                purchase=purchase,
+                invoice_type=InvoiceType.PURCHASE,
+                number_invoice=f"PINV-{purchase.pk:08d}",
+                state=InvoiceState.ISSUED,
+                created_by=user,
             )
 
         return purchase

@@ -17,7 +17,12 @@ from nexus_inventory_backend.db.models import (
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import MovementType, TaxRate, InvoiceState
+from nexus_inventory_backend.db.enums import (
+    MovementType,
+    TaxRate,
+    InvoiceState,
+    InvoiceType,
+)
 
 # Serializers
 from .sale_detail_create import SaleDetailCreateSerializer
@@ -91,7 +96,8 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         # Crear factura automáticamente
         Invoice.objects.create(
             sale=sale,
-            number_invoice=f"INV-{sale.pk:08d}",
+            invoice_type=InvoiceType.SALE,
+            number_invoice=f"SINV-{sale.pk:08d}",
             state=InvoiceState.ISSUED,
             created_by=user,
         )

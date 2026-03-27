@@ -5,12 +5,15 @@ import django_filters
 from nexus_inventory_backend.db.models import Invoice
 
 # Enums
-from nexus_inventory_backend.db.enums import InvoiceState
+from nexus_inventory_backend.db.enums import InvoiceState, InvoiceType
 
 
 class InvoiceFilter(django_filters.FilterSet):
     state = django_filters.ChoiceFilter(
         field_name="state", choices=InvoiceState.choices
+    )
+    invoice_type = django_filters.ChoiceFilter(
+        field_name="invoice_type", choices=InvoiceType.choices
     )
     pdf_generated = django_filters.BooleanFilter(field_name="pdf_generated")
     date_from = django_filters.DateFilter(
@@ -24,6 +27,7 @@ class InvoiceFilter(django_filters.FilterSet):
         model = Invoice
         fields = [
             "state",
+            "invoice_type",
             "pdf_generated",
             "date_from",
             "date_to",

@@ -286,26 +286,26 @@ def another_sale_detail(db, another_sale, another_product, another_inventory_mov
 
 
 @pytest.fixture
-def invoice(db, sale, admin_user):
+def invoice_sale(db, sale, admin_user):
     from nexus_inventory_backend.db.enums import InvoiceState
 
     return Invoice.objects.create(
         sale=sale,
-        number_invoice=f"INV-{sale.pk:08d}",
+        number_invoice=f"SINV-{sale.pk:08d}",
         state=InvoiceState.ISSUED,
         created_by=admin_user,
     )
 
 
 @pytest.fixture
-def another_invoice(db, another_sale, normal_user):
+def invoice_purchase(db, purchase, admin_user):
     from nexus_inventory_backend.db.enums import InvoiceState
 
     return Invoice.objects.create(
-        sale=another_sale,
-        number_invoice=f"INV-{another_sale.pk:08d}",
+        purchase=purchase,
+        number_invoice=f"PINV-{purchase.pk:08d}",
         state=InvoiceState.ISSUED,
-        created_by=normal_user,
+        created_by=admin_user,
     )
 
 

@@ -252,10 +252,11 @@ Una factura es opcional y se emite únicamente cuando el cliente la solicita. Si
 
 Relaciones:
 ```bash
-sale (1) ─── (1) invoice
-user (1) ─── (N) invoice
+sale     (1) ─── (1) invoice
+purchase (1) ─── (1) invoice
+user     (1) ─── (N) invoice
 ```
-* Cada factura está asociada a exactamente una venta (`sale_id UNIQUE`).
+* Cada factura está asociada a exactamente una venta o compra (`sale_id UNIQUE` o `purchase_id UNIQUE`).
 * Una venta puede tener como máximo una factura.
 * Un usuario puede emitir múltiples facturas.
 
@@ -263,6 +264,7 @@ Reglas de negocio:
 * Cada factura debe estar vinculada a una venta existente (`sale_id NOT NULL UNIQUE`).
 * El número de factura debe ser único en el sistema (`number_invoice UNIQUE`).
 * El estado de la factura puede ser `issued` o `canceled`.
+* El tipo de la factura puede ser `sale` o `purchase`
 * La fecha de emisión se registra automáticamente (`issue_date`).
 * El campo `pdf_generated` indica si la factura ya fue exportada en PDF.
 * El campo `created_by` registra el usuario que emitió la factura.
@@ -618,28 +620,6 @@ CREATE TABLE IF NOT EXISTS sale (
 );
 
 -- ─────────────────────────────────────────
--- INVOICE
--- ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS invoice (
-    id             BIGINT PRIMARY KEY AUTO_INCREMENT,
-    sale_id        BIGINT UNIQUE NOT NULL,
-    number_invoice VARCHAR(50) UNIQUE NOT NULL,
-    state          ENUM('issued', 'canceled') DEFAULT 'issued',
-    pdf_generated  BOOLEAN DEFAULT FALSE,
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NULL,
-    deleted_at     TIMESTAMP NULL,
-    created_by     BIGINT NULL,
-    updated_by     BIGINT NULL,
-    deleted_by     BIGINT NULL,
-
-    FOREIGN KEY (sale_id)    REFERENCES sale(id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES user(id),
-    FOREIGN KEY (updated_by) REFERENCES user(id),
-    FOREIGN KEY (deleted_by) REFERENCES user(id)
-);
-
--- ─────────────────────────────────────────
 -- INVENTORY_MOVEMENT
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS inventory_movement (
@@ -731,5 +711,30 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
     FOREIGN KEY (purchase_id)           REFERENCES purchase(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id)            REFERENCES product(id),
     FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
+);
+
+-- ─────────────────────────────────────────
+-- INVOICE
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS invoice (
+    id             BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sale_id        BIGINT UNIQUE NOT NULL,
+    purchase_id    BIGINT UNIQUE NOT NULL,
+    number_invoice VARCHAR(50) UNIQUE NOT NULL,
+    state          ENUM('issued', 'canceled') DEFAULT 'issued',
+    invoice_type   ENUM('sale', 'purchase'),
+    pdf_generated  BOOLEAN DEFAULT FALSE,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP NULL,
+    deleted_at     TIMESTAMP NULL,
+    created_by     BIGINT NULL,
+    updated_by     BIGINT NULL,
+    deleted_by     BIGINT NULL,
+
+    FOREIGN KEY (sale_id)     REFERENCES sale(id) ON DELETE CASCADE,
+    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES user(id),
+    FOREIGN KEY (updated_by)  REFERENCES user(id),
+    FOREIGN KEY (deleted_by)  REFERENCES user(id)
 );
 ```

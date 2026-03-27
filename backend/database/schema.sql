@@ -207,28 +207,6 @@ CREATE TABLE IF NOT EXISTS sale (
 );
 
 -- ─────────────────────────────────────────
--- INVOICE
--- ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS invoice (
-    id             BIGINT PRIMARY KEY AUTO_INCREMENT,
-    sale_id        BIGINT UNIQUE NOT NULL,
-    number_invoice VARCHAR(50) UNIQUE NOT NULL,
-    state          ENUM('issued', 'canceled') DEFAULT 'issued',
-    pdf_generated  BOOLEAN DEFAULT FALSE,
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NULL,
-    deleted_at     TIMESTAMP NULL,
-    created_by     BIGINT NULL,
-    updated_by     BIGINT NULL,
-    deleted_by     BIGINT NULL,
-
-    FOREIGN KEY (sale_id)    REFERENCES sale(id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES user(id),
-    FOREIGN KEY (updated_by) REFERENCES user(id),
-    FOREIGN KEY (deleted_by) REFERENCES user(id)
-);
-
--- ─────────────────────────────────────────
 -- INVENTORY_MOVEMENT
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS inventory_movement (
@@ -320,4 +298,29 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
     FOREIGN KEY (purchase_id)           REFERENCES purchase(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id)            REFERENCES product(id),
     FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
+);
+
+-- ─────────────────────────────────────────
+-- INVOICE
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS invoice (
+    id             BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sale_id        BIGINT UNIQUE NOT NULL,
+    purchase_id    BIGINT UNIQUE NOT NULL,
+    number_invoice VARCHAR(50) UNIQUE NOT NULL,
+    state          ENUM('issued', 'canceled') DEFAULT 'issued',
+    invoice_type   ENUM('sale', 'purchase'),
+    pdf_generated  BOOLEAN DEFAULT FALSE,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP NULL,
+    deleted_at     TIMESTAMP NULL,
+    created_by     BIGINT NULL,
+    updated_by     BIGINT NULL,
+    deleted_by     BIGINT NULL,
+
+    FOREIGN KEY (sale_id)     REFERENCES sale(id) ON DELETE CASCADE,
+    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES user(id),
+    FOREIGN KEY (updated_by)  REFERENCES user(id),
+    FOREIGN KEY (deleted_by)  REFERENCES user(id)
 );

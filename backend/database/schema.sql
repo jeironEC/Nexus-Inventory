@@ -20,10 +20,11 @@ CREATE TABLE IF NOT EXISTS role (
 CREATE TABLE IF NOT EXISTS user (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
     role_id       BIGINT NOT NULL,
+    avatar        VARCHAR(500) NULL,
     first_name    VARCHAR(100) NOT NULL,
     last_name     VARCHAR(100) NOT NULL,
     email         VARCHAR(120) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password      VARCHAR(255) NOT NULL,
     state         ENUM('active', 'inactive') DEFAULT 'active',
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP NULL,

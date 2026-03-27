@@ -19,6 +19,7 @@ class UserReadSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "role",
+            "avatar",
             "created_at",
             "updated_at",
             "deleted_at",

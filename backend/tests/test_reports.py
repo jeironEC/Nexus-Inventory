@@ -394,7 +394,7 @@ class TestInvoiceReportViewSet:
         assert response.status_code == status.HTTP_200_OK
 
     def test_invoices_report_fields_present(
-        self, api_client_auth, invoice, url_reports_invoices
+        self, api_client_auth, invoice_sale, url_reports_invoices
     ):
         response = api_client_auth.get(url_reports_invoices)
         assert set(response.data.keys()) == {
@@ -405,7 +405,7 @@ class TestInvoiceReportViewSet:
         }
 
     def test_invoices_report_counts_invoices(
-        self, api_client_auth, invoice, url_reports_invoices
+        self, api_client_auth, invoice_purchase, url_reports_invoices
     ):
         response = api_client_auth.get(url_reports_invoices)
         assert response.data["total_invoices"] == 1

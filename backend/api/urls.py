@@ -22,10 +22,14 @@ from .views import (
     CustomerPromotionViewSet,
     SaleViewSet,
     SaleDetailViewSet,
+    SaleReturnViewSet,
+    SaleReturnDetailViewSet,
     InvoiceViewSet,
     SupplierViewSet,
     PurchaseViewSet,
     PurchaseDetailViewSet,
+    PurchaseReturnViewSet,
+    PurchaseReturnDetailViewSet,
     SaleReportViewSet,
     PurchaseReportViewSet,
     InventoryReportViewSet,
@@ -53,11 +57,25 @@ router.register(
 router.register("sales", SaleViewSet, basename="sales")
 sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")
 sale_router.register("details", SaleDetailViewSet, basename="sale-detail")
+router.register("sale-returns", SaleReturnViewSet, basename="sale-returns")
+sale_return_router = routers.NestedSimpleRouter(
+    router, "sale-returns", lookup="sale_returns"
+)
+sale_return_router.register(
+    "details", SaleReturnDetailViewSet, basename="sale-return-detail"
+)
 router.register("invoices", InvoiceViewSet, basename="invoices")
 router.register("suppliers", SupplierViewSet, basename="suppliers")
 router.register("purchases", PurchaseViewSet, basename="purchases")
 purchase_router = routers.NestedSimpleRouter(router, "purchases", lookup="purchases")
 purchase_router.register("details", PurchaseDetailViewSet, basename="purchase-detail")
+router.register("purchase-returns", PurchaseReturnViewSet, basename="purchase-returns")
+purchase_return_router = routers.NestedSimpleRouter(
+    router, "purchase-returns", lookup="purchase_returns"
+)
+purchase_return_router.register(
+    "details", PurchaseReturnDetailViewSet, basename="purchase-return-detail"
+)
 router.register("reports", SaleReportViewSet, basename="sale-reports")
 router.register("reports", PurchaseReportViewSet, basename="purchase-reports")
 router.register("reports", InventoryReportViewSet, basename="inventory-reports")
@@ -71,5 +89,7 @@ urlpatterns = [
     path("auth/", include("api.auth")),
     *router.urls,
     *sale_router.urls,
+    *sale_return_router.urls,
     *purchase_router.urls,
+    *purchase_return_router.urls,
 ]

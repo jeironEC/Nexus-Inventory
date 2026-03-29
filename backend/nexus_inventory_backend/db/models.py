@@ -18,6 +18,9 @@ from .enums import (
     InvoiceType,
 )
 
+# Mixins
+from api.mixins.display import DisplayMixin
+
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL MANAGER
@@ -52,19 +55,19 @@ class UserManager(BaseUserManager):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL ROLE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Role(BaseModel):
+class Role(DisplayMixin, BaseModel):
     name = models.CharField(max_length=30)
     description = models.TextField()
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
-    def __str__(self):
-        return self.name
+    def get_display_fields(self):
+        return ["name"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL USER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class User(BaseModel, AbstractUser):
+class User(DisplayMixin, BaseModel, AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name="users")
@@ -83,23 +86,26 @@ class User(BaseModel, AbstractUser):
             raise ValueError("Deleted user cannot be active")
         super().save(*args, **kwargs)
 
+    def get_display_fields(self):
+        return ["email", lambda obj: obj.role.name]
+
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL CATEGORY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Category(BaseModel):
+class Category(DisplayMixin, BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
-    def __str__(self):
-        return self.name
+    def get_display_fields(self):
+        return ["name"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PRODUCT
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Product(BaseModel):
+class Product(DisplayMixin, BaseModel):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name="products", null=True
     )
@@ -110,27 +116,27 @@ class Product(BaseModel):
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
-    def __str__(self):
-        return self.name
+    def get_display_fields(self):
+        return ["name"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVENTORY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Inventory(BaseModel):
+class Inventory(DisplayMixin, BaseModel):
     product = models.OneToOneField(
         Product, on_delete=models.PROTECT, related_name="inventory"
     )
     quantity = models.IntegerField(default=0)
 
-    def __str__(self):
-        return f"{self.product.name} - Stock: {self.quantity}"
+    def get_display_fields(self):
+        return [lambda obj: obj.product.name, lambda obj: f"Stock: {obj.quantity}"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL CUSTOMER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Customer(BaseModel):
+class Customer(DisplayMixin, BaseModel):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=120, unique=True)
@@ -138,14 +144,14 @@ class Customer(BaseModel):
     address = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
-    def __str__(self):
-        return f"{self.first_name}: {self.email}"
+    def get_display_fields(self):
+        return ["first_name", "email"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PROMOTION
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Promotion(BaseModel):
+class Promotion(DisplayMixin, BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -153,14 +159,14 @@ class Promotion(BaseModel):
     end_date = models.DateTimeField()
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
-    def __str__(self):
-        return f"{self.name} - Discount: {self.discount_percentage}%"
+    def get_display_fields(self):
+        return ["name", lambda obj: f"Discount: {obj.discount_percentage}%"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL CUSTOMER PROMOTION
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class CustomerPromotion(BaseModel):
+class CustomerPromotion(DisplayMixin, BaseModel):
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name="customer_promotions"
     )
@@ -176,14 +182,14 @@ class CustomerPromotion(BaseModel):
             )
         ]
 
-    def __str__(self):
-        return f"{self.customer} - {self.promotion} - Applied: {self.applied}"
+    def get_display_fields(self):
+        return ["customer", "promotion", lambda obj: f"Applied: {obj.applied}"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL SALE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Sale(AuditModel):
+class Sale(DisplayMixin, AuditModel):
     customer = models.ForeignKey(
         Customer,
         on_delete=models.SET_NULL,
@@ -204,14 +210,14 @@ class Sale(AuditModel):
         max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
     )
 
-    def __str__(self):
-        return f"{self.total_amount} - {self.payment_method}"
+    def get_display_fields(self):
+        return ["total_amount", "payment_method"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVENTORY MOVEMENT
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class InventoryMovement(models.Model):
+class InventoryMovement(DisplayMixin, models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="inventory_movements"
     )
@@ -224,14 +230,14 @@ class InventoryMovement(models.Model):
     quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.product.name} - Quantity: {self.quantity}"
+    def get_display_fields(self):
+        return [lambda obj: obj.product.name, lambda obj: f"Quantity: {obj.quantity}"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL SALE DETAIL
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class SaleDetail(models.Model):
+class SaleDetail(DisplayMixin, models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="details")
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="sale_details"
@@ -244,28 +250,28 @@ class SaleDetail(models.Model):
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.sale.total_amount} - {self.product.name}"
+    def get_display_fields(self):
+        return [lambda obj: obj.sale.total_amount, lambda obj: obj.product.name]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL SUPPLIER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Supplier(BaseModel):
+class Supplier(DisplayMixin, BaseModel):
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=120)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
-    def __str__(self):
-        return f"{self.name} - {self.email}"
+    def get_display_fields(self):
+        return ["name", "email"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PURCHASE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Purchase(AuditModel):
+class Purchase(DisplayMixin, AuditModel):
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, related_name="purchases"
     )
@@ -277,14 +283,14 @@ class Purchase(AuditModel):
         max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
     )
 
-    def __str__(self):
-        return f"{self.supplier.name} - {self.total_amount} - {self.created_at}"
+    def get_display_fields(self):
+        return [lambda obj: obj.supplier.name, "total_amount", "created_at"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PURCHASE DETAIL
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class PurchaseDetail(models.Model):
+class PurchaseDetail(DisplayMixin, models.Model):
     purchase = models.ForeignKey(
         Purchase, on_delete=models.CASCADE, related_name="details"
     )
@@ -299,14 +305,18 @@ class PurchaseDetail(models.Model):
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.purchase.supplier.name} - {self.product.name} - {self.quantity}"
+    def get_display_fields(self):
+        return [
+            lambda obj: obj.purchase.supplier.name,
+            lambda obj: obj.product.name,
+            "quantity",
+        ]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVOICE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Invoice(BaseModel):
+class Invoice(DisplayMixin, BaseModel):
     sale = models.OneToOneField(
         Sale, on_delete=models.PROTECT, related_name="invoice", null=True, blank=True
     )
@@ -334,5 +344,101 @@ class Invoice(BaseModel):
                 "Invoice must be linked to either a sale or a purchase."
             )
 
-    def __str__(self):
-        return f"{self.number_invoice} - {self.state}"
+    def get_display_fields(self):
+        return ["number_invoice", "state"]
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# MODEL SALE RETURN
+# ───────────────────────────────────────────────────────────────────────────────
+class SaleReturn(DisplayMixin, AuditModel):
+    sale = models.ForeignKey(Sale, on_delete=models.PROTECT, related_name="returns")
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="sale_returns"
+    )
+    reason = models.TextField()
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    state = models.CharField(
+        max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
+    )
+
+    def get_display_fields(self):
+        return [lambda obj: f"Return Sale #{obj.sale.id}", "total_amount", "state"]
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# MODEL SALE RETURN DETAIL
+# ───────────────────────────────────────────────────────────────────────────────
+class SaleReturnDetail(DisplayMixin, models.Model):
+    sale_return = models.ForeignKey(
+        SaleReturn, on_delete=models.CASCADE, related_name="details"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="sale_return_details"
+    )
+    inventory_movement = models.OneToOneField(
+        InventoryMovement, on_delete=models.PROTECT, related_name="sale_return_detail"
+    )
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_display_fields(self):
+        return [
+            lambda obj: obj.product.name,
+            lambda obj: f"Quantity {obj.quantity}",
+            lambda obj: f"Return #{obj.sale_return.id}",
+        ]
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# MODEL PURCHASE RETURN
+# ───────────────────────────────────────────────────────────────────────────────
+class PurchaseReturn(DisplayMixin, AuditModel):
+    purchase = models.ForeignKey(
+        Purchase, on_delete=models.PROTECT, related_name="returns"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="purchase_returns"
+    )
+    reason = models.TextField()
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    state = models.CharField(
+        max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
+    )
+
+    def get_display_fields(self):
+        return [
+            lambda obj: f"Return Purchase #{obj.purchase.id}",
+            "total_amount",
+            "state",
+        ]
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# MODEL PURCHASE RETURN DETAIL
+# ───────────────────────────────────────────────────────────────────────────────
+class PurchaseReturnDetail(DisplayMixin, models.Model):
+    purchase_return = models.ForeignKey(
+        PurchaseReturn, on_delete=models.CASCADE, related_name="details"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="purchase_return_details"
+    )
+    inventory_movement = models.OneToOneField(
+        InventoryMovement,
+        on_delete=models.PROTECT,
+        related_name="purchase_return_detail",
+    )
+    quantity = models.IntegerField()
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_display_fields(self):
+        return [
+            lambda obj: obj.product.name,
+            lambda obj: f"Quantity {obj.quantity}",
+            lambda obj: f"Return #{obj.purchase_return.id}",
+        ]

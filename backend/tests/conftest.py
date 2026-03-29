@@ -24,6 +24,10 @@ from nexus_inventory_backend.db.models import (
     Invoice,
     Supplier,
     Purchase,
+    SaleReturn,
+    SaleReturnDetail,
+    PurchaseReturn,
+    PurchaseReturnDetail,
 )
 
 # Datetime
@@ -329,6 +333,68 @@ def another_supplier(db):
     )
 
 
+@pytest.fixture
+def sale_return(db, sale, admin_user):
+    return SaleReturn.objects.create(
+        sale=sale,
+        user=admin_user,
+        reason="Product defective",
+        total_amount="100.00",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
+def sale_return_detail(db, sale_return, product, admin_user):
+    from nexus_inventory_backend.db.enums import MovementType
+
+    inventory_movement = InventoryMovement.objects.create(
+        product=product,
+        user=admin_user,
+        movement_type=MovementType.IN,
+        quantity=2,
+    )
+    return SaleReturnDetail.objects.create(
+        sale_return=sale_return,
+        product=product,
+        inventory_movement=inventory_movement,
+        quantity=2,
+        unit_price=50.00,
+        subtotal=100.00,
+    )
+
+
+@pytest.fixture
+def purchase_return(db, purchase, admin_user):
+    return PurchaseReturn.objects.create(
+        purchase=purchase,
+        user=admin_user,
+        reason="Product defective",
+        total_amount="200.00",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
+def purchase_return_detail(db, purchase_return, product, admin_user):
+    from nexus_inventory_backend.db.enums import MovementType
+
+    inventory_movement = InventoryMovement.objects.create(
+        product=product,
+        user=admin_user,
+        movement_type=MovementType.OUT,
+        quantity=2,
+    )
+    return PurchaseReturnDetail.objects.create(
+        purchase_return=purchase_return,
+        product=product,
+        inventory_movement=inventory_movement,
+        quantity=2,
+        unit_cost=100.00,
+        subtotal=200.00,
+    )
+
+
 # ======================================================================================================================================================================
 # PAYLOADS
 # ======================================================================================================================================================================
@@ -539,6 +605,58 @@ def payload_another_purchase(another_supplier, another_product):
         "details": [
             {"product_id": another_product.pk, "quantity": 1, "unit_cost": "250.00"}
         ],
+    }
+
+
+@pytest.fixture
+def payload_sale_return(sale, product, sale_detail):
+    return {
+        "sale_id": sale.pk,
+        "reason": "Product not as described",
+        "details": [{"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}],
+    }
+
+
+@pytest.fixture
+def sale_return_payload_no_details(sale):
+    return {
+        "sale_id": sale.pk,
+        "reason": "Product not as described",
+    }
+
+
+@pytest.fixture
+def payload_sale_return_exceeds_quantity(sale, product, sale_detail):
+    return {
+        "sale_id": sale.pk,
+        "reason": "Product not as described",
+        "details": [{"product_id": product.pk, "quantity": 100, "unit_price": "50.00"}],
+    }
+
+
+@pytest.fixture
+def payload_purchase_return(purchase, product, purchase_detail):
+    return {
+        "purchase_id": purchase.pk,
+        "reason": "Product not as described",
+        "details": [{"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}],
+    }
+
+
+@pytest.fixture
+def purchase_return_payload_no_details(purchase):
+    return {
+        "purchase_id": purchase.pk,
+        "reason": "Product not as described",
+    }
+
+
+@pytest.fixture
+def payload_purchase_return_exceeds_quantity(purchase, product, purchase_detail):
+    return {
+        "purchase_id": purchase.pk,
+        "reason": "Product not as described",
+        "details": [{"product_id": product.pk, "quantity": 100, "unit_cost": "100.00"}],
     }
 
 
@@ -948,3 +1066,88 @@ def url_reports_customers_promotions():
 @pytest.fixture
 def url_reports_invoices():
     return reverse("invoice-reports-invoices")
+
+
+@pytest.fixture
+def sale_returns_url():
+    return reverse("sale-returns-list")
+
+
+@pytest.fixture
+def sale_return_detail_url():
+    def _url(pk):
+        return reverse("sale-returns-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_return_cancel_url():
+    def _url(pk):
+        return reverse("sale-returns-cancel", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_return_details_url():
+    def _url(sale_return_pk):
+        return reverse(
+            "sale-return-detail-list", kwargs={"sale_returns_pk": sale_return_pk}
+        )
+
+    return _url
+
+
+@pytest.fixture
+def sale_return_detail_item_url():
+    def _url(sale_return_pk, pk):
+        return reverse(
+            "sale-return-detail-detail",
+            kwargs={"sale_returns_pk": sale_return_pk, "pk": pk},
+        )
+
+    return _url
+
+
+@pytest.fixture
+def purchase_returns_url():
+    return reverse("purchase-returns-list")
+
+
+@pytest.fixture
+def purchase_return_detail_url():
+    def _url(pk):
+        return reverse("purchase-returns-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchase_return_cancel_url():
+    def _url(pk):
+        return reverse("purchase-returns-cancel", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchase_return_details_url():
+    def _url(purchase_return_pk):
+        return reverse(
+            "purchase-return-detail-list",
+            kwargs={"purchase_returns_pk": purchase_return_pk},
+        )
+
+    return _url
+
+
+@pytest.fixture
+def purchase_return_detail_item_url():
+    def _url(purchase_return_pk, pk):
+        return reverse(
+            "purchase-return-detail-detail",
+            kwargs={"purchase_returns_pk": purchase_return_pk, "pk": pk},
+        )
+
+    return _url

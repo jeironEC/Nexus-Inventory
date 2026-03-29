@@ -324,3 +324,70 @@ CREATE TABLE IF NOT EXISTS invoice (
     FOREIGN KEY (updated_by)  REFERENCES user(id),
     FOREIGN KEY (deleted_by)  REFERENCES user(id)
 );
+
+-- ─────────────────────────────────────────
+-- SALE RETURN
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS sale_return (
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sale_id      BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    reason       TEXT,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    state        ENUM('completed', 'canceled') DEFAULT 'completed',
+
+    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+
+)
+
+-- ─────────────────────────────────────────
+-- SALE RETURN DETAIL
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS sale_return_detail (
+    id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sale_return_id        BIGINT UNIQUE NOT NULL,
+    product_id            BIGINT UNIQUE NOT NULL,
+    inventory_movement_id BIGINT UNIQUE NOT NULL
+    quantity              INT NOT NULL,
+    unit_price            DECIMAL(10, 2) NOT NULL,
+    subtotal              DECIMAL(12, 2) NOT NULL,
+    created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (sale_return_id)        REFERENCES sale_return(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id)            REFERENCES product(id),
+    FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
+)
+
+-- ─────────────────────────────────────────
+-- PURCHASE RETURN
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS purchase_return (
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    purchase_id  BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    reason       TEXT,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    state        ENUM('completed', 'canceled') DEFAULT 'completed',
+
+    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+)
+
+-- ─────────────────────────────────────────
+-- PURCHASE RETURN DETAIL
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS purchase_return_detail (
+    id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    purchase_return_id    BIGINT UNIQUE NOT NULL,
+    product_id            BIGINT UNIQUE NOT NULL,
+    inventory_movement_id BIGINT UNIQUE NOT NULL
+    quantity              INT NOT NULL,
+    unit_cost             DECIMAL(10, 2) NOT NULL,
+    subtotal              DECIMAL(12, 2) NOT NULL,
+    created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (purchase_return_id)    REFERENCES purchase_return(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id)            REFERENCES product(id),
+    FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
+)

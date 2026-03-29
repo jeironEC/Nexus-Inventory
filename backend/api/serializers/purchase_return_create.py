@@ -1,46 +1,49 @@
 # DRF
 from rest_framework import serializers
 
-# Python
-
 # Django
 from django.db import transaction
 
 # Models
 from nexus_inventory_backend.db.models import (
-    Purchase,
-    PurchaseDetail,
+    PurchaseReturn,
+    PurchaseReturnDetail,
     InventoryMovement,
-    Supplier,
-    Invoice,
+    Purchase,
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import MovementType, InvoiceType, InvoiceState
+from nexus_inventory_backend.db.enums import MovementType
 
 # Serializers
-from api.serializers.purchase_detail_create import PurchaseDetailCreateSerializer
-
-# Models
+from .purchase_return_detail_create import PurchaseReturnDetailCreateSerializer
 
 
-class PurchaseCreateSerializer(serializers.ModelSerializer):
-    supplier_id = serializers.PrimaryKeyRelatedField(
-        queryset=Supplier.objects.all(),
-        source="supplier",
+class PurchaseReturnCreateSerializer(serializers.ModelSerializer):
+    purchase_id = serializers.PrimaryKeyRelatedField(
+        queryset=Purchase.objects.all(),
+        source="purchase",
     )
-    details = PurchaseDetailCreateSerializer(many=True)
+    details = PurchaseReturnDetailCreateSerializer(many=True)
 
     class Meta:
-        model = Purchase
+        model = PurchaseReturn
         fields = [
-            "supplier_id",
+            "purchase_id",
+            "reason",
             "details",
         ]
 
     def validate_details(self, value):
         if not value:
             raise serializers.ValidationError("At least one detail is required.")
+        return value
+
+    def validate_purchase_id(self, value):
+        if value.state == "CANCELED":
+            raise serializers.ValidationError(
+                "Cannot return items from a canceled purchase."
+            )
         return value
 
     @transaction.atomic
@@ -52,7 +55,7 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
             detail["quantity"] * detail["unit_cost"] for detail in details_data
         )
 
-        purchase = Purchase.objects.create(
+        purchase_return = PurchaseReturn.objects.create(
             **validated_data,
             user=user,
             total_amount=total_amount,
@@ -66,12 +69,12 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
             inventory_movement = InventoryMovement.objects.create(
                 product=product,
                 user=user,
-                movement_type=MovementType.IN,
+                movement_type=MovementType.OUT,
                 quantity=quantity,
             )
 
-            PurchaseDetail.objects.create(
-                purchase=purchase,
+            PurchaseReturnDetail.objects.create(
+                purchase_return=purchase_return,
                 product=product,
                 inventory_movement=inventory_movement,
                 quantity=quantity,
@@ -79,12 +82,4 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
                 subtotal=quantity * unit_cost,
             )
 
-            Invoice.objects.create(
-                purchase=purchase,
-                invoice_type=InvoiceType.PURCHASE,
-                number_invoice=f"PINV-{purchase.pk:08d}",
-                state=InvoiceState.ISSUED,
-                created_by=user,
-            )
-
-        return purchase
+        return purchase_return

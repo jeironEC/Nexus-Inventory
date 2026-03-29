@@ -18,6 +18,10 @@ from .models import (
     Supplier,
     Purchase,
     PurchaseDetail,
+    SaleReturn,
+    SaleReturnDetail,
+    PurchaseReturn,
+    PurchaseReturnDetail,
 )
 
 # Admin Registers
@@ -36,3 +40,7 @@ admin.site.register(SaleDetail)
 admin.site.register(Supplier)
 admin.site.register(Purchase)
 admin.site.register(PurchaseDetail)
+admin.site.register(SaleReturn)
+admin.site.register(SaleReturnDetail)
+admin.site.register(PurchaseReturn)
+admin.site.register(PurchaseReturnDetail)

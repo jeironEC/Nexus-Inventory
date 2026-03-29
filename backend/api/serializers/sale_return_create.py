@@ -1,40 +1,36 @@
 # DRF
 from rest_framework import serializers
 
-# Python
-
 # Django
 from django.db import transaction
 
 # Models
 from nexus_inventory_backend.db.models import (
-    Purchase,
-    PurchaseDetail,
+    SaleReturn,
+    SaleReturnDetail,
     InventoryMovement,
-    Supplier,
-    Invoice,
+    Sale,
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import MovementType, InvoiceType, InvoiceState
+from nexus_inventory_backend.db.enums import MovementType
 
 # Serializers
-from api.serializers.purchase_detail_create import PurchaseDetailCreateSerializer
-
-# Models
+from .sale_return_detail_create import SaleReturnDetailCreateSerializer
 
 
-class PurchaseCreateSerializer(serializers.ModelSerializer):
-    supplier_id = serializers.PrimaryKeyRelatedField(
-        queryset=Supplier.objects.all(),
-        source="supplier",
+class SaleReturnCreateSerializer(serializers.ModelSerializer):
+    sale_id = serializers.PrimaryKeyRelatedField(
+        queryset=Sale.objects.all(),
+        source="sale",
     )
-    details = PurchaseDetailCreateSerializer(many=True)
+    details = SaleReturnDetailCreateSerializer(many=True)
 
     class Meta:
-        model = Purchase
+        model = SaleReturn
         fields = [
-            "supplier_id",
+            "sale_id",
+            "reason",
             "details",
         ]
 
@@ -43,16 +39,23 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("At least one detail is required.")
         return value
 
+    def validate_sale_id(self, value):
+        if value.state == "CANCELED":
+            raise serializers.ValidationError(
+                "Cannot return items from a canceled sale."
+            )
+        return value
+
     @transaction.atomic
     def create(self, validated_data):
         details_data = validated_data.pop("details")
         user = self.context["request"].user
 
         total_amount = sum(
-            detail["quantity"] * detail["unit_cost"] for detail in details_data
+            detail["quantity"] * detail["unit_price"] for detail in details_data
         )
 
-        purchase = Purchase.objects.create(
+        sale_return = SaleReturn.objects.create(
             **validated_data,
             user=user,
             total_amount=total_amount,
@@ -61,7 +64,7 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
         for detail in details_data:
             product = detail["product"]
             quantity = detail["quantity"]
-            unit_cost = detail["unit_cost"]
+            unit_price = detail["unit_price"]
 
             inventory_movement = InventoryMovement.objects.create(
                 product=product,
@@ -70,21 +73,13 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
                 quantity=quantity,
             )
 
-            PurchaseDetail.objects.create(
-                purchase=purchase,
+            SaleReturnDetail.objects.create(
+                sale_return=sale_return,
                 product=product,
                 inventory_movement=inventory_movement,
                 quantity=quantity,
-                unit_cost=unit_cost,
-                subtotal=quantity * unit_cost,
+                unit_price=unit_price,
+                subtotal=quantity * unit_price,
             )
 
-            Invoice.objects.create(
-                purchase=purchase,
-                invoice_type=InvoiceType.PURCHASE,
-                number_invoice=f"PINV-{purchase.pk:08d}",
-                state=InvoiceState.ISSUED,
-                created_by=user,
-            )
-
-        return purchase
+        return sale_return

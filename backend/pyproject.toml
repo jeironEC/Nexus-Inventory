@@ -14,6 +14,7 @@ dependencies = [
     "djangorestframework-simplejwt",
     "django-filter",
     "drf-nested-routers",
+    "django-cors-headers",
 ]
 
 [project.optional-dependencies]

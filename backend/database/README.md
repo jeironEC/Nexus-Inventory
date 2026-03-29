@@ -53,12 +53,16 @@ role (1) ─── (N) user
 user (1) ─── (N) sale
 user (1) ─── (N) invoice
 user (1) ─── (N) purchase
+user (1) ─── (N) sale_return
+user (1) ─── (N) purchase_return
 user (1) ─── (N) inventory_movement
 ```
 * Un rol puede tener muchos usuarios.
 * Un usuario puede procesar muchas ventas.
 * Un usuario puede emitir muchas facturas.
 * Un usuario puede registrar muchas compras.
+* Un usuario puede registrar muchas devoluciones de venta.
+* Un usuario puede registrar muchas devoluciones de compra.
 * Un usuario puede generar muchos movimientos de inventario.
 
 Reglas de negocio:
@@ -105,12 +109,16 @@ category (1) ─── (N) product
 product  (1) ─── (1) inventory
 product  (1) ─── (N) sale_detail
 product  (1) ─── (N) purchase_detail
+product  (1) ─── (N) sale_return_detail
+product  (1) ─── (N) purchase_return_detail
 product  (1) ─── (N) inventory_movement
 ```
 * Cada producto pertenece a una única categoría.
 * Cada producto tiene un único registro de inventario.
 * Un producto puede aparecer en múltiples detalles de venta.
 * Un producto puede aparecer en múltiples detalles de compra.
+* Un producto puede aparecer en múltiples detalles de devolución de venta.
+* Un producto puede aparecer en múltiples detalles de devolución de compra.
 * Un producto puede generar múltiples movimientos de inventario.
 
 Reglas de negocio:
@@ -228,11 +236,13 @@ customer (1) ─── (N) sale
 user     (1) ─── (N) sale
 sale     (1) ─── (1) invoice
 sale     (1) ─── (N) sale_detail
+sale     (1) ─── (N) sale_return
 ```
 * Un cliente puede tener múltiples ventas.
 * Un usuario puede procesar múltiples ventas.
 * Una venta puede generar como máximo una factura.
 * Una venta contiene múltiples líneas de productos en `sale_detail`.
+* Una venta puede tener múltiples devoluciones asociadas.
 
 Reglas de negocio:
 * Cada venta debe estar asociada a un usuario que realizó la operación (`user_id NOT NULL`).
@@ -283,11 +293,15 @@ product            (1) ─── (N) inventory_movement
 user               (1) ─── (N) inventory_movement
 inventory_movement (1) ─── (1) sale_detail
 inventory_movement (1) ─── (1) purchase_detail
+inventory_movement (1) ─── (1) sale_return_detail
+inventory_movement (1) ─── (1) purchase_return_detail
 ```
 * Un producto puede tener múltiples movimientos de inventario.
 * Un usuario puede generar múltiples movimientos de inventario.
 * Cada movimiento puede estar asociado a un detalle de venta (salida de stock).
 * Cada movimiento puede estar asociado a un detalle de compra (entrada de stock).
+* Cada movimiento puede estar asociado a un detalle de devolución de venta (entrada de stock).
+* Cada movimiento puede estar asociado a un detalle de devolución de compra (salida de stock).
 
 Reglas de negocio:
 * Cada movimiento debe estar asociado a un producto existente (`product_id NOT NULL`).
@@ -365,10 +379,12 @@ Relaciones:
 supplier (1) ─── (N) purchase
 user     (1) ─── (N) purchase
 purchase (1) ─── (N) purchase_detail
+purchase (1) ─── (N) purchase_return
 ```
 * Un proveedor puede tener múltiples compras.
 * Un usuario puede registrar múltiples compras.
 * Cada compra puede tener múltiples líneas de detalle en `purchase_detail`.
+* Cada compra puede tener múltiples devoluciones asociadas.
 
 Reglas de negocio:
 * Cada compra debe estar asociada a un proveedor (`supplier_id NOT NULL`).
@@ -408,6 +424,122 @@ Reglas de negocio:
 * El subtotal se calcula como `quantity × unit_cost`.
 * Cada línea de compra debe generar un movimiento de inventario de entrada (`in`) (regla de negocio a nivel de aplicación).
 * Una compra cancelada no debería generar movimientos de inventario nuevos ni afectar el stock (regla de negocio a nivel de aplicación).
+
+---
+
+### Tabla Sale Return
+La tabla **Sale Return** almacena las devoluciones realizadas por clientes sobre ventas previamente completadas.
+
+Permite registrar cuando un cliente devuelve productos, indicando el motivo de la devolución y el monto total a reembolsar. Cada devolución genera automáticamente movimientos de inventario de entrada (`in`) para reponer el stock.
+
+Las líneas de productos devueltos se almacenan en la tabla **Sale Return Detail**.
+
+Relaciones:
+```bash
+sale         (1) ─── (N) sale_return
+user         (1) ─── (N) sale_return
+sale_return  (1) ─── (N) sale_return_detail
+```
+* Una venta puede tener múltiples devoluciones asociadas.
+* Un usuario puede registrar múltiples devoluciones.
+* Cada devolución puede contener múltiples productos en `sale_return_detail`.
+
+Reglas de negocio:
+* Cada devolución debe estar asociada a una venta existente (`sale_id NOT NULL`).
+* El campo `reason` es obligatorio y debe explicar el motivo de la devolución (`NOT NULL`).
+* El monto total de la devolución se calcula automáticamente desde los detalles.
+* El campo `state` indica si la devolución fue:
+  * `completed` → la devolución fue procesada correctamente.
+  * `canceled` → la devolución fue anulada.
+* Una devolución cancelada no debería revertirse ni afectar el inventario (regla de negocio a nivel de aplicación).
+* No se puede devolver más cantidad de la originalmente vendida para cada producto.
+* Las devoluciones de ventas generan movimientos de inventario de entrada (`in`) para reponer el stock.
+
+---
+
+### Tabla Sale Return Detail
+La tabla **Sale Return Detail** almacena las líneas o ítems individuales de cada devolución de venta.
+
+Cada registro representa un producto devuelto en una devolución, indicando la cantidad, el precio unitario al que se vendió y el subtotal, además de vincular el movimiento de inventario correspondiente para reponer el stock.
+
+Relaciones:
+```bash
+sale_return        (1) ─── (N) sale_return_detail
+product            (1) ─── (N) sale_return_detail
+sale_return_detail (1) ─── (1) inventory_movement
+```
+* Una devolución de venta puede contener múltiples productos.
+* Un producto puede aparecer en múltiples devoluciones de venta.
+* Cada línea de devolución genera un único movimiento de inventario de entrada.
+
+Reglas de negocio:
+* Cada detalle debe estar asociado a una devolución existente (`sale_return_id NOT NULL`).
+* Si una devolución se elimina, todos sus detalles se eliminan automáticamente (`ON DELETE CASCADE`).
+* Cada detalle debe referenciar un producto existente (`product_id NOT NULL`).
+* Cada detalle está vinculado a un único movimiento de inventario (`inventory_movement_id UNIQUE`).
+* La cantidad devuelta se almacena en `quantity`.
+* El precio unitario corresponde al precio al que se vendió el producto originalmente (`unit_price`).
+* El subtotal se calcula como `quantity × unit_price`.
+* Cada línea de devolución debe generar un movimiento de inventario de entrada (`in`) (regla de negocio a nivel de aplicación).
+* La cantidad devuelta por producto no puede superar la cantidad originalmente vendida en la venta asociada.
+
+---
+
+### Tabla Purchase Return
+La tabla **Purchase Return** almacena las devoluciones realizadas a proveedores sobre compras previamente completadas.
+
+Permite registrar cuando se devuelven productos a un proveedor, indicando el motivo de la devolución y el monto total a descontar. Cada devolución genera automáticamente movimientos de inventario de salida (`out`) para reducir el stock.
+
+Las líneas de productos devueltos se almacenan en la tabla **Purchase Return Detail**.
+
+Relaciones:
+```bash
+purchase         (1) ─── (N) purchase_return
+user             (1) ─── (N) purchase_return
+purchase_return  (1) ─── (N) purchase_return_detail
+```
+* Una compra puede tener múltiples devoluciones asociadas.
+* Un usuario puede registrar múltiples devoluciones.
+* Cada devolución puede contener múltiples productos en `purchase_return_detail`.
+
+Reglas de negocio:
+* Cada devolución debe estar asociada a una compra existente (`purchase_id NOT NULL`).
+* El campo `reason` es obligatorio y debe explicar el motivo de la devolución (`NOT NULL`).
+* El monto total de la devolución se calcula automáticamente desde los detalles.
+* El campo `state` indica si la devolución fue:
+  * `completed` → la devolución fue procesada correctamente.
+  * `canceled` → la devolución fue anulada.
+* Una devolución cancelada no debería revertirse ni afectar el inventario (regla de negocio a nivel de aplicación).
+* No se puede devolver más cantidad de la originalmente comprada para cada producto.
+* Las devoluciones de compras generan movimientos de inventario de salida (`out`) para reducir el stock.
+
+---
+
+### Tabla Purchase Return Detail
+La tabla **Purchase Return Detail** almacena las líneas o ítems individuales de cada devolución de compra.
+
+Cada registro representa un producto devuelto a un proveedor en una devolución, indicando la cantidad, el costo unitario al que se compró y el subtotal, además de vincular el movimiento de inventario correspondiente para ajustar el stock.
+
+Relaciones:
+```bash
+purchase_return        (1) ─── (N) purchase_return_detail
+product                (1) ─── (N) purchase_return_detail
+purchase_return_detail (1) ─── (1) inventory_movement
+```
+* Una devolución de compra puede contener múltiples productos.
+* Un producto puede aparecer en múltiples devoluciones de compra.
+* Cada línea de devolución genera un único movimiento de inventario de salida.
+
+Reglas de negocio:
+* Cada detalle debe estar asociado a una devolución existente (`purchase_return_id NOT NULL`).
+* Si una devolución se elimina, todos sus detalles se eliminan automáticamente (`ON DELETE CASCADE`).
+* Cada detalle debe referenciar un producto existente (`product_id NOT NULL`).
+* Cada detalle está vinculado a un único movimiento de inventario (`inventory_movement_id UNIQUE`).
+* La cantidad devuelta se almacena en `quantity`.
+* El costo unitario corresponde al precio al que se compró el producto originalmente (`unit_cost`).
+* El subtotal se calcula como `quantity × unit_cost`.
+* Cada línea de devolución debe generar un movimiento de inventario de salida (`out`) (regla de negocio a nivel de aplicación).
+* La cantidad devuelta por producto no puede superar la cantidad originalmente comprada en la compra asociada.
 
 ## Esquema
 ```bash
@@ -737,4 +869,71 @@ CREATE TABLE IF NOT EXISTS invoice (
     FOREIGN KEY (updated_by)  REFERENCES user(id),
     FOREIGN KEY (deleted_by)  REFERENCES user(id)
 );
+
+-- ─────────────────────────────────────────
+-- SALE RETURN
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS sale_return (
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sale_id      BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    reason       TEXT,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    state        ENUM('completed', 'canceled') DEFAULT 'completed',
+
+    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+
+)
+
+-- ─────────────────────────────────────────
+-- SALE RETURN DETAIL
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS sale_return_detail (
+    id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sale_return_id        BIGINT UNIQUE NOT NULL,
+    product_id            BIGINT UNIQUE NOT NULL,
+    inventory_movement_id BIGINT UNIQUE NOT NULL
+    quantity              INT NOT NULL,
+    unit_price            DECIMAL(10, 2) NOT NULL,
+    subtotal              DECIMAL(12, 2) NOT NULL,
+    created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (sale_return_id)        REFERENCES sale_return(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id)            REFERENCES product(id),
+    FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
+)
+
+-- ─────────────────────────────────────────
+-- PURCHASE RETURN
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS purchase_return (
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    purchase_id  BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    reason       TEXT,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    state        ENUM('completed', 'canceled') DEFAULT 'completed',
+
+    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+)
+
+-- ─────────────────────────────────────────
+-- PURCHASE RETURN DETAIL
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS purchase_return_detail (
+    id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    purchase_return_id    BIGINT UNIQUE NOT NULL,
+    product_id            BIGINT UNIQUE NOT NULL,
+    inventory_movement_id BIGINT UNIQUE NOT NULL
+    quantity              INT NOT NULL,
+    unit_cost             DECIMAL(10, 2) NOT NULL,
+    subtotal              DECIMAL(12, 2) NOT NULL,
+    created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (purchase_return_id)    REFERENCES purchase_return(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id)            REFERENCES product(id),
+    FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
+)
 ```

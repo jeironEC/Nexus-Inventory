@@ -1,16 +1,31 @@
 export const DEFAULT_TIMEOUT = 3000;
 
+// =========================================================================
 // URLS ENDPOINTS
-export const URL_BASE = "http://127.0.0.1:8000"
+// =========================================================================
+
+// URL BASE
+export const URL_BASE = "http://127.0.0.1:8000";
+
+// URLS TOKEN
 export const URL_AUTH_TOKEN = "/v1/auth/token/";
 export const URL_AUTH_REFRESH = "/v1/auth/token/refresh/";
-export const URL_USER = "/v1/users/";
+
+// URLS USERS
+export const URL_USERS = "/v1/users/";
 export const URL_ACTIVE_USERS = "/v1/users/active/";
 export const URL_INACTIVE_USERS = "/v1/users/inactive/";
-export const URL_USER_PROFILE = "/v1/users/me/";
-export const URL_ROLE = "/v1/roles/";
+export const URL_USERS_PROFILE = "/v1/users/me/";
+
+// URLS ROLES
+export const URL_ROLES = "/v1/roles/";
 export const URL_ACTIVE_ROLES = "/v1/roles/active/";
 export const URL_INACTIVE_ROLES = "/v1/roles/inactive/";
+
+// URLS CATEGORIES
+export const URL_CATEGORIES = "/v1/categories/";
+export const URL_ACTIVE_CATEGORIES = "/v1/categories/active/";
+export const URL_INACTIVE_CATEGORIES = "/v1/categories/inactive/";
 
 // KEYS
 export const TOKEN_KEY = 'auth_token';

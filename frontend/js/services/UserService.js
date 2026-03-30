@@ -1,32 +1,32 @@
 import { authService } from "./AuthService.js";
 import {
-    URL_USER,
+    URL_USERS,
     URL_ACTIVE_USERS,
     URL_INACTIVE_USERS,
-    URL_USER_PROFILE,
+    URL_USERS_PROFILE,
 } from "../util/const.js";
 
-export class UserService {
+class UserService {
     constructor() {
         this.api = authService.getApiClient();
     }
 
     async getAllUsers(filtros = {}) {
         const params = new URLSearchParams(filtros).toString();
-        const endpoint = params ? `${URL_USER}?${params}` : `${URL_USER}`;
+        const endpoint = params ? `${URL_USERS}?${params}` : `${URL_USERS}`;
         return await this.api.get(endpoint);
     }
 
     async create(dades) {
-        return await this.api.post(`${URL_USER}`, dades);
+        return await this.api.post(`${URL_USERS}`, dades);
     }
 
     async activate(id) {
-        return await this.api.patch(`${URL_USER}${id}/activate/`);
+        return await this.api.patch(`${URL_USERS}${id}/activate/`);
     }
 
     async deactivate(id) {
-        return await this.api.patch(`${URL_USER}${id}/deactivate/`);
+        return await this.api.patch(`${URL_USERS}${id}/deactivate/`);
     }
 
     async getActiveUsers() {
@@ -38,15 +38,15 @@ export class UserService {
     }
 
     async getUserProfile() {
-        return await this.api.get(`${URL_USER_PROFILE}`);
+        return await this.api.get(`${URL_USERS_PROFILE}`);
     }
 
     async updateUserProfile(dades) {
-        return await this.api.patch(`${URL_USER_PROFILE}`, dades);
+        return await this.api.patch(`${URL_USERS_PROFILE}`, dades);
     }
 
     async deleteUserProfile() {
-        return await this.api.delete(`${URL_USER_PROFILE}`);
+        return await this.api.delete(`${URL_USERS_PROFILE}`);
     }
 }
 

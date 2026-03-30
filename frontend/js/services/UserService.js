@@ -1,4 +1,4 @@
-import { AuthService } from "./AuthService.js";
+import { authService } from "./AuthService.js";
 import {
     URL_USER,
     URL_ACTIVE_USERS,
@@ -8,7 +8,7 @@ import {
 
 export class UserService {
     constructor() {
-        this.api = new AuthService().getApiClient();
+        this.api = authService.getApiClient();
     }
 
     async getAllUsers(filtros = {}) {
@@ -49,3 +49,5 @@ export class UserService {
         return await this.api.delete(`${URL_USER_PROFILE}`);
     }
 }
+
+export const userService = new UserService();

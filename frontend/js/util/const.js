@@ -8,6 +8,9 @@ export const URL_USER = "/v1/users/";
 export const URL_ACTIVE_USERS = "/v1/users/active/";
 export const URL_INACTIVE_USERS = "/v1/users/inactive/";
 export const URL_USER_PROFILE = "/v1/users/me/";
+export const URL_ROLE = "/v1/roles/";
+export const URL_ACTIVE_ROLES = "/v1/roles/active/";
+export const URL_INACTIVE_ROLES = "/v1/roles/inactive/";
 
 // KEYS
 export const TOKEN_KEY = 'auth_token';

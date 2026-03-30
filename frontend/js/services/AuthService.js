@@ -154,3 +154,5 @@ export class AuthService {
         return this.api;
     }
 }
+
+export const authService = new AuthService();

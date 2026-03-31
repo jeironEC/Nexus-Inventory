@@ -466,6 +466,7 @@ class CustomerPromotionViewSet(
     """
     Gestiona la asignación de promociones a clientes.
     Evita duplicados: si la promoción ya está asignada retorna 400.
+    Valida que el cliente esté activo y la promoción no haya expirado.
     """
 
     queryset = (
@@ -481,6 +482,49 @@ class CustomerPromotionViewSet(
     user_filterset_class = CustomerPromotionFilter
 
     def create(self, request, *args, **kwargs):
+        customer_id = request.data.get("customer_id")
+        promotion_id = request.data.get("promotion_id")
+
+        if customer_id and promotion_id:
+            from nexus_inventory_backend.db.models import Customer, Promotion
+            from nexus_inventory_backend.db.enums import State
+
+            try:
+                customer = Customer.objects.get(pk=customer_id)
+            except Customer.DoesNotExist:
+                return Response(
+                    {"detail": "Customer not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            if customer.state != State.ACTIVE:
+                return Response(
+                    {"detail": "Customer is not active."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                promotion = Promotion.objects.get(pk=promotion_id)
+            except Promotion.DoesNotExist:
+                return Response(
+                    {"detail": "Promotion not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            if promotion.state != State.ACTIVE:
+                return Response(
+                    {"detail": "Promotion is not active."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            from datetime import date
+
+            if promotion.end_date < date.today():
+                return Response(
+                    {"detail": "Promotion has expired."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -496,6 +540,15 @@ class CustomerPromotionViewSet(
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+    @action(detail=True, methods=["patch"])
+    def apply(self, request, pk=None):
+        customer_promotion = self.get_object()
+        customer_promotion.applied = True
+        customer_promotion.save(update_fields=["applied"])
+
+        serializer = self.get_serializer(customer_promotion)
+        return Response(serializer.data)
 
 
 class SaleViewSet(

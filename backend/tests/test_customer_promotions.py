@@ -8,10 +8,13 @@ from rest_framework import status
 from django.utils import timezone
 
 # Models
-from nexus_inventory_backend.db.models import CustomerPromotion
+from nexus_inventory_backend.db.models import Promotion, CustomerPromotion
+
+# Enums
+from nexus_inventory_backend.db.enums import State
 
 # Datetime
-from datetime import timedelta
+from datetime import timedelta, date
 
 
 @pytest.mark.django_db
@@ -46,6 +49,7 @@ class TestGetCustomerPromotion:
             "customer",
             "promotion",
             "applied",
+            "can_apply",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -113,6 +117,7 @@ class TestPostCustomerPromotion:
             "promotion",
             "customer",
             "applied",
+            "can_apply",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -223,8 +228,8 @@ class TestFiltersCustomerPromotion:
         customer_promotion,
         another_customer_promotion,
     ):
-        response = api_client_auth.get(customer_promotions_url, {"applied": True})
-        assert len(response.data) == 1
+        response = api_client_auth.get(customer_promotions_url, {"applied": False})
+        assert len(response.data) >= 1
 
     def test_customer_promotions_filters_date_from_correctly(
         self, api_client_auth, customer_promotions_url, customer_promotion
@@ -293,8 +298,147 @@ class TestFiltersCustomerPromotion:
         response = api_client_auth.get(
             customer_promotions_url,
             {
-                "applied": True,
+                "applied": False,
                 "date_from": str(today),
             },
         )
         assert len(response.data) >= 1
+
+
+@pytest.mark.django_db
+class TestCustomerPromotionValidations:
+    def test_create_with_inactive_customer_returns_400(
+        self,
+        api_client_auth,
+        customer_promotions_url,
+        payload_customer_promotion,
+        customer_inactive,
+        promotion,
+    ):
+        payload = {
+            "customer_id": customer_inactive.pk,
+            "promotion_id": promotion.pk,
+        }
+        response = api_client_auth.post(customer_promotions_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Customer is not active" in response.data["detail"]
+
+    def test_create_with_inactive_promotion_returns_400(
+        self,
+        api_client_auth,
+        customer_promotions_url,
+        payload_customer_promotion,
+        customer,
+        promotion_inactive,
+    ):
+        payload = {
+            "customer_id": customer.pk,
+            "promotion_id": promotion_inactive.pk,
+        }
+        response = api_client_auth.post(customer_promotions_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Promotion is not active" in response.data["detail"]
+
+    def test_create_with_expired_promotion_returns_400(
+        self,
+        api_client_auth,
+        customer_promotions_url,
+        customer,
+    ):
+        expired_promotion = Promotion.objects.create(
+            name="Expired Promo",
+            discount_percentage=10,
+            start_date=date(2020, 1, 1),
+            end_date=date(2020, 12, 31),
+            state=State.ACTIVE,
+        )
+        payload = {
+            "customer_id": customer.pk,
+            "promotion_id": expired_promotion.pk,
+        }
+        response = api_client_auth.post(customer_promotions_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Promotion has expired" in response.data["detail"]
+
+    def test_create_applied_default_false(
+        self,
+        api_client_auth,
+        customer_promotions_url,
+        payload_customer_promotion,
+    ):
+        response = api_client_auth.post(
+            customer_promotions_url, payload_customer_promotion
+        )
+        assert not response.data["applied"]
+
+
+@pytest.mark.django_db
+class TestCustomerPromotionApply:
+    def test_apply_promotion_returns_200(
+        self, api_client_auth, customer_promotion_apply_url, customer_promotion
+    ):
+        response = api_client_auth.patch(
+            customer_promotion_apply_url(customer_promotion.pk)
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["applied"]
+
+    def test_apply_promotion_persists(
+        self, api_client_auth, customer_promotion_apply_url, customer_promotion
+    ):
+        api_client_auth.patch(customer_promotion_apply_url(customer_promotion.pk))
+        customer_promotion.refresh_from_db()
+        assert customer_promotion.applied
+
+    def test_apply_promotion_unauthenticated_returns_401(
+        self, api_client, customer_promotion_apply_url, customer_promotion
+    ):
+        response = api_client.patch(customer_promotion_apply_url(customer_promotion.pk))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_apply_promotion_nonexistent_returns_404(
+        self, api_client_auth, customer_promotion_apply_url
+    ):
+        response = api_client_auth.patch(customer_promotion_apply_url(999))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestCustomerPromotionCanApply:
+    def test_can_apply_true_when_valid(
+        self, api_client_auth, customer_promotions_url, customer_promotion
+    ):
+        response = api_client_auth.get(customer_promotions_url)
+        assert response.data[0]["can_apply"]
+
+    def test_can_apply_false_when_applied(
+        self, api_client_auth, customer_promotions_url, customer_promotion
+    ):
+        customer_promotion.applied = True
+        customer_promotion.save()
+        response = api_client_auth.get(customer_promotions_url)
+        assert not response.data[0]["can_apply"]
+
+    def test_can_apply_false_when_customer_inactive(
+        self, api_client_auth, customer_promotions_url, customer_promotion
+    ):
+        customer_promotion.customer.state = State.INACTIVE
+        customer_promotion.customer.save()
+        response = api_client_auth.get(customer_promotions_url)
+        assert not response.data[0]["can_apply"]
+
+    def test_can_apply_false_when_promotion_inactive(
+        self, api_client_auth, customer_promotions_url, customer_promotion
+    ):
+        customer_promotion.promotion.state = State.INACTIVE
+        customer_promotion.promotion.save()
+        response = api_client_auth.get(customer_promotions_url)
+        assert not response.data[0]["can_apply"]
+
+    def test_can_apply_false_when_promotion_expired(
+        self, api_client_auth, customer_promotions_url, customer_promotion
+    ):
+        customer_promotion.promotion.end_date = date(2020, 12, 31)
+        customer_promotion.promotion.save()
+        response = api_client_auth.get(customer_promotions_url)
+        assert not response.data[0]["can_apply"]

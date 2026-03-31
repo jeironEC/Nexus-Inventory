@@ -11,6 +11,12 @@ from .promotion import PromotionSerializer
 # Mixins
 from api.mixins.audit_fields import AuditFieldsMixin
 
+# Enums
+from nexus_inventory_backend.db.enums import State
+
+# Datetime
+from datetime import date
+
 
 class CustomerPromotionSerializer(AuditFieldsMixin):
     customer = CustomerSerializer(read_only=True)
@@ -21,6 +27,7 @@ class CustomerPromotionSerializer(AuditFieldsMixin):
     promotion_id = serializers.PrimaryKeyRelatedField(
         queryset=Promotion.objects.all(), source="promotion", write_only=True
     )
+    can_apply = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomerPromotion
@@ -31,6 +38,7 @@ class CustomerPromotionSerializer(AuditFieldsMixin):
             "promotion",
             "promotion_id",
             "applied",
+            "can_apply",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -40,10 +48,23 @@ class CustomerPromotionSerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
+            "applied",
+            "can_apply",
             "created_at",
             "updated_at",
             "deleted_at",
         ]
+
+    def get_can_apply(self, obj):
+        if obj.applied:
+            return False
+        if obj.customer.state != State.ACTIVE:
+            return False
+        if obj.promotion.state != State.ACTIVE:
+            return False
+        if obj.promotion.end_date < date.today():
+            return False
+        return True
 
     def validate(self, data):
         customer = data.get("customer")
@@ -63,3 +84,7 @@ class CustomerPromotionSerializer(AuditFieldsMixin):
                 )
 
         return data
+
+    def create(self, validated_data):
+        validated_data["applied"] = False
+        return super().create(validated_data)

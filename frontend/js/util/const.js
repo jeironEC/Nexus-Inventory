@@ -45,6 +45,11 @@ export const URL_CUSTOMERS = "/v1/customers/";
 export const URL_ACTIVE_CUSTOMERS = `${URL_CUSTOMERS}active/`;
 export const URL_INACTIVE_CUSTOMERS = `${URL_CUSTOMERS}inactive/`;
 
+// URLS PROMOTIONS
+export const URL_PROMOTIONS = "/v1/promotions/";
+export const URL_ACTIVE_PROMOTIONS = `${URL_PROMOTIONS}active/`;
+export const URL_INACTIVE_PROMOTIONS = `${URL_PROMOTIONS}inactive/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

@@ -155,8 +155,8 @@ class Promotion(DisplayMixin, BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
     state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
     def get_display_fields(self):

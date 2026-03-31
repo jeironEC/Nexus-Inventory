@@ -60,6 +60,11 @@ export const URL_INVOICES = "/v1/invoices/";
 export const URL_INVOICE_SALE = `${URL_INVOICES}sale/`;
 export const URL_INVOICE_PURCHASE = `${URL_SALES}purchase/`;
 
+// URLS SUPPLIERS
+export const URL_SUPPLIERS = "/v1/suppliers/";
+export const URL_ACTIVE_SUPPLIERS = `${URL_SUPPLIERS}active/`;
+export const URL_INACTIVE_SUPPLIERS = `${URL_SUPPLIERS}inactive/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

@@ -65,6 +65,11 @@ export const URL_SUPPLIERS = "/v1/suppliers/";
 export const URL_ACTIVE_SUPPLIERS = `${URL_SUPPLIERS}active/`;
 export const URL_INACTIVE_SUPPLIERS = `${URL_SUPPLIERS}inactive/`;
 
+// URLS PURCHASES
+export const URL_PURCHASES = "/v1/purchases/";
+export const URL_COMPLETED_PURCHASES = `${URL_PURCHASES}completed/`;
+export const URL_CANCELED_PURCHASES = `${URL_PURCHASES}canceled/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

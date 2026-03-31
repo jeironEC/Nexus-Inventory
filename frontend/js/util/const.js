@@ -70,6 +70,9 @@ export const URL_PURCHASES = "/v1/purchases/";
 export const URL_COMPLETED_PURCHASES = `${URL_PURCHASES}completed/`;
 export const URL_CANCELED_PURCHASES = `${URL_PURCHASES}canceled/`;
 
+// URL CUSTOMER PROMOTIONS
+export const URL_CUSTOMER_PROMOTIONS = "/v1/customer_promotions/";
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

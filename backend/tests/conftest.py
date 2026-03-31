@@ -32,7 +32,7 @@ from nexus_inventory_backend.db.models import (
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import InvoiceState, InvoiceType
+from nexus_inventory_backend.db.enums import State, InvoiceState, InvoiceType
 
 # Datetime
 from datetime import timedelta
@@ -189,6 +189,18 @@ def customer(db):
 
 
 @pytest.fixture
+def customer_inactive(db):
+    return Customer.objects.create(
+        first_name="Cliente",
+        last_name="Inactivo",
+        email="inactivo@test.com",
+        number_phone="640000000",
+        address="Dirección inactiva",
+        state=State.INACTIVE,
+    )
+
+
+@pytest.fixture
 def another_customer(db):
     return Customer.objects.create(
         first_name="Rafael",
@@ -211,6 +223,18 @@ def promotion(db):
 
 
 @pytest.fixture
+def promotion_inactive(db):
+    return Promotion.objects.create(
+        name="Promotion Inactive",
+        description="Inactive promotion",
+        discount_percentage=15,
+        start_date=timezone.now().date().isoformat(),
+        end_date=(timezone.now() + timedelta(days=30)).date().isoformat(),
+        state=State.INACTIVE,
+    )
+
+
+@pytest.fixture
 def another_promotion(db):
     return Promotion.objects.create(
         name="promotion 2028",
@@ -226,7 +250,6 @@ def customer_promotion(db, customer, promotion):
     return CustomerPromotion.objects.create(
         customer=customer,
         promotion=promotion,
-        applied=True,
     )
 
 
@@ -235,7 +258,6 @@ def another_customer_promotion(db, another_customer, another_promotion):
     return CustomerPromotion.objects.create(
         customer=another_customer,
         promotion=another_promotion,
-        applied=False,
     )
 
 
@@ -867,6 +889,14 @@ def customer_list_promotions_url():
 def customer_promotion_assign_url():
     def _url(pk):
         return reverse("customers-add-promotion", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def customer_promotion_apply_url():
+    def _url(pk):
+        return reverse("customer_promotions-apply", kwargs={"pk": pk})
 
     return _url
 

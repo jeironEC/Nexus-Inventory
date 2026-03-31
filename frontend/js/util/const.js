@@ -27,6 +27,11 @@ export const URL_CATEGORIES = "/v1/categories/";
 export const URL_ACTIVE_CATEGORIES = "/v1/categories/active/";
 export const URL_INACTIVE_CATEGORIES = "/v1/categories/inactive/";
 
+// URLS PRODUCTS
+export const URL_PRODUCTS = "/v1/products/";
+export const URL_ACTIVE_PRODUCTS = "/v1/products/active/";
+export const URL_INACTIVE_PRODUCTS = "/v1/products/inactive/";
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

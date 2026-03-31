@@ -40,6 +40,11 @@ export const URL_PRODUCT_INVENTORIES = `${URL_INVENTORIES}product/`;
 // URLS INVENTORY MOVEMENTS
 export const URL_INVENTORY_MOVEMENTS = "/v1/inventory_movements/";
 
+// URLS CUSTOMERS
+export const URL_CUSTOMERS = "/v1/customers/";
+export const URL_ACTIVE_CUSTOMERS = `${URL_CUSTOMERS}active/`;
+export const URL_INACTIVE_CUSTOMERS = `${URL_CUSTOMERS}inactive/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

@@ -50,6 +50,11 @@ export const URL_PROMOTIONS = "/v1/promotions/";
 export const URL_ACTIVE_PROMOTIONS = `${URL_PROMOTIONS}active/`;
 export const URL_INACTIVE_PROMOTIONS = `${URL_PROMOTIONS}inactive/`;
 
+// URLS SALES
+export const URL_SALES = "/v1/sales/";
+export const URL_COMPLETED_SALES = `${URL_SALES}completed/`;
+export const URL_CANCELED_SALES = `${URL_SALES}canceled/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

@@ -10,7 +10,7 @@ import {
     CSRFTOKEN_KEY
 } from "../util/const.js";
 
-export class AuthService {
+class AuthService {
     constructor() {
         this.api = new ApiClient(URL_BASE, {
             timeout: DEFAULT_TIMEOUT,

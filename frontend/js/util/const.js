@@ -55,6 +55,11 @@ export const URL_SALES = "/v1/sales/";
 export const URL_COMPLETED_SALES = `${URL_SALES}completed/`;
 export const URL_CANCELED_SALES = `${URL_SALES}canceled/`;
 
+// URLS INVOICES
+export const URL_INVOICES = "/v1/invoices/";
+export const URL_INVOICE_SALE = `${URL_INVOICES}sale/`;
+export const URL_INVOICE_PURCHASE = `${URL_SALES}purchase/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

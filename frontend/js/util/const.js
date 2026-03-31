@@ -32,6 +32,11 @@ export const URL_PRODUCTS = "/v1/products/";
 export const URL_ACTIVE_PRODUCTS = "/v1/products/active/";
 export const URL_INACTIVE_PRODUCTS = "/v1/products/inactive/";
 
+// URLS INVENTORIES
+export const URL_INVENTORIES = "/v1/inventories/";
+export const URL_LOW_INVENTORIES = "/v1/inventories/low-stock/";
+export const URL_PRODUCT_INVENTORIES = "/v1/inventories/product/";
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

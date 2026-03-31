@@ -660,6 +660,30 @@ class InvoiceViewSet(
         serializer = InvoiceSerializer(invoice, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["get"], url_path="sale/(?P<sale_id>[^/.]+)")
+    def invoice_by_sale(self, request, sale_id=None):
+        try:
+            invoice = self.get_queryset().get(sale_id=sale_id)
+            serializer = self.get_serializer(invoice)
+            return Response(serializer.data)
+        except Invoice.DoesNotExist:
+            return Response(
+                {"detail": "Invoice not found for this sale"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    @action(detail=False, methods=["get"], url_path="purchase/(?P<purchase_id>[^/.]+)")
+    def invoice_by_purchase(self, request, purchase_id=None):
+        try:
+            invoice = self.get_queryset().get(purchase_id=purchase_id)
+            serializer = self.get_serializer(invoice)
+            return Response(serializer.data)
+        except Invoice.DoesNotExist:
+            return Response(
+                {"detail": "Invoice not found for this purchase"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
 
 class SupplierViewSet(
     StrictFilterMixin,

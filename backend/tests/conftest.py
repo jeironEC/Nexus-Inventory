@@ -21,6 +21,7 @@ from nexus_inventory_backend.db.models import (
     Promotion,
     CustomerPromotion,
     Sale,
+    SaleDetail,
     Invoice,
     Supplier,
     Purchase,
@@ -29,6 +30,9 @@ from nexus_inventory_backend.db.models import (
     PurchaseReturn,
     PurchaseReturnDetail,
 )
+
+# Enums
+from nexus_inventory_backend.db.enums import InvoiceState, InvoiceType
 
 # Datetime
 from datetime import timedelta
@@ -263,8 +267,6 @@ def another_sale(db, another_customer, normal_user):
 
 @pytest.fixture
 def sale_detail(db, sale, product, inventory_movements):
-    from nexus_inventory_backend.db.models import SaleDetail
-
     return SaleDetail.objects.create(
         sale=sale,
         product=product,
@@ -277,8 +279,6 @@ def sale_detail(db, sale, product, inventory_movements):
 
 @pytest.fixture
 def another_sale_detail(db, another_sale, another_product, another_inventory_movements):
-    from nexus_inventory_backend.db.models import SaleDetail
-
     return SaleDetail.objects.create(
         sale=another_sale,
         product=another_product,
@@ -291,11 +291,10 @@ def another_sale_detail(db, another_sale, another_product, another_inventory_mov
 
 @pytest.fixture
 def invoice_sale(db, sale, admin_user):
-    from nexus_inventory_backend.db.enums import InvoiceState
-
     return Invoice.objects.create(
         sale=sale,
         number_invoice=f"SINV-{sale.pk:08d}",
+        invoice_type=InvoiceType.SALE,
         state=InvoiceState.ISSUED,
         created_by=admin_user,
     )
@@ -303,11 +302,10 @@ def invoice_sale(db, sale, admin_user):
 
 @pytest.fixture
 def invoice_purchase(db, purchase, admin_user):
-    from nexus_inventory_backend.db.enums import InvoiceState
-
     return Invoice.objects.create(
         purchase=purchase,
         number_invoice=f"PINV-{purchase.pk:08d}",
+        invoice_type=InvoiceType.PURCHASE,
         state=InvoiceState.ISSUED,
         created_by=admin_user,
     )
@@ -919,6 +917,22 @@ def invoices_url():
 def invoice_detail_url():
     def _url(pk):
         return reverse("invoices-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def invoice_by_sale_url():
+    def _url(pk):
+        return reverse("invoices-invoice-by-sale", kwargs={"sale_id": pk})
+
+    return _url
+
+
+@pytest.fixture
+def invoice_by_purchase_url():
+    def _url(pk):
+        return reverse("invoices-invoice-by-purchase", kwargs={"purchase_id": pk})
 
     return _url
 

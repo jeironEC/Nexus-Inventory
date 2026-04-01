@@ -76,14 +76,17 @@ class AuthService {
         try {
             const response = await this.api.post(URL_AUTH_TOKEN, { email, password });
 
-            this.setToken(response.access);
-            this.setRefreshToken(response.refresh);
+            const accessToken = response.data.access;
+            const refreshToken = response.data.refresh;
+
+            this.setToken(accessToken);
+            this.setRefreshToken(refreshToken);
             this.setCsrfToken(this.getCsrfToken());
 
-            localStorage.setItem(TOKEN_KEY, response.access);
-            localStorage.setItem(REFRESH_KEY, response.refresh);
+            localStorage.setItem(TOKEN_KEY, accessToken);
+            localStorage.setItem(REFRESH_KEY, refreshToken);
 
-            return { success: true, user: this.getUserFromToken(response.access) };
+            return { success: true, user: this.getUserFromToken(accessToken) }
         } catch (error) {
             throw error;
         }
@@ -106,10 +109,11 @@ class AuthService {
         try {
             const response = await this.api.post(URL_AUTH_REFRESH, { refresh });
 
-            this.setToken(response.access);
-            localStorage.setItem(TOKEN_KEY, response.access);
+            const accessToken = response.data.access;
+            this.setToken(accessToken);
+            localStorage.setItem(TOKEN_KEY, accessToken);
 
-            return response.access;
+            return accessToken;
         } catch (error) {
             this.logout();
             throw error;

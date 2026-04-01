@@ -25,10 +25,11 @@ export class ApiClient {
         this.authToken = options.authToken || null;
         this.refreshToken = options.refreshToken || null;
         this.csrfToken = options.csrfToken || null;
-        this.refreshEndpoint = options.refreshEndpoint || `${URL_AUTH_REFRESH}`;
+        this.refreshEndpoint = options.refreshEndpoint || URL_AUTH_REFRESH;
         this.onUnauthorized = options.onUnauthorized || null;
         this.isRefreshing = false;
         this.subscribers = [];
+        this.pendingRequests = new Map();
     }
 
     setCsrfToken(token) {
@@ -113,6 +114,12 @@ export class ApiClient {
             retryRefresh = true,
         } = options;
 
+        const requestKey = `${method}:${endpoint}:${JSON.stringify(data || {})}`;
+
+        if (this.pendingRequests.has(requestKey)) {
+            return this.pendingRequests.get(requestKey);
+        }
+
         const needsCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
         const url = `${this.baseUrl}${endpoint}`;
         const config = {
@@ -126,6 +133,19 @@ export class ApiClient {
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        const fetchPromise = this._executeRequest(url, config, needsCsrf, retryRefresh, timeoutId, controller);
+
+        this.pendingRequests.set(requestKey, fetchPromise);
+
+        try {
+            return await fetchPromise;
+        } finally {
+            this.pendingRequests.delete(requestKey);
+        }
+    }
+
+    async _executeRequest(url, config, needsCsrf, retryRefresh, timeoutId, controller) {
         config.signal = controller.signal;
 
         try {
@@ -142,9 +162,11 @@ export class ApiClient {
                             'Authorization': `Bearer ${newToken}`,
                         },
                     };
+
                     if (needsCsrf && this.csrfToken) {
                         retryConfig.headers['X-CSRFTOKEN'] = this.csrfToken;
                     }
+
                     const retryResponse = await fetch(url, retryConfig);
 
                     return this.handleResponse(retryResponse);
@@ -179,15 +201,63 @@ export class ApiClient {
         }
 
         if (!response.ok) {
-            const message = data?.detail || data?.message || `HTTP error ${response.status}`;
+            const message = this.extractErrorMessage(data, response.status);
             throw new ApiClientError(message, response.status, data);
         }
 
-        if (response.status === 204) {
-            return { success: true };
+        const successResponse = {
+            success: true,
+            status: response.status,
+            message: this.getSuccessMessage(response.status),
+            data: data
+        };
+
+        if (response.status === 204 || !data) {
+            return { ...successResponse, data: null };
         }
 
-        return data;
+        return successResponse;
+    }
+
+    extractErrorMessage(data, status) {
+        if (!data) {
+            return `HTTP error ${status}`;
+        }
+
+        if (typeof data === 'string') {
+            return data;
+        }
+
+        if (data.detail) {
+            return data.detail;
+        }
+
+        if (data.message) {
+            return data.message;
+        }
+
+        if (data.errors && typeof data.errors === 'object') {
+            const firstError = Object.values(data.errors)[0];
+            if (Array.isArray(firstError)) {
+                return firstError[0];
+            }
+            return JSON.stringify(firstError);
+        }
+
+        if (data.non_field_errors) {
+            return data.non_field_errors[0];
+        }
+
+        return `HTTP error ${status}`;
+    }
+
+    getSuccessMessage(status) {
+        const messages = {
+            200: 'Operación exitosa',
+            201: 'Recurso creado correctamente',
+            204: 'Operación exitosa',
+        };
+        return messages[status] || 'Operación exitosa';
     }
 
     get(endpoint, options = {}) {

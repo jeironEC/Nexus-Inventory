@@ -1,6 +1,6 @@
 /**
  * ========================================
- * MÓDULO DE BASE DE API
+ * MÓDULO BASE DE API
  * ========================================
  * Gestión de comunicaciones con el backend
  * Utiliza fetch para las peticiones HTTP

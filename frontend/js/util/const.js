@@ -73,6 +73,11 @@ export const URL_CANCELED_PURCHASES = `${URL_PURCHASES}canceled/`;
 // URL CUSTOMER PROMOTIONS
 export const URL_CUSTOMER_PROMOTIONS = "/v1/customer_promotions/";
 
+// URLS SALES RETURNS
+export const URL_SALE_RETURNS = "/v1/sale-returns/";
+export const URL_COMPLETED_SALE_RETURNS = `${URL_SALE_RETURNS}completed/`;
+export const URL_CANCELED_SALE_RETURNS = `${URL_SALE_RETURNS}canceled/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

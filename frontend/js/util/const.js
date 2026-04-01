@@ -89,6 +89,11 @@ export const URL_REPORTS_SALES_BY_CUSTOMER = `${URL_REPORTS_SALES}by-customer/`;
 export const URL_REPORTS_SALES_BY_PAYMENT_METHOD = `${URL_REPORTS_SALES}by-payment-method/`;
 export const URL_REPORTS_SALES_BY_PERIOD = `${URL_REPORTS_SALES}by-period/`;
 
+// URLS PURCHASES REPORTS
+export const URL_REPORTS_PURCHASES = "/v1/reports/purchases/";
+export const URL_REPORTS_PURCHASES_BY_SUPPLIER = `${URL_REPORTS_PURCHASES}by-supplier/`;
+export const URL_REPORTS_PURCHASES_BY_PERIOD = `${URL_REPORTS_PURCHASES}by-period/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

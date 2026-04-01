@@ -83,6 +83,12 @@ export const URL_PURCHASE_RETURNS = "/v1/purchase-returns/";
 export const URL_COMPLETED_PURCHASE_RETURNS = `${URL_PURCHASE_RETURNS}completed/`;
 export const URL_CANCELED_PURCHASE_RETURNS = `${URL_PURCHASE_RETURNS}canceled/`;
 
+// URLS SALES REPORTS
+export const URL_REPORTS_SALES = "/v1/reports/sales/";
+export const URL_REPORTS_SALES_BY_CUSTOMER = `${URL_REPORTS_SALES}by-customer/`;
+export const URL_REPORTS_SALES_BY_PAYMENT_METHOD = `${URL_REPORTS_SALES}by-payment-method/`;
+export const URL_REPORTS_SALES_BY_PERIOD = `${URL_REPORTS_SALES}by-period/`;
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

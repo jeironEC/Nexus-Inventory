@@ -109,6 +109,11 @@ export const URL_REPORTS_INVOICES = "/v1/reports/invoices/";
 export const URL_REPORTS_INVOICES_SALES = "/v1/reports/invoices/sales/";
 export const URL_REPORTS_INVOICES_PURCHASES = "/v1/reports/invoices/purchases/";
 
+// URLS INVENTORIES REPORTS
+export const URL_REPORTS_INVENTORIES = "/v1/reports/inventory/";
+export const URL_REPORTS_INVENTORIES_LOW_STOCK = "/v1/reports/inventory/low-stock/";
+export const URL_REPORTS_INVENTORIES_MOVEMENTS = "/v1/reports/inventory/movements/";
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

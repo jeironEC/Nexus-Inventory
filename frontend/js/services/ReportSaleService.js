@@ -12,19 +12,19 @@ class ReportSaleService {
     }
 
     async getReportsSales() {
-        return this.api.get(`${URL_REPORTS_SALES}`);
+        return this.api.get(URL_REPORTS_SALES);
     }
 
     async getReportsSalesByCustomer() {
-        return this.api.get(`${URL_REPORTS_SALES_BY_CUSTOMER}`);
+        return this.api.get(URL_REPORTS_SALES_BY_CUSTOMER);
     }
 
     async getReportsSalesByPaymentMethod() {
-        return this.api.get(`${URL_REPORTS_SALES_BY_PAYMENT_METHOD}`);
+        return this.api.get(URL_REPORTS_SALES_BY_PAYMENT_METHOD);
     }
 
     async getReportsSalesByPeriod() {
-        return this.api.get(`${URL_REPORTS_SALES_BY_PERIOD}`);
+        return this.api.get(URL_REPORTS_SALES_BY_PERIOD);
     }
 }
 

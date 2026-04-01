@@ -11,15 +11,15 @@ class ReportPurchaseService {
     }
 
     async getReportsPurchases() {
-        return this.api.get(`${URL_REPORTS_PURCHASES}`);
+        return this.api.get(URL_REPORTS_PURCHASES);
     }
 
     async getReportsPurchasesBySupplier() {
-        return this.api.get(`${URL_REPORTS_PURCHASES_BY_SUPPLIER}`);
+        return this.api.get(URL_REPORTS_PURCHASES_BY_SUPPLIER);
     }
 
     async getReportsPurchasesByPeriod() {
-        return this.api.get(`${URL_REPORTS_PURCHASES_BY_PERIOD}`);
+        return this.api.get(URL_REPORTS_PURCHASES_BY_PERIOD);
     }
 }
 

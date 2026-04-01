@@ -73,10 +73,15 @@ export const URL_CANCELED_PURCHASES = `${URL_PURCHASES}canceled/`;
 // URL CUSTOMER PROMOTIONS
 export const URL_CUSTOMER_PROMOTIONS = "/v1/customer_promotions/";
 
-// URLS SALES RETURNS
+// URLS SALE RETURNS
 export const URL_SALE_RETURNS = "/v1/sale-returns/";
 export const URL_COMPLETED_SALE_RETURNS = `${URL_SALE_RETURNS}completed/`;
 export const URL_CANCELED_SALE_RETURNS = `${URL_SALE_RETURNS}canceled/`;
+
+// URLS PURCHASE RETURNS
+export const URL_PURCHASE_RETURNS = "/v1/purchase-returns/";
+export const URL_COMPLETED_PURCHASE_RETURNS = `${URL_PURCHASE_RETURNS}completed/`;
+export const URL_CANCELED_PURCHASE_RETURNS = `${URL_PURCHASE_RETURNS}canceled/`;
 
 // KEYS
 export const TOKEN_KEY = 'auth_token';

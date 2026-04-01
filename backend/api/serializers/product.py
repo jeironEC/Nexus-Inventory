@@ -2,7 +2,7 @@
 from rest_framework import serializers
 
 # Models
-from nexus_inventory_backend.db.models import Category, Product
+from nexus_inventory_backend.db.models import Category, Product, Inventory
 
 # Serializers
 from .category import CategorySerializer
@@ -79,3 +79,10 @@ class ProductSerializer(AuditFieldsMixin):
             )
 
         return data
+
+    def create(self, validated_data):
+        product = super().create(validated_data)
+
+        Inventory.objects.create(product=product, quantity=0)
+
+        return product

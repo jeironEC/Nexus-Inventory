@@ -13,6 +13,7 @@ from nexus_inventory_backend.db.models import (
     InventoryMovement,
     Supplier,
     Invoice,
+    Inventory,
 )
 
 # Enums
@@ -69,6 +70,12 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
                 movement_type=MovementType.IN,
                 quantity=quantity,
             )
+
+            inventory, created = Inventory.objects.get_or_create(
+                product=product, defaults={"quantity": 0}
+            )
+            inventory.quantity += quantity
+            inventory.save()
 
             PurchaseDetail.objects.create(
                 purchase=purchase,

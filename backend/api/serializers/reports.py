@@ -10,6 +10,20 @@ class SaleReportSerializer(serializers.Serializer):
     canceled_sales = serializers.IntegerField()
 
 
+class SaleReturnReportSerializer(serializers.Serializer):
+    total_returns = serializers.IntegerField()
+    completed_returns = serializers.IntegerField()
+    canceled_returns = serializers.IntegerField()
+    total_refund_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
+class PurchaseReturnReportSerializer(serializers.Serializer):
+    total_returns = serializers.IntegerField()
+    completed_returns = serializers.IntegerField()
+    canceled_returns = serializers.IntegerField()
+    total_refund_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
 class SaleByCustomerSerializer(serializers.Serializer):
     customer_id = serializers.IntegerField(allow_null=True)
     customer_name = serializers.CharField(allow_null=True)

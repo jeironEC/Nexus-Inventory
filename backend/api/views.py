@@ -62,6 +62,8 @@ from .serializers.reports import (
     CustomerTopSerializer,
     CustomerPromotionReportSerializer,
     InvoiceReportSerializer,
+    SaleReturnReportSerializer,
+    PurchaseReturnReportSerializer,
 )
 
 # Filters
@@ -1611,7 +1613,7 @@ class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
 
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses=SaleReportSerializer)
+    @extend_schema(responses=SaleReturnReportSerializer)
     @action(detail=False, methods=["get"], url_path="sale-returns")
     def sale_returns(self, request):
         qs = self.get_filtered_queryset(
@@ -1625,7 +1627,7 @@ class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                 "total_amount", filter=Q(state=OperationState.COMPLETED)
             ),
         )
-        serializer = SaleReportSerializer(data)
+        serializer = SaleReturnReportSerializer(data)
         return Response(serializer.data)
 
 
@@ -1637,7 +1639,7 @@ class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
 
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses=PurchaseReportSerializer)
+    @extend_schema(responses=PurchaseReturnReportSerializer)
     @action(detail=False, methods=["get"], url_path="purchase-returns")
     def purchase_returns(self, request):
         qs = self.get_filtered_queryset(
@@ -1651,5 +1653,5 @@ class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                 "total_amount", filter=Q(state=OperationState.COMPLETED)
             ),
         )
-        serializer = PurchaseReportSerializer(data)
+        serializer = PurchaseReturnReportSerializer(data)
         return Response(serializer.data)

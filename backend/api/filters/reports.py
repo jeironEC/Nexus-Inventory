@@ -91,3 +91,26 @@ class InvoiceReportFilter(django_filters.FilterSet):
         field_name="created_at__date", lookup_expr="lte"
     )
     state = django_filters.CharFilter(field_name="state", lookup_expr="iexact")
+    invoice_type = django_filters.CharFilter(
+        field_name="invoice_type", lookup_expr="iexact"
+    )
+
+
+class SaleReturnReportFilter(django_filters.FilterSet):
+    date_from = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="gte"
+    )
+    date_to = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="lte"
+    )
+    state = django_filters.CharFilter(field_name="state", lookup_expr="iexact")
+
+
+class PurchaseReturnReportFilter(django_filters.FilterSet):
+    date_from = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="gte"
+    )
+    date_to = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="lte"
+    )
+    state = django_filters.CharFilter(field_name="state", lookup_expr="iexact")

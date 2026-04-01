@@ -36,6 +36,8 @@ from .views import (
     ProductReportViewSet,
     CustomerReportViewSet,
     InvoiceReportViewSet,
+    SaleReturnReportViewSet,
+    PurchaseReturnReportViewSet,
 )
 
 router = SimpleRouter()
@@ -82,6 +84,10 @@ router.register("reports", InventoryReportViewSet, basename="inventory-reports")
 router.register("reports", ProductReportViewSet, basename="product-reports")
 router.register("reports", CustomerReportViewSet, basename="customer-reports")
 router.register("reports", InvoiceReportViewSet, basename="invoice-reports")
+router.register("reports", SaleReturnReportViewSet, basename="sale-return-reports")
+router.register(
+    "reports", PurchaseReturnReportViewSet, basename="purchase-return-reports"
+)
 
 urlpatterns = [
     path("health/", healthcheck, name="health"),

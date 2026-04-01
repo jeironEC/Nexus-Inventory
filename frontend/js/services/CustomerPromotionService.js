@@ -2,8 +2,8 @@ import { authService } from "./AuthService.js";
 import { URL_CUSTOMER_PROMOTIONS } from "../util/const.js";
 
 class CustomerPromotionService {
-    constructor() {
-        this.api = authService.getApiClient();
+    get api() {
+        return authService.getApiClient();
     }
 
     async getAllCustomerPromotions(filtros = {}) {

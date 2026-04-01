@@ -6,8 +6,8 @@ import {
 } from "../util/const.js";
 
 class ReportInvoiceService {
-    constructor() {
-        this.api = authService.getApiClient();
+    get api() {
+        return authService.getApiClient();
     }
 
     async getReportsInvoices() {

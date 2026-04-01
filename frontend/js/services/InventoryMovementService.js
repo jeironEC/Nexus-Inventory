@@ -4,8 +4,8 @@ import {
 } from "../util/const.js";
 
 class InventoryMovementService {
-    constructor() {
-        this.api = authService.getApiClient();
+    get api() {
+        return authService.getApiClient();
     }
 
     async getAllInventoryMovements(filtros = {}) {

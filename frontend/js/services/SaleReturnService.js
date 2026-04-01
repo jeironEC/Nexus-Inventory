@@ -6,8 +6,8 @@ import {
 } from "../util/const.js";
 
 class SaleReturnService {
-    constructor() {
-        this.api = authService.getApiClient();
+    get api() {
+        return authService.getApiClient();
     }
 
     async getAllSaleReturns(filtros = {}) {

@@ -95,8 +95,14 @@ export const URL_REPORTS_PURCHASES_BY_SUPPLIER = `${URL_REPORTS_PURCHASES}by-sup
 export const URL_REPORTS_PURCHASES_BY_PERIOD = `${URL_REPORTS_PURCHASES}by-period/`;
 
 // URLS CUSTOMERS REPORTS
-export const URL_REPORTS_CUSTOMERS_PROMOTIONS = "/v1/reports/customers/promotions";
-export const URL_REPORTS_CUSTOMERS_TOP = "/v1/reports/customers/top";
+export const URL_REPORTS_CUSTOMERS_PROMOTIONS = "/v1/reports/customers/promotions/";
+export const URL_REPORTS_CUSTOMERS_TOP = "/v1/reports/customers/top/";
+
+// URLS PRODUCTS REPORTS
+export const URL_REPORTS_PRODUCTS_BY_CATEGORY = "/v1/reports/products/by-category/";
+export const URL_REPORTS_PRODUCTS_LOW_SELLING = "/v1/reports/products/low-selling/";
+export const URL_REPORTS_PRODUCTS_MOST_PURCHASED = "/v1/reports/products/most-purchased/";
+export const URL_REPORTS_PRODUCTS_TOP_SELLING = "/v1/reports/products/top-selling/";
 
 // KEYS
 export const TOKEN_KEY = 'auth_token';

@@ -10,11 +10,11 @@ class ReportCustomerService {
     }
 
     async getReportsCustomersPromotion() {
-        return this.api.get(`${URL_REPORTS_CUSTOMERS_PROMOTIONS}`);
+        return this.api.get(URL_REPORTS_CUSTOMERS_PROMOTIONS);
     }
 
     async getReportsCustomersTop() {
-        return this.api.get(`${URL_REPORTS_CUSTOMERS_TOP}`);
+        return this.api.get(URL_REPORTS_CUSTOMERS_TOP);
     }
 }
 

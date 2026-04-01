@@ -62,6 +62,8 @@ from .serializers.reports import (
     CustomerTopSerializer,
     CustomerPromotionReportSerializer,
     InvoiceReportSerializer,
+    SaleReturnReportSerializer,
+    PurchaseReturnReportSerializer,
 )
 
 # Filters
@@ -127,6 +129,8 @@ from .filters.reports import (
     ProductReportFilter,
     CustomerReportFilter,
     InvoiceReportFilter,
+    SaleReturnReportFilter,
+    PurchaseReturnReportFilter,
 )
 
 # Models
@@ -166,7 +170,7 @@ from .mixins.report_filter import ReportFilterMixin
 from .mixins.audit_fields import AuditUserMixin, AuditOperationUserMixin
 
 # Enums
-from nexus_inventory_backend.db.enums import OperationState, InvoiceState
+from nexus_inventory_backend.db.enums import OperationState, InvoiceState, InvoiceType
 
 # Utils
 from api.utils import get_trunc_func
@@ -872,6 +876,240 @@ class PurchaseDetailViewSet(
         )
 
 
+class SaleReturnViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    OperationStateMixin,
+    NoPutMixin,
+    AuditOperationUserMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las devoluciones de ventas del sistema.
+    Permite cancelar devoluciones mediante el endpoint /cancel.
+    """
+
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = SaleReturnAdminFilter
+    user_filterset_class = SaleReturnFilter
+
+    queryset = (
+        SaleReturn.objects.select_related(
+            "sale",
+            "sale__customer",
+            "user",
+            "updated_by",
+            "deleted_by",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return SaleReturnCreateSerializer
+        if self.action == "cancel":
+            return EmptySerializer
+        return SaleReturnReadSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.action == "create":
+            context["sale_id"] = self.request.data.get("sale_id")
+        return context
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_name="cancel",
+        serializer_class=EmptySerializer,
+    )
+    def cancel(self, request, pk=None):
+        sale_return = self.get_object()
+
+        if sale_return.state == OperationState.CANCELED:
+            return Response(
+                {"detail": "Sale return is already canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        sale_return.state = OperationState.CANCELED
+        sale_return.updated_by = request.user
+        sale_return.save(update_fields=["state", "updated_by", "updated_at"])
+
+        serializer = SaleReturnReadSerializer(sale_return, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="sale_returns_pk", type=int, location=OpenApiParameter.PATH
+            )
+        ]
+    ),
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="sale_returns_pk", type=int, location=OpenApiParameter.PATH
+            )
+        ]
+    ),
+)
+class SaleReturnDetailViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los detalles de una devolución de venta.
+    """
+
+    serializer_class = SaleReturnDetailReadSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = SaleReturnDetailAdminFilter
+    user_filterset_class = SaleReturnDetailFilter
+    http_method_names = ["get"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return SaleReturnDetail.objects.none()
+
+        sale_return_pk = self.kwargs.get("sale_returns_pk")
+        if not SaleReturn.objects.filter(pk=sale_return_pk).exists():
+            raise NotFound(f"SaleReturn {sale_return_pk} not found.")
+
+        return (
+            SaleReturnDetail.objects.select_related(
+                "product",
+                "product__category",
+                "inventory_movement",
+            )
+            .filter(sale_return__id=sale_return_pk)
+            .order_by("created_at")
+        )
+
+
+class PurchaseReturnViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    OperationStateMixin,
+    NoPutMixin,
+    AuditOperationUserMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las devoluciones de compras del sistema.
+    Permite cancelar devoluciones mediante el endpoint /cancel.
+    """
+
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = PurchaseReturnAdminFilter
+    user_filterset_class = PurchaseReturnFilter
+
+    queryset = (
+        PurchaseReturn.objects.select_related(
+            "purchase",
+            "purchase__supplier",
+            "user",
+            "updated_by",
+            "deleted_by",
+        )
+        .all()
+        .order_by("-created_at")
+    )
+
+    def get_serializer_class(self):
+        if self.action in ["create", "partial_update"]:
+            return PurchaseReturnCreateSerializer
+        if self.action == "cancel":
+            return EmptySerializer
+        return PurchaseReturnReadSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.action == "create":
+            context["purchase_id"] = self.request.data.get("purchase_id")
+        return context
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_name="cancel",
+        serializer_class=EmptySerializer,
+    )
+    def cancel(self, request, pk=None):
+        purchase_return = self.get_object()
+
+        if purchase_return.state == OperationState.CANCELED:
+            return Response(
+                {"detail": "Purchase return is already canceled."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        purchase_return.state = OperationState.CANCELED
+        purchase_return.updated_by = request.user
+        purchase_return.save(update_fields=["state", "updated_by", "updated_at"])
+
+        serializer = PurchaseReturnReadSerializer(
+            purchase_return, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="purchase_returns_pk", type=int, location=OpenApiParameter.PATH
+            )
+        ]
+    ),
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="purchase_returns_pk", type=int, location=OpenApiParameter.PATH
+            )
+        ]
+    ),
+)
+class PurchaseReturnDetailViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona los detalles de una devolución de compra.
+    """
+
+    serializer_class = PurchaseReturnDetailReadSerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = PurchaseReturnDetailAdminFilter
+    user_filterset_class = PurchaseReturnDetailFilter
+    http_method_names = ["get"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return PurchaseReturnDetail.objects.none()
+
+        purchase_return_pk = self.kwargs.get("purchase_returns_pk")
+        if not PurchaseReturn.objects.filter(pk=purchase_return_pk).exists():
+            raise NotFound(f"PurchaseReturn {purchase_return_pk} not found.")
+
+        return (
+            PurchaseReturnDetail.objects.select_related(
+                "product",
+                "product__category",
+                "inventory_movement",
+            )
+            .filter(purchase_return__id=purchase_return_pk)
+            .order_by("created_at")
+        )
+
+
 class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
     Expone reportes relacionados con las ventas del sistema.
@@ -1317,6 +1555,7 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
     Expone reportes relacionados con las facturas del sistema.
     Incluye resumen de facturas emitidas, canceladas y con PDF generado.
+    Incluye reportes específicos de facturas de ventas y compras.
     """
 
     permission_classes = [IsAuthenticated]
@@ -1334,236 +1573,85 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         serializer = InvoiceReportSerializer(data)
         return Response(serializer.data)
 
+    @extend_schema(responses=InvoiceReportSerializer)
+    @action(detail=False, methods=["get"], url_path="invoices/sales")
+    def invoices_sales(self, request):
+        qs = self.get_filtered_queryset(
+            Invoice.objects.filter(invoice_type=InvoiceType.SALE), InvoiceReportFilter
+        )
+        data = qs.aggregate(
+            total_invoices=Count("id"),
+            issued_invoices=Count("id", filter=Q(state=InvoiceState.ISSUED)),
+            canceled_invoices=Count("id", filter=Q(state=InvoiceState.CANCELED)),
+            pdf_generated=Count("id", filter=Q(pdf_generated=True)),
+        )
+        serializer = InvoiceReportSerializer(data)
+        return Response(serializer.data)
 
-class SaleReturnViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    OperationStateMixin,
-    NoPutMixin,
-    AuditOperationUserMixin,
-    SoftDeleteQuerysetMixin,
-    viewsets.ModelViewSet,
-):
+    @extend_schema(responses=InvoiceReportSerializer)
+    @action(detail=False, methods=["get"], url_path="invoices/purchases")
+    def invoices_purchases(self, request):
+        qs = self.get_filtered_queryset(
+            Invoice.objects.filter(invoice_type=InvoiceType.PURCHASE),
+            InvoiceReportFilter,
+        )
+        data = qs.aggregate(
+            total_invoices=Count("id"),
+            issued_invoices=Count("id", filter=Q(state=InvoiceState.ISSUED)),
+            canceled_invoices=Count("id", filter=Q(state=InvoiceState.CANCELED)),
+            pdf_generated=Count("id", filter=Q(pdf_generated=True)),
+        )
+        serializer = InvoiceReportSerializer(data)
+        return Response(serializer.data)
+
+
+class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
-    Gestiona las devoluciones de ventas del sistema.
-    Permite cancelar devoluciones mediante el endpoint /cancel.
+    Expone reportes relacionados con las devoluciones de ventas.
+    Incluye resumen general, devoluciones canceladas y completadas.
     """
 
     permission_classes = [IsAuthenticated]
-    admin_filterset_class = SaleReturnAdminFilter
-    user_filterset_class = SaleReturnFilter
 
-    queryset = (
-        SaleReturn.objects.select_related(
-            "sale",
-            "sale__customer",
-            "user",
-            "updated_by",
-            "deleted_by",
+    @extend_schema(responses=SaleReturnReportSerializer)
+    @action(detail=False, methods=["get"], url_path="sale-returns")
+    def sale_returns(self, request):
+        qs = self.get_filtered_queryset(
+            SaleReturn.objects.all(), SaleReturnReportFilter
         )
-        .all()
-        .order_by("-created_at")
-    )
-
-    def get_serializer_class(self):
-        if self.action in ["create", "partial_update"]:
-            return SaleReturnCreateSerializer
-        if self.action == "cancel":
-            return EmptySerializer
-        return SaleReturnReadSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.action == "create":
-            context["sale_id"] = self.request.data.get("sale_id")
-        return context
-
-    @action(
-        detail=True,
-        methods=["patch"],
-        url_name="cancel",
-        serializer_class=EmptySerializer,
-    )
-    def cancel(self, request, pk=None):
-        sale_return = self.get_object()
-
-        if sale_return.state == OperationState.CANCELED:
-            return Response(
-                {"detail": "Sale return is already canceled."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        sale_return.state = OperationState.CANCELED
-        sale_return.updated_by = request.user
-        sale_return.save(update_fields=["state", "updated_by", "updated_at"])
-
-        serializer = SaleReturnReadSerializer(sale_return, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="sale_returns_pk", type=int, location=OpenApiParameter.PATH
-            )
-        ]
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="sale_returns_pk", type=int, location=OpenApiParameter.PATH
-            )
-        ]
-    ),
-)
-class SaleReturnDetailViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    viewsets.ModelViewSet,
-):
-    """
-    Gestiona los detalles de una devolución de venta.
-    """
-
-    serializer_class = SaleReturnDetailReadSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = SaleReturnDetailAdminFilter
-    user_filterset_class = SaleReturnDetailFilter
-    http_method_names = ["get"]
-
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return SaleReturnDetail.objects.none()
-
-        sale_return_pk = self.kwargs.get("sale_returns_pk")
-        if not SaleReturn.objects.filter(pk=sale_return_pk).exists():
-            raise NotFound(f"SaleReturn {sale_return_pk} not found.")
-
-        return (
-            SaleReturnDetail.objects.select_related(
-                "product",
-                "product__category",
-                "inventory_movement",
-            )
-            .filter(sale_return__id=sale_return_pk)
-            .order_by("created_at")
+        data = qs.aggregate(
+            total_returns=Count("id"),
+            completed_returns=Count("id", filter=Q(state=OperationState.COMPLETED)),
+            canceled_returns=Count("id", filter=Q(state=OperationState.CANCELED)),
+            total_refund_amount=Sum(
+                "total_amount", filter=Q(state=OperationState.COMPLETED)
+            ),
         )
+        serializer = SaleReturnReportSerializer(data)
+        return Response(serializer.data)
 
 
-class PurchaseReturnViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    OperationStateMixin,
-    NoPutMixin,
-    AuditOperationUserMixin,
-    SoftDeleteQuerysetMixin,
-    viewsets.ModelViewSet,
-):
+class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
-    Gestiona las devoluciones de compras del sistema.
-    Permite cancelar devoluciones mediante el endpoint /cancel.
+    Expone reportes relacionados con las devoluciones de compras.
+    Incluye resumen general, devoluciones canceladas y completadas.
     """
 
     permission_classes = [IsAuthenticated]
-    admin_filterset_class = PurchaseReturnAdminFilter
-    user_filterset_class = PurchaseReturnFilter
 
-    queryset = (
-        PurchaseReturn.objects.select_related(
-            "purchase",
-            "purchase__supplier",
-            "user",
-            "updated_by",
-            "deleted_by",
+    @extend_schema(responses=PurchaseReturnReportSerializer)
+    @action(detail=False, methods=["get"], url_path="purchase-returns")
+    def purchase_returns(self, request):
+        qs = self.get_filtered_queryset(
+            PurchaseReturn.objects.all(), PurchaseReturnReportFilter
         )
-        .all()
-        .order_by("-created_at")
-    )
-
-    def get_serializer_class(self):
-        if self.action in ["create", "partial_update"]:
-            return PurchaseReturnCreateSerializer
-        if self.action == "cancel":
-            return EmptySerializer
-        return PurchaseReturnReadSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        if self.action == "create":
-            context["purchase_id"] = self.request.data.get("purchase_id")
-        return context
-
-    @action(
-        detail=True,
-        methods=["patch"],
-        url_name="cancel",
-        serializer_class=EmptySerializer,
-    )
-    def cancel(self, request, pk=None):
-        purchase_return = self.get_object()
-
-        if purchase_return.state == OperationState.CANCELED:
-            return Response(
-                {"detail": "Purchase return is already canceled."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        purchase_return.state = OperationState.CANCELED
-        purchase_return.updated_by = request.user
-        purchase_return.save(update_fields=["state", "updated_by", "updated_at"])
-
-        serializer = PurchaseReturnReadSerializer(
-            purchase_return, context={"request": request}
+        data = qs.aggregate(
+            total_returns=Count("id"),
+            completed_returns=Count("id", filter=Q(state=OperationState.COMPLETED)),
+            canceled_returns=Count("id", filter=Q(state=OperationState.CANCELED)),
+            total_refund_amount=Sum(
+                "total_amount", filter=Q(state=OperationState.COMPLETED)
+            ),
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="purchase_returns_pk", type=int, location=OpenApiParameter.PATH
-            )
-        ]
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="purchase_returns_pk", type=int, location=OpenApiParameter.PATH
-            )
-        ]
-    ),
-)
-class PurchaseReturnDetailViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    viewsets.ModelViewSet,
-):
-    """
-    Gestiona los detalles de una devolución de compra.
-    """
-
-    serializer_class = PurchaseReturnDetailReadSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = PurchaseReturnDetailAdminFilter
-    user_filterset_class = PurchaseReturnDetailFilter
-    http_method_names = ["get"]
-
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return PurchaseReturnDetail.objects.none()
-
-        purchase_return_pk = self.kwargs.get("purchase_returns_pk")
-        if not PurchaseReturn.objects.filter(pk=purchase_return_pk).exists():
-            raise NotFound(f"PurchaseReturn {purchase_return_pk} not found.")
-
-        return (
-            PurchaseReturnDetail.objects.select_related(
-                "product",
-                "product__category",
-                "inventory_movement",
-            )
-            .filter(purchase_return__id=purchase_return_pk)
-            .order_by("created_at")
-        )
+        serializer = PurchaseReturnReportSerializer(data)
+        return Response(serializer.data)

@@ -417,3 +417,102 @@ class TestInvoiceReportViewSet:
     ):
         response = api_client.get(url_reports_invoices)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+class TestInvoiceReportViewSetSalesAndPurchases:
+    def test_invoices_sales_report_returns_200(
+        self, api_client_auth, url_reports_invoices_sales
+    ):
+        response = api_client_auth.get(url_reports_invoices_sales)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_invoices_sales_report_returns_only_sale_invoices(
+        self,
+        api_client_auth,
+        invoice_sale,
+        invoice_purchase,
+        url_reports_invoices_sales,
+    ):
+        response = api_client_auth.get(url_reports_invoices_sales)
+        assert response.data["total_invoices"] == 1
+
+    def test_invoices_purchases_report_returns_200(
+        self, api_client_auth, url_reports_invoices_purchases
+    ):
+        response = api_client_auth.get(url_reports_invoices_purchases)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_invoices_purchases_report_returns_only_purchase_invoices(
+        self,
+        api_client_auth,
+        invoice_sale,
+        invoice_purchase,
+        url_reports_invoices_purchases,
+    ):
+        response = api_client_auth.get(url_reports_invoices_purchases)
+        assert response.data["total_invoices"] == 1
+
+    def test_invoices_sales_unauthenticated_returns_401(
+        self, api_client, url_reports_invoices_sales
+    ):
+        response = api_client.get(url_reports_invoices_sales)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_invoices_purchases_unauthenticated_returns_401(
+        self, api_client, url_reports_invoices_purchases
+    ):
+        response = api_client.get(url_reports_invoices_purchases)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+class TestSaleReturnReportViewSet:
+    def test_sale_returns_report_returns_200(
+        self, api_client_auth, url_reports_sale_returns
+    ):
+        response = api_client_auth.get(url_reports_sale_returns)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_sale_returns_report_fields_present(
+        self, api_client_auth, url_reports_sale_returns
+    ):
+        response = api_client_auth.get(url_reports_sale_returns)
+        assert set(response.data.keys()) == {
+            "total_returns",
+            "completed_returns",
+            "canceled_returns",
+            "total_refund_amount",
+        }
+
+    def test_sale_returns_report_unauthenticated_returns_401(
+        self, api_client, url_reports_sale_returns
+    ):
+        response = api_client.get(url_reports_sale_returns)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+class TestPurchaseReturnReportViewSet:
+    def test_purchase_returns_report_returns_200(
+        self, api_client_auth, url_reports_purchase_returns
+    ):
+        response = api_client_auth.get(url_reports_purchase_returns)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_purchase_returns_report_fields_present(
+        self, api_client_auth, url_reports_purchase_returns
+    ):
+        response = api_client_auth.get(url_reports_purchase_returns)
+        assert set(response.data.keys()) == {
+            "total_returns",
+            "completed_returns",
+            "canceled_returns",
+            "total_refund_amount",
+        }
+
+    def test_purchase_returns_report_unauthenticated_returns_401(
+        self, api_client, url_reports_purchase_returns
+    ):
+        response = api_client.get(url_reports_purchase_returns)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

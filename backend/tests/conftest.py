@@ -1028,6 +1028,91 @@ def purchase_detail_item_url():
 
 
 @pytest.fixture
+def sale_returns_url():
+    return reverse("sale-returns-list")
+
+
+@pytest.fixture
+def sale_return_detail_url():
+    def _url(pk):
+        return reverse("sale-returns-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_return_cancel_url():
+    def _url(pk):
+        return reverse("sale-returns-cancel", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def sale_return_details_url():
+    def _url(sale_return_pk):
+        return reverse(
+            "sale-return-detail-list", kwargs={"sale_returns_pk": sale_return_pk}
+        )
+
+    return _url
+
+
+@pytest.fixture
+def sale_return_detail_item_url():
+    def _url(sale_return_pk, pk):
+        return reverse(
+            "sale-return-detail-detail",
+            kwargs={"sale_returns_pk": sale_return_pk, "pk": pk},
+        )
+
+    return _url
+
+
+@pytest.fixture
+def purchase_returns_url():
+    return reverse("purchase-returns-list")
+
+
+@pytest.fixture
+def purchase_return_detail_url():
+    def _url(pk):
+        return reverse("purchase-returns-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchase_return_cancel_url():
+    def _url(pk):
+        return reverse("purchase-returns-cancel", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def purchase_return_details_url():
+    def _url(purchase_return_pk):
+        return reverse(
+            "purchase-return-detail-list",
+            kwargs={"purchase_returns_pk": purchase_return_pk},
+        )
+
+    return _url
+
+
+@pytest.fixture
+def purchase_return_detail_item_url():
+    def _url(purchase_return_pk, pk):
+        return reverse(
+            "purchase-return-detail-detail",
+            kwargs={"purchase_returns_pk": purchase_return_pk, "pk": pk},
+        )
+
+    return _url
+
+
+@pytest.fixture
 def url_reports_sales():
     return reverse("sale-reports-sales")
 
@@ -1113,85 +1198,20 @@ def url_reports_invoices():
 
 
 @pytest.fixture
-def sale_returns_url():
-    return reverse("sale-returns-list")
+def url_reports_invoices_sales():
+    return reverse("invoice-reports-invoices-sales")
 
 
 @pytest.fixture
-def sale_return_detail_url():
-    def _url(pk):
-        return reverse("sale-returns-detail", kwargs={"pk": pk})
-
-    return _url
+def url_reports_invoices_purchases():
+    return reverse("invoice-reports-invoices-purchases")
 
 
 @pytest.fixture
-def sale_return_cancel_url():
-    def _url(pk):
-        return reverse("sale-returns-cancel", kwargs={"pk": pk})
-
-    return _url
+def url_reports_sale_returns():
+    return reverse("sale-return-reports-sale-returns")
 
 
 @pytest.fixture
-def sale_return_details_url():
-    def _url(sale_return_pk):
-        return reverse(
-            "sale-return-detail-list", kwargs={"sale_returns_pk": sale_return_pk}
-        )
-
-    return _url
-
-
-@pytest.fixture
-def sale_return_detail_item_url():
-    def _url(sale_return_pk, pk):
-        return reverse(
-            "sale-return-detail-detail",
-            kwargs={"sale_returns_pk": sale_return_pk, "pk": pk},
-        )
-
-    return _url
-
-
-@pytest.fixture
-def purchase_returns_url():
-    return reverse("purchase-returns-list")
-
-
-@pytest.fixture
-def purchase_return_detail_url():
-    def _url(pk):
-        return reverse("purchase-returns-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def purchase_return_cancel_url():
-    def _url(pk):
-        return reverse("purchase-returns-cancel", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def purchase_return_details_url():
-    def _url(purchase_return_pk):
-        return reverse(
-            "purchase-return-detail-list",
-            kwargs={"purchase_returns_pk": purchase_return_pk},
-        )
-
-    return _url
-
-
-@pytest.fixture
-def purchase_return_detail_item_url():
-    def _url(purchase_return_pk, pk):
-        return reverse(
-            "purchase-return-detail-detail",
-            kwargs={"purchase_returns_pk": purchase_return_pk, "pk": pk},
-        )
-
-    return _url
+def url_reports_purchase_returns():
+    return reverse("purchase-return-reports-purchase-returns")

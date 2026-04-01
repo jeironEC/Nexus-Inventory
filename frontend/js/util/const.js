@@ -94,6 +94,10 @@ export const URL_REPORTS_PURCHASES = "/v1/reports/purchases/";
 export const URL_REPORTS_PURCHASES_BY_SUPPLIER = `${URL_REPORTS_PURCHASES}by-supplier/`;
 export const URL_REPORTS_PURCHASES_BY_PERIOD = `${URL_REPORTS_PURCHASES}by-period/`;
 
+// URLS CUSTOMERS REPORTS
+export const URL_REPORTS_CUSTOMERS_PROMOTIONS = "/v1/reports/customers/promotions";
+export const URL_REPORTS_CUSTOMERS_TOP = "/v1/reports/customers/top";
+
 // KEYS
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_KEY = 'refresh_token';

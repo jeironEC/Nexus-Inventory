@@ -14,7 +14,7 @@ class ReportPurchaseService {
         return this.api.get(`${URL_REPORTS_PURCHASES}`);
     }
 
-    async getReportsSalesBySupplier() {
+    async getReportsPurchasesBySupplier() {
         return this.api.get(`${URL_REPORTS_PURCHASES_BY_SUPPLIER}`);
     }
 

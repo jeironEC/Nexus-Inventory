@@ -203,48 +203,22 @@ class TestFiltersInvoice:
         response = api_client_auth.get(invoices_url, {"pdf_generated": "true"})
         assert response.status_code == status.HTTP_200_OK
 
-
-@pytest.mark.django_db
-class TestInvoiceBySaleEndpoint:
-    def test_get_invoice_by_sale_returns_200(
-        self, api_client_auth, invoice_sale, invoice_by_sale_url
+    def test_invoices_filters_by_sale_id(
+        self, api_client_auth, invoices_url, invoice_sale, invoice_purchase
     ):
-        response = api_client_auth.get(invoice_by_sale_url(invoice_sale.sale.pk))
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data["invoice_type"] == "SALE"
+        response = api_client_auth.get(invoices_url, {"sale_id": invoice_sale.sale.pk})
+        assert len(response.data) == 1
+        assert response.data[0]["invoice_type"] == "SALE"
 
-    def test_get_invoice_by_sale_returns_404_when_not_found(
-        self, api_client_auth, invoice_by_sale_url
-    ):
-        response = api_client_auth.get(invoice_by_sale_url(99999))
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_get_invoice_by_sale_unauthenticated_returns_401(
-        self, api_client, invoice_sale, invoice_by_sale_url
-    ):
-        response = api_client.get(invoice_by_sale_url(invoice_sale.sale.pk))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
-class TestInvoiceByPurchaseEndpoint:
-    def test_get_invoice_by_purchase_returns_200(
-        self, api_client_auth, invoice_purchase, invoice_by_purchase_url
+    def test_invoices_filters_by_purchase_id(
+        self, api_client_auth, invoices_url, invoice_sale, invoice_purchase
     ):
         response = api_client_auth.get(
-            invoice_by_purchase_url(invoice_purchase.purchase.pk)
+            invoices_url, {"purchase_id": invoice_purchase.purchase.pk}
         )
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data["invoice_type"] == "PURCHASE"
+        assert len(response.data) == 1
+        assert response.data[0]["invoice_type"] == "PURCHASE"
 
-    def test_get_invoice_by_purchase_returns_404_when_not_found(
-        self, api_client_auth, invoice_by_purchase_url
-    ):
-        response = api_client_auth.get(invoice_by_purchase_url(99999))
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_get_invoice_by_purchase_unauthenticated_returns_401(
-        self, api_client, invoice_purchase, invoice_by_purchase_url
-    ):
-        response = api_client.get(invoice_by_purchase_url(invoice_purchase.purchase.pk))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    def test_invoices_filters_by_sale_id_not_found(self, api_client_auth, invoices_url):
+        response = api_client_auth.get(invoices_url, {"sale_id": 99999})
+        assert response.data == []

@@ -71,3 +71,9 @@ export { reportCustomerService } from './ReportCustomerService.js';
 
 // Reports - Invoices
 export { reportInvoiceService } from './ReportInvoiceService.js';
+
+// Report - Sales Returns
+export { reportSaleReturnService } from './ReportSaleReturnService.js';
+
+// Report - Purchases Returns
+export { reportPurchaseReturnService } from './ReportPurchaseReturnService.js';

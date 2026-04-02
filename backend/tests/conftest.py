@@ -827,13 +827,13 @@ def inventories_low_stock_url():
 
 @pytest.fixture
 def inventory_movements_url():
-    return reverse("inventory_movements-list")
+    return reverse("inventory-movements-list")
 
 
 @pytest.fixture
 def inventory_movements_detail_url():
     def _url(pk):
-        return reverse("inventory_movements-detail", kwargs={"pk": pk})
+        return reverse("inventory-movements-detail", kwargs={"pk": pk})
 
     return _url
 
@@ -866,13 +866,13 @@ def promotion_detail_url():
 
 @pytest.fixture
 def customer_promotions_url():
-    return reverse("customer_promotions-list")
+    return reverse("customer-promotions-list")
 
 
 @pytest.fixture
 def customer_promotion_detail_url():
     def _url(pk):
-        return reverse("customer_promotions-detail", kwargs={"pk": pk})
+        return reverse("customer-promotions-detail", kwargs={"pk": pk})
 
     return _url
 
@@ -896,7 +896,7 @@ def customer_promotion_assign_url():
 @pytest.fixture
 def customer_promotion_apply_url():
     def _url(pk):
-        return reverse("customer_promotions-apply", kwargs={"pk": pk})
+        return reverse("customer-promotions-apply", kwargs={"pk": pk})
 
     return _url
 
@@ -947,22 +947,6 @@ def invoices_url():
 def invoice_detail_url():
     def _url(pk):
         return reverse("invoices-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def invoice_by_sale_url():
-    def _url(pk):
-        return reverse("invoices-invoice-by-sale", kwargs={"sale_id": pk})
-
-    return _url
-
-
-@pytest.fixture
-def invoice_by_purchase_url():
-    def _url(pk):
-        return reverse("invoices-invoice-by-purchase", kwargs={"purchase_id": pk})
 
     return _url
 

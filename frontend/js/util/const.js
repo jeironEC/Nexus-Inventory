@@ -38,7 +38,7 @@ export const URL_LOW_INVENTORIES = `${URL_INVENTORIES}low-stock/`;
 export const URL_PRODUCT_INVENTORIES = `${URL_INVENTORIES}product/`;
 
 // URLS INVENTORY MOVEMENTS
-export const URL_INVENTORY_MOVEMENTS = "/v1/inventory_movements/";
+export const URL_INVENTORY_MOVEMENTS = "/v1/inventory-movements/";
 
 // URLS CUSTOMERS
 export const URL_CUSTOMERS = "/v1/customers/";
@@ -57,8 +57,6 @@ export const URL_CANCELED_SALES = `${URL_SALES}canceled/`;
 
 // URLS INVOICES
 export const URL_INVOICES = "/v1/invoices/";
-export const URL_INVOICE_SALE = `${URL_INVOICES}sale/`;
-export const URL_INVOICE_PURCHASE = `${URL_SALES}purchase/`;
 
 // URLS SUPPLIERS
 export const URL_SUPPLIERS = "/v1/suppliers/";
@@ -71,7 +69,7 @@ export const URL_COMPLETED_PURCHASES = `${URL_PURCHASES}completed/`;
 export const URL_CANCELED_PURCHASES = `${URL_PURCHASES}canceled/`;
 
 // URL CUSTOMER PROMOTIONS
-export const URL_CUSTOMER_PROMOTIONS = "/v1/customer_promotions/";
+export const URL_CUSTOMER_PROMOTIONS = "/v1/customer-promotions/";
 
 // URLS SALE RETURNS
 export const URL_SALE_RETURNS = "/v1/sale-returns/";
@@ -113,6 +111,12 @@ export const URL_REPORTS_INVOICES_PURCHASES = "/v1/reports/invoices/purchases/";
 export const URL_REPORTS_INVENTORIES = "/v1/reports/inventory/";
 export const URL_REPORTS_INVENTORIES_LOW_STOCK = "/v1/reports/inventory/low-stock/";
 export const URL_REPORTS_INVENTORIES_MOVEMENTS = "/v1/reports/inventory/movements/";
+
+// URLS SALE RETURNS REPORTS
+export const URL_REPORTS_SALE_RETURNS = "/v1/reports/sale-returns/";
+
+// URLS PURCHASE RETURNS REPORTS
+export const URL_REPORTS_PURCHASE_RETURNS = "/v1/reports/purchase-returns/";
 
 // KEYS
 export const TOKEN_KEY = 'auth_token';

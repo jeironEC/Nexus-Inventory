@@ -49,12 +49,12 @@ router.register("categories", CategoryViewSet, basename="categories")
 router.register("products", ProductViewSet, basename="products")
 router.register("inventories", InventoryViewSet, basename="inventories")
 router.register(
-    "inventory_movements", InventoryMovementViewSet, basename="inventory_movements"
+    "inventory-movements", InventoryMovementViewSet, basename="inventory-movements"
 )
 router.register("customers", CustomerViewSet, basename="customers")
 router.register("promotions", PromotionViewSet, basename="promotions")
 router.register(
-    "customer_promotions", CustomerPromotionViewSet, basename="customer_promotions"
+    "customer-promotions", CustomerPromotionViewSet, basename="customer-promotions"
 )
 router.register("sales", SaleViewSet, basename="sales")
 sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")

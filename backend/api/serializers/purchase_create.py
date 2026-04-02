@@ -35,9 +35,11 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = [
+            "id",
             "supplier_id",
             "details",
         ]
+        read_only_fields = ["id"]
 
     def validate_details(self, value):
         if not value:

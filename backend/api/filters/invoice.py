@@ -16,6 +16,8 @@ class InvoiceFilter(django_filters.FilterSet):
         field_name="invoice_type", choices=InvoiceType.choices
     )
     pdf_generated = django_filters.BooleanFilter(field_name="pdf_generated")
+    sale_id = django_filters.NumberFilter(field_name="sale_id")
+    purchase_id = django_filters.NumberFilter(field_name="purchase_id")
     date_from = django_filters.DateFilter(
         field_name="created_at__date", lookup_expr="gte"
     )

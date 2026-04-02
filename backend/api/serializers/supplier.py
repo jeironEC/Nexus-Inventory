@@ -1,4 +1,5 @@
 # DRF
+from rest_framework import serializers
 
 # Models
 from nexus_inventory_backend.db.models import Supplier
@@ -31,3 +32,21 @@ class SupplierSerializer(AuditFieldsMixin):
             "updated_at",
             "deleted_at",
         ]
+
+    def validate(self, data):
+        name = data.get("name")
+        is_create = not self.instance
+
+        if is_create and not name:
+            raise serializers.ValidationError({"name": "Name is required."})
+
+        if name:
+            queryset = Supplier.objects.filter(name__iexact=name)
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            if queryset.exists():
+                raise serializers.ValidationError(
+                    {"name": "A supplier with this name already exists."}
+                )
+
+        return data

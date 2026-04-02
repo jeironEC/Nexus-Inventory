@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Inventory - API Tests</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@300;400;500;600&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/tests.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img class="logo-img" src="../assets/Nexus_Inventory_Logo.svg" alt="Nexus Inventory">
+                </div>
+                <div class="logo-text">Nexus Inventory</div>
+                <p class="sidebar-subtitle">API Test Runner</p>
+            </div>
+
+            <div class="service-list" id="servicesList"></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="tests-panel">
+                <div class="welcome-panel" id="welcomePanel">
+                    <div class="welcome-icon">🧪</div>
+                    <div class="welcome-title">API Test Runner</div>
+                    <div class="welcome-text">Select a service to view its tests</div>
+                </div>
+
+                <div class="detail-view" id="detailView">
+                    <div class="test-detail-header">
+                        <div class="test-detail-title">
+                            <button class="back-btn" id="backBtn">Back</button>
+                            <h2 id="serviceTitle">Service</h2>
+                        </div>
+                        <button class="run-btn" id="runAllBtn">Run all</button>
+                    </div>
+
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <span class="stat-value pass" id="passCount">0</span>
+                            <span class="stat-label">Pass</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value fail" id="failCount">0</span>
+                            <span class="stat-label">Fail</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalCount" style="color: var(--sky)">0</span>
+                            <span class="stat-label">Total</span>
+                        </div>
+                    </div>
+
+                    <div class="test-grid" id="testGrid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="../js/tests/runner.js"></script>
+</body>
+</html>

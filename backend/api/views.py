@@ -168,6 +168,7 @@ from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 from .mixins.operation_state import OperationStateMixin
 from .mixins.report_filter import ReportFilterMixin
 from .mixins.audit_fields import AuditUserMixin, AuditOperationUserMixin
+from .mixins.is_active import UserStateMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import OperationState, InvoiceState, InvoiceType
@@ -183,6 +184,17 @@ def healthcheck(request):
     return JsonResponse({"health": "ok"}, status=200)
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Roles"], summary="List roles"),
+    create=extend_schema(tags=["Roles"], summary="Create role"),
+    retrieve=extend_schema(tags=["Roles"], summary="Get role"),
+    partial_update=extend_schema(tags=["Roles"], summary="Partial update role"),
+    destroy=extend_schema(tags=["Roles"], summary="Delete role"),
+    active=extend_schema(tags=["Roles"], summary="List active roles"),
+    inactive=extend_schema(tags=["Roles"], summary="List inactive roles"),
+    activate=extend_schema(tags=["Roles"], summary="Activate role"),
+    deactivate=extend_schema(tags=["Roles"], summary="Deactivate role"),
+)
 class UserRoleViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -208,10 +220,14 @@ class UserRoleViewSet(
     user_filterset_class = RoleFilter
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Users"], summary="List users"),
+    create=extend_schema(tags=["Users"], summary="Create user"),
+)
 class UserViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    StateMixin,
+    UserStateMixin,
     AuditUserMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -280,6 +296,19 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Categories"], summary="List categories"),
+    create=extend_schema(tags=["Categories"], summary="Create category"),
+    retrieve=extend_schema(tags=["Categories"], summary="Get category"),
+    partial_update=extend_schema(
+        tags=["Categories"], summary="Partial update category"
+    ),
+    destroy=extend_schema(tags=["Categories"], summary="Delete category"),
+    active=extend_schema(tags=["Categories"], summary="List active categories"),
+    inactive=extend_schema(tags=["Categories"], summary="List inactive categories"),
+    activate=extend_schema(tags=["Categories"], summary="Activate category"),
+    deactivate=extend_schema(tags=["Categories"], summary="Deactivate category"),
+)
 class CategoryViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -305,6 +334,17 @@ class CategoryViewSet(
     user_filterset_class = CategoryFilter
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Products"], summary="List products"),
+    create=extend_schema(tags=["Products"], summary="Create product"),
+    retrieve=extend_schema(tags=["Products"], summary="Get product"),
+    partial_update=extend_schema(tags=["Products"], summary="Partial update product"),
+    destroy=extend_schema(tags=["Products"], summary="Delete product"),
+    active=extend_schema(tags=["Products"], summary="List active products"),
+    inactive=extend_schema(tags=["Products"], summary="List inactive products"),
+    activate=extend_schema(tags=["Products"], summary="Activate product"),
+    deactivate=extend_schema(tags=["Products"], summary="Deactivate product"),
+)
 class ProductViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -332,6 +372,13 @@ class ProductViewSet(
     user_filterset_class = ProductFilter
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Inventory"], summary="List inventory"),
+    get_by_product=extend_schema(
+        tags=["Inventory"], summary="Get inventory by product"
+    ),
+    low_stock=extend_schema(tags=["Inventory"], summary="List low stock inventory"),
+)
 class InventoryViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -372,6 +419,14 @@ class InventoryViewSet(
         return Response(serializer.data)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Inventory Movements"], summary="List inventory movements"
+    ),
+    retrieve=extend_schema(
+        tags=["Inventory Movements"], summary="Get inventory movement"
+    ),
+)
 class InventoryMovementViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -395,6 +450,20 @@ class InventoryMovementViewSet(
     user_filterset_class = InventoryMovementFilter
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Customers"], summary="List customers"),
+    create=extend_schema(tags=["Customers"], summary="Create customer"),
+    retrieve=extend_schema(tags=["Customers"], summary="Get customer"),
+    partial_update=extend_schema(tags=["Customers"], summary="Partial update customer"),
+    destroy=extend_schema(tags=["Customers"], summary="Delete customer"),
+    active=extend_schema(tags=["Customers"], summary="List active customers"),
+    inactive=extend_schema(tags=["Customers"], summary="List inactive customers"),
+    activate=extend_schema(tags=["Customers"], summary="Activate customer"),
+    deactivate=extend_schema(tags=["Customers"], summary="Deactivate customer"),
+    list_promotions=extend_schema(
+        tags=["Customers"], summary="List customer promotions"
+    ),
+)
 class CustomerViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -435,6 +504,19 @@ class CustomerViewSet(
         return Response(serializer.data)
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Promotions"], summary="List promotions"),
+    create=extend_schema(tags=["Promotions"], summary="Create promotion"),
+    retrieve=extend_schema(tags=["Promotions"], summary="Get promotion"),
+    partial_update=extend_schema(
+        tags=["Promotions"], summary="Partial update promotion"
+    ),
+    destroy=extend_schema(tags=["Promotions"], summary="Delete promotion"),
+    active=extend_schema(tags=["Promotions"], summary="List active promotions"),
+    inactive=extend_schema(tags=["Promotions"], summary="List inactive promotions"),
+    activate=extend_schema(tags=["Promotions"], summary="Activate promotion"),
+    deactivate=extend_schema(tags=["Promotions"], summary="Deactivate promotion"),
+)
 class PromotionViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -459,6 +541,26 @@ class PromotionViewSet(
     user_filterset_class = PromotionFilter
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Customer Promotions"], summary="List customer promotions"
+    ),
+    create=extend_schema(
+        tags=["Customer Promotions"], summary="Create customer promotion"
+    ),
+    retrieve=extend_schema(
+        tags=["Customer Promotions"], summary="Get customer promotion"
+    ),
+    partial_update=extend_schema(
+        tags=["Customer Promotions"], summary="Partial update customer promotion"
+    ),
+    destroy=extend_schema(
+        tags=["Customer Promotions"], summary="Delete customer promotion"
+    ),
+    apply=extend_schema(
+        tags=["Customer Promotions"], summary="Apply promotion to customer"
+    ),
+)
 class CustomerPromotionViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -555,6 +657,15 @@ class CustomerPromotionViewSet(
         return Response(serializer.data)
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Sales"], summary="List sales"),
+    create=extend_schema(tags=["Sales"], summary="Create sale"),
+    retrieve=extend_schema(tags=["Sales"], summary="Get sale"),
+    update=extend_schema(tags=["Sales"], summary="Update sale"),
+    partial_update=extend_schema(tags=["Sales"], summary="Partial update sale"),
+    destroy=extend_schema(tags=["Sales"], summary="Delete sale"),
+    cancel=extend_schema(tags=["Sales"], summary="Cancel sale"),
+)
 class SaleViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -661,6 +772,11 @@ class SaleDetailViewSet(
         )
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Invoices"], summary="List invoices"),
+    retrieve=extend_schema(tags=["Invoices"], summary="Get invoice"),
+    cancel=extend_schema(tags=["Invoices"], summary="Cancel invoice"),
+)
 class InvoiceViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -717,31 +833,18 @@ class InvoiceViewSet(
         serializer = InvoiceSerializer(invoice, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["get"], url_path="sale/(?P<sale_id>[^/.]+)")
-    def invoice_by_sale(self, request, sale_id=None):
-        try:
-            invoice = self.get_queryset().get(sale_id=sale_id)
-            serializer = self.get_serializer(invoice)
-            return Response(serializer.data)
-        except Invoice.DoesNotExist:
-            return Response(
-                {"detail": "Invoice not found for this sale"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
 
-    @action(detail=False, methods=["get"], url_path="purchase/(?P<purchase_id>[^/.]+)")
-    def invoice_by_purchase(self, request, purchase_id=None):
-        try:
-            invoice = self.get_queryset().get(purchase_id=purchase_id)
-            serializer = self.get_serializer(invoice)
-            return Response(serializer.data)
-        except Invoice.DoesNotExist:
-            return Response(
-                {"detail": "Invoice not found for this purchase"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-
+@extend_schema_view(
+    list=extend_schema(tags=["Suppliers"], summary="List suppliers"),
+    create=extend_schema(tags=["Suppliers"], summary="Create supplier"),
+    retrieve=extend_schema(tags=["Suppliers"], summary="Get supplier"),
+    partial_update=extend_schema(tags=["Suppliers"], summary="Partial update supplier"),
+    destroy=extend_schema(tags=["Suppliers"], summary="Delete supplier"),
+    active=extend_schema(tags=["Suppliers"], summary="List active suppliers"),
+    inactive=extend_schema(tags=["Suppliers"], summary="List inactive suppliers"),
+    activate=extend_schema(tags=["Suppliers"], summary="Activate supplier"),
+    deactivate=extend_schema(tags=["Suppliers"], summary="Deactivate supplier"),
+)
 class SupplierViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -766,6 +869,15 @@ class SupplierViewSet(
     user_filterset_class = SupplierFilter
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Purchases"], summary="List purchases"),
+    create=extend_schema(tags=["Purchases"], summary="Create purchase"),
+    retrieve=extend_schema(tags=["Purchases"], summary="Get purchase"),
+    update=extend_schema(tags=["Purchases"], summary="Update purchase"),
+    partial_update=extend_schema(tags=["Purchases"], summary="Partial update purchase"),
+    destroy=extend_schema(tags=["Purchases"], summary="Delete purchase"),
+    cancel=extend_schema(tags=["Purchases"], summary="Cancel purchase"),
+)
 class PurchaseViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -876,6 +988,16 @@ class PurchaseDetailViewSet(
         )
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Sale Returns"], summary="List sale returns"),
+    create=extend_schema(tags=["Sale Returns"], summary="Create sale return"),
+    retrieve=extend_schema(tags=["Sale Returns"], summary="Get sale return"),
+    partial_update=extend_schema(
+        tags=["Sale Returns"], summary="Partial update sale return"
+    ),
+    destroy=extend_schema(tags=["Sale Returns"], summary="Delete sale return"),
+    cancel=extend_schema(tags=["Sale Returns"], summary="Cancel sale return"),
+)
 class SaleReturnViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
@@ -992,6 +1114,16 @@ class SaleReturnDetailViewSet(
         )
 
 
+@extend_schema_view(
+    list=extend_schema(tags=["Purchase Returns"], summary="List purchase returns"),
+    create=extend_schema(tags=["Purchase Returns"], summary="Create purchase return"),
+    retrieve=extend_schema(tags=["Purchase Returns"], summary="Get purchase return"),
+    partial_update=extend_schema(
+        tags=["Purchase Returns"], summary="Partial update purchase return"
+    ),
+    destroy=extend_schema(tags=["Purchase Returns"], summary="Delete purchase return"),
+    cancel=extend_schema(tags=["Purchase Returns"], summary="Cancel purchase return"),
+)
 class PurchaseReturnViewSet(
     StrictFilterMixin,
     RoleFilterMixin,

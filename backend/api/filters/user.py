@@ -21,8 +21,12 @@ class UserFilter(django_filters.FilterSet):
     full_name = django_filters.CharFilter(method="filter_full_name")
 
     # Rangs
-    date_from = django_filters.DateFilter(field_name="created_at", lookup_expr="gte")
-    date_to = django_filters.DateFilter(field_name="created_at", lookup_expr="lte")
+    date_from = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="gte"
+    )
+    date_to = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="lte"
+    )
 
     def filter_full_name(self, queryset, name, value):
         return queryset.filter(

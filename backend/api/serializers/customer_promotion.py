@@ -1,5 +1,6 @@
 # DRF
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 # Models
 from nexus_inventory_backend.db.models import Promotion, Customer, CustomerPromotion
@@ -55,7 +56,8 @@ class CustomerPromotionSerializer(AuditFieldsMixin):
             "deleted_at",
         ]
 
-    def get_can_apply(self, obj):
+    @extend_schema_field(bool)
+    def get_can_apply(self, obj) -> bool:
         if obj.applied:
             return False
         if obj.customer.state != State.ACTIVE:

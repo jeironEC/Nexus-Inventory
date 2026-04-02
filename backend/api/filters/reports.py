@@ -2,15 +2,6 @@
 import django_filters
 
 
-class ReportDateFilter(django_filters.FilterSet):
-    date_from = django_filters.DateFilter(
-        field_name="created_at__date", lookup_expr="gte"
-    )
-    date_to = django_filters.DateFilter(
-        field_name="created_at__date", lookup_expr="lte"
-    )
-
-
 class SaleReportFilter(django_filters.FilterSet):
     date_from = django_filters.DateFilter(
         field_name="created_at__date", lookup_expr="gte"
@@ -50,10 +41,6 @@ class PurchaseReportFilter(django_filters.FilterSet):
 
 class InventoryReportFilter(django_filters.FilterSet):
     category_id = django_filters.NumberFilter(field_name="product__category__id")
-    low_stock_threshold = django_filters.NumberFilter(method="filter_noop")
-
-    def filter_noop(self, queryset, name, value):
-        return queryset
 
 
 class ProductReportFilter(django_filters.FilterSet):
@@ -64,10 +51,6 @@ class ProductReportFilter(django_filters.FilterSet):
         field_name="sale__created_at__date", lookup_expr="lte"
     )
     category_id = django_filters.NumberFilter(field_name="product__category__id")
-    limit = django_filters.NumberFilter(method="filter_noop")
-
-    def filter_noop(self, queryset, name, value):
-        return queryset
 
 
 class CustomerReportFilter(django_filters.FilterSet):
@@ -77,10 +60,6 @@ class CustomerReportFilter(django_filters.FilterSet):
     date_to = django_filters.DateFilter(
         field_name="sales__created_at__date", lookup_expr="lte"
     )
-    limit = django_filters.NumberFilter(method="filter_noop")
-
-    def filter_noop(self, queryset, name, value):
-        return queryset
 
 
 class InvoiceReportFilter(django_filters.FilterSet):
@@ -94,6 +73,8 @@ class InvoiceReportFilter(django_filters.FilterSet):
     invoice_type = django_filters.CharFilter(
         field_name="invoice_type", lookup_expr="iexact"
     )
+    sale_id = django_filters.NumberFilter(field_name="sale_id")
+    purchase_id = django_filters.NumberFilter(field_name="purchase_id")
 
 
 class SaleReturnReportFilter(django_filters.FilterSet):

@@ -10,10 +10,11 @@ from nexus_inventory_backend.db.models import (
     SaleReturnDetail,
     InventoryMovement,
     Sale,
+    Inventory,
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import MovementType
+from nexus_inventory_backend.db.enums import MovementType, OperationState
 
 # Serializers
 from .sale_return_detail_create import SaleReturnDetailCreateSerializer
@@ -29,10 +30,12 @@ class SaleReturnCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaleReturn
         fields = [
+            "id",
             "sale_id",
             "reason",
             "details",
         ]
+        read_only_fields = ["id"]
 
     def validate_details(self, value):
         if not value:
@@ -40,7 +43,7 @@ class SaleReturnCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_sale_id(self, value):
-        if value.state == "CANCELED":
+        if value.state == OperationState.CANCELED:
             raise serializers.ValidationError(
                 "Cannot return items from a canceled sale."
             )
@@ -72,6 +75,12 @@ class SaleReturnCreateSerializer(serializers.ModelSerializer):
                 movement_type=MovementType.IN,
                 quantity=quantity,
             )
+
+            inventory, _ = Inventory.objects.get_or_create(
+                product=product, defaults={"quantity": 0}
+            )
+            inventory.quantity += quantity
+            inventory.save()
 
             SaleReturnDetail.objects.create(
                 sale_return=sale_return,

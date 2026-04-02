@@ -19,8 +19,12 @@ class RoleFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
 
     # Rangs
-    date_from = django_filters.DateFilter(field_name="created_at", lookup_expr="gte")
-    date_to = django_filters.DateFilter(field_name="created_at", lookup_expr="lte")
+    date_from = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="gte"
+    )
+    date_to = django_filters.DateFilter(
+        field_name="created_at__date", lookup_expr="lte"
+    )
 
     class Meta:
         model = Role

@@ -234,3 +234,74 @@ El entorno se selecciona automáticamente según el contexto de ejecución:
 3. **CI/Tests**: Usar configuración `Test` (SQLite en memoria)
 
 Para desarrollo local, el proyecto usa SQLite3 por defecto, por lo que no se necesita configurar PostgreSQL. Para ejecutar en contenedor o producción, es necesario configurar las variables de entorno de PostgreSQL.
+
+### Cómo ejecutar con Docker
+
+#### Construcción de la imagen
+
+```bash
+# Construir imagen
+docker build -t nexus-inventory-backend .
+
+# O con docker-compose
+docker-compose up --build
+```
+
+#### Ejecución del contenedor
+
+```bash
+# Con docker-compose
+docker-compose up -d
+
+# Con docker directo
+docker run -d \
+  -e DATABASE_NAME=nexus_inventory \
+  -e DATABASE_USERNAME=postgres \
+  -e DATABASE_PASSWORD=postgres \
+  -e DATABASE_HOST=db \
+  -e DATABASE_PORT=5432 \
+  -p 8000:8000 \
+  nexus-inventory-backend
+```
+
+#### Ver logs
+
+```bash
+docker-compose logs -f backend
+```
+
+#### Detener contenedores
+
+```bash
+docker-compose down
+```
+
+### Flujo de configuración del backend
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Dockerización del Backend                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌──────────────┐                      ┌──────────────────┐    │
+│   │  Dockerfile  │                      │  docker-compose  │    │
+│   └──────┬───────┘                      └────────┬─────────┘    │
+│          │                                       │              │
+│          ▼                                       ▼              │
+│   Imagen Docker                            Orquestación         │
+│   + PostgreSQL                             + PostgreSQL         │
+│   + Backend                                + Backend            │
+│                                                                 │
+│   ┌──────────────┐                      ┌──────────────────┐    │
+│   │  GitHub CI   │                      │       .env       │    │
+│   └──────────────┘                      └──────────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Pasos para ejecutar
+
+1. **Instalar Docker/Podman** en la máquina local
+2. **Construir la imagen**: `docker build -t nexus-inventory-backend .`
+3. **Ejecutar con docker-compose**: `docker-compose up --build`
+4. **Verificar funcionamiento**: Acceder a `http://localhost:8000/` o `http://localhost:8000/admin/`

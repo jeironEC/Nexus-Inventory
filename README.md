@@ -188,3 +188,49 @@ Para usar sentry en el proyecto se debe crear el archivo .env y incluir la sigui
 ```bash
 SENTRY_DSN="url_proporcionada_por_sentry"
 ```
+
+### Flujo de configuración del backend
+
+El proyecto utiliza `django-configurations` para gestionar diferentes entornos de ejecución. La configuración se selecciona mediante el flag `--settings` o la variable de entorno `DJANGO_SETTINGS_MODULE`.
+
+#### Diagrama de flujo
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Configuración de Base de Datos               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌──────────────┐                      ┌──────────────────┐    │
+│   │    Local     │                      │      Docker      │    │
+│   │   (SQLite)   │                      │   (PostgreSQL)   │    │
+│   └──────┬───────┘                      └────────┬─────────┘    │
+│          │                                        │             │
+│          ▼                                        ▼             │
+│   db.sqlite3 (local)                    Variables de entorno    │
+│                                                                 │
+│   ┌──────────────┐                      ┌──────────────────┐    │
+│   │     Test     │                      │    Production    │    │
+│   │  (:memory:)  │                      │   (PostgreSQL)   │    │
+│   └──────────────┘                      └──────────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Entornos disponibles
+
+| Entorno   | Base de datos | Uso                              |
+|-----------|---------------|----------------------------------|
+| Local     | SQLite3       | Desarrollo local sin Docker     |
+| Docker    | PostgreSQL    | Contenedor con PostgreSQL       |
+| Test      | SQLite3       | Ejecución de tests              |
+| Production| PostgreSQL    | Entorno de producción           |
+
+#### Selección de entorno
+
+El entorno se selecciona automáticamente según el contexto de ejecución:
+
+1. **Desarrollo local**: Usar configuración `Local` (SQLite)
+2. **Contenedor Docker**: Usar configuración `Docker` (PostgreSQL)
+3. **CI/Tests**: Usar configuración `Test` (SQLite en memoria)
+
+Para desarrollo local, el proyecto usa SQLite3 por defecto, por lo que no se necesita configurar PostgreSQL. Para ejecutar en contenedor o producción, es necesario configurar las variables de entorno de PostgreSQL.

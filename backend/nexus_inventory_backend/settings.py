@@ -203,8 +203,8 @@ class Docker(Base):
             "PORT": env.int("DATABASE_PORT", default=5432),
         }
     }
-    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
-    SECRET_KEY = env("SECRET_KEY")
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
+    SECRET_KEY = env("SECRET_KEY", default="no_hack_me_please")
 
 
 class Test(Base):

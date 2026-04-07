@@ -27,7 +27,7 @@ test = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nexus_inventory_backend.settings"
-DJANGO_CONFIGURATION = "Local"
+DJANGO_CONFIGURATION = "Test"
 python_files = [
     "test_*.py",
     "*_test.py"

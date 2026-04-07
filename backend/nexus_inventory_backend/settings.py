@@ -196,12 +196,23 @@ class Docker(Base):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("DATABASE_NAME"),
-            "USER": env("DATABASE_USERNAME"),
-            "PASSWORD": env("DATABASE_PASSWORD"),
-            "HOST": env("DATABASE_HOST"),
-            "PORT": env.int("DATABASE_PORT", 5432),
+            "NAME": env("DATABASE_NAME", default="nexus_inventory"),
+            "USER": env("DATABASE_USERNAME", default="postgres"),
+            "PASSWORD": env("DATABASE_PASSWORD", default="postgres"),
+            "HOST": env("DATABASE_HOST", default="localhost"),
+            "PORT": env.int("DATABASE_PORT", default=5432),
         }
     }
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
     SECRET_KEY = env("SECRET_KEY")
+
+
+class Test(Base):
+    """Configuración para tests"""
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    }

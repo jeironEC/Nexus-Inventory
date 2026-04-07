@@ -5,11 +5,13 @@ import os
 import sys
 
 
-def main():
+def main() -> int:
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "nexus_inventory_backend.settings")
+    os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
+
     try:
-        from django.core.management import execute_from_command_line
+        from configurations.management import execute_from_command_line
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "
@@ -18,6 +20,8 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

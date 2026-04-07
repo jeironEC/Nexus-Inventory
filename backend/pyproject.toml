@@ -15,6 +15,7 @@ dependencies = [
     "django-filter",
     "drf-nested-routers",
     "django-cors-headers",
+    "psycopg2-binary",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +27,7 @@ test = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nexus_inventory_backend.settings"
+DJANGO_CONFIGURATION = "Test"
 python_files = [
     "test_*.py",
     "*_test.py"

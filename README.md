@@ -305,3 +305,53 @@ docker-compose down
 2. **Construir la imagen**: `docker build -t nexus-inventory-backend .`
 3. **Ejecutar con docker-compose**: `docker-compose up --build`
 4. **Verificar funcionamiento**: Acceder a `http://localhost:8000/` o `http://localhost:8000/admin/`
+
+### Cómo ejecutar
+
+```bash
+# Construir y ejecutar desde la raíz
+docker-compose up -d
+
+# Acceso al frontend: http://localhost
+# Acceso al backend: http://localhost:8000/admin/
+```
+
+### Ver logs
+
+```bash
+docker-compose logs -f frontend
+```
+
+### Detener contenedores
+
+```bash
+docker-compose down
+```
+
+### Flujo de configuración del frontend
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   Dockerización del Frontend                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌──────────────┐                      ┌──────────────────┐    │
+│   │  Dockerfile  │                      │    nginx.conf    │    │
+│   └──────┬───────┘                      └────────┬─────────┘    │
+│          │                                       │              │
+│          ▼                                       ▼              │
+│      Imagen Nginx                          Servir estáticos     │
+│       + Archivos HTML/CSS/JS                + Proxy API         │
+│                                                                 │
+│   ┌──────────────┐                      ┌──────────────────┐    │
+│   │docker-compose│                      │   Apache/Nginx   │    │
+│   └──────┬───────┘                      └──────────────────┘    │
+│          │                                                      │
+│          ▼                                                      │
+│      Orquestación                                               │
+│       + Frontend                                                │
+│       + Backend                                                 │
+│       + PostgreSQL                                              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```

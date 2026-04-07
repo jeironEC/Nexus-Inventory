@@ -16,6 +16,7 @@ dependencies = [
     "drf-nested-routers",
     "django-cors-headers",
     "psycopg2-binary",
+    "gunicorn",
 ]
 
 [project.optional-dependencies]

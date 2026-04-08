@@ -20,7 +20,9 @@ environ.Env.read_env(BASE_DIR / ".env")
 class Base(Configuration):
     """Configuración base común a todos los entornos"""
 
-    SECRET_KEY = "django-insecure-+o&8ma_*^(g$rw@r6zy=u9cvex*scmeswoc0-q5+niybl-v7%q"
+    SECRET_KEY = env(
+        "DJANGO_SECRET_KEY", default="django-insecure-fallback-key-change-in-production"
+    )
 
     DEBUG = True
 

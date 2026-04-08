@@ -1,0 +1,79 @@
+name: CI/CD Pipeline
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
+            - name: Install flake8
+              run: pip install flake8
+            - name: Run flake8
+              run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    test:
+        needs: lint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Run tests
+              run: |
+                  cd backend
+                  pytest -v
+
+    security:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Security scan
+              run: |
+                  pip install safety bandit
+                  safety check
+                  bandit -r ./backend
+
+    build-backend:
+        needs: security
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push'
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build backend image
+              run: docker build -t ghcr.io/${{ github.repository }}/backend:${{ github.sha }} ./backend
+
+    build-frontend:
+        needs: security
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push'
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Build frontend image
+              run: docker build -t ghcr.io/${{ github.repository }}/frontend:${{ github.sha }} ./frontend
+
+    push:
+        needs: [build-backend, build-frontend]
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push'
+        steps:
+            - name: Push images
+              run: |
+                  echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+                  docker push ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+                  docker push ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+
+    deploy:
+        needs: push
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/main'
+        steps:
+            - name: Deploy to production
+              run: echo "Deploy triggered"

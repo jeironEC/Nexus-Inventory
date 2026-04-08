@@ -9,7 +9,7 @@ from rest_framework_nested import routers
 
 # Views
 from .views import (
-    healthcheck,
+    HealthCheckView,
     UserRoleViewSet,
     UserViewSet,
     UserMeViewSet,
@@ -90,7 +90,7 @@ router.register(
 )
 
 urlpatterns = [
-    path("health/", healthcheck, name="health"),
+    path("health/", HealthCheckView.as_view(), name="health-check"),
     path("", include("api.docs")),
     path("auth/", include("api.auth")),
     *router.urls,

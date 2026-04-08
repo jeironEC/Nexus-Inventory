@@ -58,7 +58,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: Build backend image
-              run: docker build -t ghcr.io/${{ github.repository }}/backend:${{ github.sha }} ./backend
+              run: |
+                REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+                docker build -t ghcr.io/$REPO/backend:${{ github.sha }} ./backend
 
     build-frontend:
         needs: security
@@ -68,7 +70,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: Build frontend image
-              run: docker build -t ghcr.io/${{ github.repository }}/frontend:${{ github.sha }} ./frontend
+              run: |
+                REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+                docker build -t ghcr.io/$REPO/frontend:${{ github.sha }} ./frontend
 
     push:
         needs: [build-backend, build-frontend]
@@ -77,9 +81,10 @@ jobs:
         steps:
             - name: Push images
               run: |
-                  echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-                  docker push ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
-                  docker push ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+                REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+                echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+                docker push ghcr.io/$REPO/backend:${{ github.sha }}
+                docker push ghcr.io/$REPO/frontend:${{ github.sha }}
 
     deploy:
         needs: push

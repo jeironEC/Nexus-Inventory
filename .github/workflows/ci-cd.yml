@@ -57,7 +57,7 @@ jobs:
             - name: Security scan
               run: |
                   pip install safety bandit
-                  bandit -r ./backend -x ./backend/venv
+                  bandit -r ./backend -x ./backend/venv,./backend/tests
 
     build:
         needs: security

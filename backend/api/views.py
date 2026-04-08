@@ -1,15 +1,16 @@
 # Django
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Avg, Q
+from django.utils import timezone
 
 # DRF
 from rest_framework import mixins, status, viewsets
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import NotFound
 
@@ -176,12 +177,24 @@ from nexus_inventory_backend.db.enums import OperationState, InvoiceState, Invoi
 # Utils
 from api.utils import get_trunc_func
 
+# Date
+from datetime import date
 
-def healthcheck(request):
-    """
-    Muestra el estado de la API
-    """
-    return JsonResponse({"health": "ok"}, status=200)
+
+@extend_schema(tags=["Health"])
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes: list[str] = []
+    serializer_class = EmptySerializer
+
+    def get(self, request):
+        return Response(
+            {
+                "status": "ok",
+                "version": "1.0.0",
+                "timestamp": timezone.now().date().isoformat(),
+            }
+        )
 
 
 @extend_schema_view(
@@ -622,8 +635,6 @@ class CustomerPromotionViewSet(
                     {"detail": "Promotion is not active."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            from datetime import date
 
             if promotion.end_date < date.today():
                 return Response(

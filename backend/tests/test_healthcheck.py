@@ -1,6 +1,9 @@
 # Internal
 import pytest
 
+# Django
+from django.utils import timezone
+
 # HTTP
 from http import HTTPStatus
 
@@ -14,4 +17,8 @@ def test_healthcheck_status(client):
 @pytest.mark.django_db
 def test_healthcheck_json(client):
     response = client.get("/v1/health/")
-    assert response.json() == {"health": "ok"}
+    assert response.json() == {
+        "status": "ok",
+        "version": "1.0.0",
+        "timestamp": timezone.now().date().isoformat(),
+    }

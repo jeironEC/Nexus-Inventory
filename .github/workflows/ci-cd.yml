@@ -6,6 +6,10 @@ on:
     pull_request:
         branches: [main, develop]
 
+permissions:
+    contents: read
+    packages: write
+
 jobs:
     lint:
         runs-on: ubuntu-latest
@@ -25,10 +29,14 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - name: Set up Python
-              uses: actions/setup-python@v5
+            - uses: actions/setup-python@v5
               with:
                   python-version: "3.13"
+            - name: Cache pip
+              uses: actions/cache@v4
+              with:
+                  path: ~/.cache/pip
+                  key: ${{ runner.os }}-pip-${{ hashFiles('backend/test-requirements.txt') }}
             - name: Install dependencies
               run: pip install -r backend/test-requirements.txt
             - name: Run tests
@@ -49,47 +57,62 @@ jobs:
             - name: Security scan
               run: |
                   pip install safety bandit
-                  bandit -r ./backend -x ./backend/venv || true
+                  bandit -r ./backend -x ./backend/venv,./backend/tests
 
-    build-backend:
+    build:
         needs: security
         runs-on: ubuntu-latest
-        if: github.event_name == 'push'
-        steps:
-            - uses: actions/checkout@v4
-            - name: Build backend image
-              run: |
-                REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-                docker build -t ghcr.io/$REPO/backend:${{ github.sha }} ./backend
-
-    build-frontend:
-        needs: security
-        runs-on: ubuntu-latest
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        outputs:
+            image_tag: ${{ steps.meta.outputs.version }}
 
         steps:
             - uses: actions/checkout@v4
-            - name: Build frontend image
-              run: |
-                REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-                docker build -t ghcr.io/$REPO/frontend:${{ github.sha }} ./frontend
 
-    push:
-        needs: [build-backend, build-frontend]
-        runs-on: ubuntu-latest
-        if: github.event_name == 'push'
-        steps:
-            - name: Push images
+            - name: Extract metadata
+              id: meta
               run: |
-                REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-                echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-                docker push ghcr.io/$REPO/backend:${{ github.sha }}
-                docker push ghcr.io/$REPO/frontend:${{ github.sha }}
+                  SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+                  echo "version=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+            - name: Lowercase repo
+              id: repo
+              run: |
+                  echo "value=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Login to GHCR
+              if: github.ref == 'refs/heads/main'
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.repository_owner }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build (and push if main) backend
+              uses: docker/build-push-action@v6
+              with:
+                  context: ./backend
+                  push: ${{ github.ref == 'refs/heads/main' }}
+                  tags: |
+                      ghcr.io/${{ steps.repo.outputs.value }}/backend:${{ steps.meta.outputs.version }}
+                      ${{ github.ref == 'refs/heads/main' && format('ghcr.io/{0}/backend:latest', steps.repo.outputs.value) || '' }}
+
+            - name: Build (and push if main) frontend
+              uses: docker/build-push-action@v6
+              with:
+                  context: ./frontend
+                  push: ${{ github.ref == 'refs/heads/main' }}
+                  tags: |
+                      ghcr.io/${{ steps.repo.outputs.value }}/frontend:${{ steps.meta.outputs.version }}
+                      ${{ github.ref == 'refs/heads/main' && format('ghcr.io/{0}/frontend:latest', steps.repo.outputs.value) || '' }}
 
     deploy:
-        needs: push
+        needs: build
         runs-on: ubuntu-latest
         if: github.ref == 'refs/heads/main'
         steps:
-            - name: Deploy to production
-              run: echo "Deploy triggered"
+            - name: Deploy
+              run: echo "Deploying version ${{ needs.build.outputs.image_tag }}"

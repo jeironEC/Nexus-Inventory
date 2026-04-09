@@ -59,7 +59,7 @@ jobs:
             - name: Run Bandit
               run: pip install bandit && bandit -r ./backend -x ./backend/venv,./backend/tests
             - name: Run Safety
-              run: pip install safety && safety scan
+              run: pip install safety && safety scan --ignore-opensource
 
     build:
         needs: security

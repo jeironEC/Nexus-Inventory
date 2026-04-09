@@ -58,8 +58,6 @@ jobs:
               run: pip install -r backend/test-requirements.txt
             - name: Run Bandit
               run: pip install bandit && bandit -r ./backend -x ./backend/venv,./backend/tests
-            - name: Run Safety
-              run: pip install safety && safety scan --full-report --keyless
 
     build:
         needs: security

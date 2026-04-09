@@ -9,6 +9,8 @@ on:
 permissions:
     contents: read
     packages: write
+    security-events: write
+    actions: read
 
 jobs:
     lint:

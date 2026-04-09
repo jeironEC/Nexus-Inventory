@@ -54,10 +54,25 @@ jobs:
                   python-version: "3.13"
             - name: Install dependencies
               run: pip install -r backend/test-requirements.txt
-            - name: Security scan
-              run: |
-                  pip install safety bandit
-                  bandit -r ./backend -x ./backend/venv,./backend/tests
+            - name: Run Bandit
+              run: pip install bandit && bandit -r ./backend -x ./backend/venv,./backend/tests
+            - name: Run Safety
+              run: pip install safety && safety check
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@master
+              with:
+                scan-type: 'fs'
+                scan-ref: '.'
+                format: 'sarif'
+                output: 'trivy-results.sarif'
+            - name: Upload Trivy results to GitHub Security tab
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                sarif_file: 'trivy-results.sarif'
+            - name: Run CodeQL
+              uses: github/codeql-action/analyze@v3
+              with:
+                category: "/language:python"
 
     build:
         needs: security

@@ -3,11 +3,11 @@ FROM nginx:alpine
 RUN mkdir -p /etc/ssl/private /etc/ssl/certs
 
 COPY ssl/ /etc/ssl/
-COPY html/ /usr/share/nginx/html/
-COPY css/ /usr/share/nginx/html/css/
-COPY js/ /usr/share/nginx/html/js/
-COPY assets/ /usr/share/nginx/html/assets/
-COPY nginx-prod.conf /etc/nginx/nginx.conf
+COPY frontend/html/ /usr/share/nginx/html/
+COPY frontend/css/ /usr/share/nginx/html/css/
+COPY frontend/js/ /usr/share/nginx/html/js/
+COPY frontend/assets/ /usr/share/nginx/html/assets/
+COPY frontend/nginx-prod.conf /etc/nginx/nginx.conf
 
 EXPOSE 443
 

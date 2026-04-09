@@ -24,7 +24,7 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=nexus_inventory_backend.settings
       - DJANGO_CONFIGURATION=Production
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SECRET_KEY=django-insecure-prod-key-change-in-production
       - ALLOWED_HOSTS=localhost,127.0.0.1
       - DATABASE_NAME=nexus_inventory
       - DATABASE_USERNAME=postgres
@@ -40,8 +40,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
+      context: .
+      dockerfile: frontend/Dockerfile.prod
     ports:
       - "80:80"
       - "443:443"

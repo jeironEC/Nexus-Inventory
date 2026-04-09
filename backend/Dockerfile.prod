@@ -1,0 +1,28 @@
+FROM python:3.13-slim
+
+ENV \
+    PATH=/app/venv/bin:$PATH \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DJANGO_SETTINGS_MODULE=nexus_inventory_backend.settings \
+    DJANGO_CONFIGURATION=Production
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+RUN chmod +x /app/entrypoint.sh
+
+EXPOSE 8000
+
+CMD ["/app/entrypoint.sh"]

@@ -42,6 +42,7 @@ class Base(Configuration):
         "api",
         "django_filters",
         "corsheaders",
+        "django_prometheus",
     ]
 
     MIDDLEWARE = [
@@ -54,6 +55,8 @@ class Base(Configuration):
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "nexus_inventory_backend.middleware.MetricsMiddleware",
+        "django_prometheus.middleware.PrometheusBeforeMiddleware",
+        "django_prometheus.middleware.PrometheusAfterMiddleware",
     ]
 
     CORS_ALLOWED_ORIGINS = [

@@ -9,6 +9,8 @@ on:
 permissions:
     contents: read
     packages: write
+    security-events: write
+    actions: read
 
 jobs:
     lint:
@@ -54,10 +56,8 @@ jobs:
                   python-version: "3.13"
             - name: Install dependencies
               run: pip install -r backend/test-requirements.txt
-            - name: Security scan
-              run: |
-                  pip install safety bandit
-                  bandit -r ./backend -x ./backend/venv,./backend/tests
+            - name: Run Bandit
+              run: pip install bandit && bandit -r ./backend -x ./backend/venv,./backend/tests
 
     build:
         needs: security
@@ -82,6 +82,12 @@ jobs:
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
+
+            - name: Write SSL certificates
+              run: |
+                  mkdir -p ssl
+                  echo "${{ secrets.SSL_CERT }}" > ssl/server.crt
+                  echo "${{ secrets.SSL_KEY }}" > ssl/server.key
 
             - name: Login to GHCR
               if: github.ref == 'refs/heads/main'

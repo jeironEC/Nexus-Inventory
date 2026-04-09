@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nexus_inventory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=nexus_inventory_backend.settings
+      - DJANGO_CONFIGURATION=Production
+      - DJANGO_SECRET_KEY=django-insecure-prod-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - DATABASE_NAME=nexus_inventory
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - SECURE_SSL_REDIRECT=True
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./ssl:/app/ssl:ro
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/ssl:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

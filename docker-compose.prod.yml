@@ -25,13 +25,13 @@ services:
       - DJANGO_SETTINGS_MODULE=nexus_inventory_backend.settings
       - DJANGO_CONFIGURATION=Production
       - DJANGO_SECRET_KEY=django-insecure-prod-key-change-in-production
-      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
       - DATABASE_NAME=nexus_inventory
       - DATABASE_USERNAME=postgres
       - DATABASE_PASSWORD=postgres
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
-      - SECURE_SSL_REDIRECT=True
+      - SECURE_SSL_REDIRECT=False
     depends_on:
       db:
         condition: service_healthy
@@ -49,6 +49,26 @@ services:
       - ./ssl:/etc/ssl:ro
     depends_on:
       - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
 
 volumes:
   postgres_data:

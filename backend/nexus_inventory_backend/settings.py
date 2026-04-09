@@ -46,6 +46,7 @@ class Base(Configuration):
     ]
 
     MIDDLEWARE = [
+        "django_prometheus.middleware.PrometheusBeforeMiddleware",
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "corsheaders.middleware.CorsMiddleware",
@@ -55,7 +56,6 @@ class Base(Configuration):
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "nexus_inventory_backend.middleware.MetricsMiddleware",
-        "django_prometheus.middleware.PrometheusBeforeMiddleware",
         "django_prometheus.middleware.PrometheusAfterMiddleware",
     ]
 

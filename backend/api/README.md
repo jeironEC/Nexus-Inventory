@@ -201,6 +201,11 @@
 | GET | `/reports/products/most-purchased/` | Productos más comprados |
 | GET | `/reports/products/top-selling/` | Productos más vendidos |
 
+### Purchase Returns
+| Método | Endpoint | Descripción |
+| ------ | -------- | ----------- |
+| GET | `/reports/purchase-returns/` | Devoluciones de compras |
+
 ### Purchases
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |

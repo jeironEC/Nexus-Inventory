@@ -18,6 +18,7 @@ dependencies = [
     "psycopg2-binary",
     "gunicorn",
     "django-prometheus",
+    "weasyprint",
 ]
 
 [project.optional-dependencies]

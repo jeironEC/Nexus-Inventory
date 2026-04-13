@@ -17,6 +17,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = [
             "id",
+            "company",
             "sale",
             "purchase",
             "number_invoice",
@@ -29,6 +30,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "company",
             "sale",
             "purchase",
             "invoice_type",

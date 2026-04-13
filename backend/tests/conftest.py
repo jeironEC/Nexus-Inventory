@@ -13,6 +13,7 @@ from django.utils import timezone
 from nexus_inventory_backend.db.models import (
     User,
     Role,
+    Company,
     Category,
     Product,
     Inventory,
@@ -105,6 +106,18 @@ def admin_user(db, admin_role):
 def normal_user(db, cashier_role):
     return User.objects.create_user(
         email="user@test.com", password="StrongPass123!", role=cashier_role
+    )
+
+
+@pytest.fixture
+def company(db, admin_user):
+    return Company.objects.create(
+        tax_id="A12345678",
+        name="Company",
+        address="Address",
+        number_phone="600000000",
+        email="company@company.cat",
+        website="https://company.cat",
     )
 
 
@@ -262,8 +275,9 @@ def another_customer_promotion(db, another_customer, another_promotion):
 
 
 @pytest.fixture
-def sale(db, customer, admin_user):
+def sale(db, company, customer, admin_user):
     return Sale.objects.create(
+        company=company,
         customer=customer,
         user=admin_user,
         subtotal=100.00,
@@ -275,8 +289,9 @@ def sale(db, customer, admin_user):
 
 
 @pytest.fixture
-def another_sale(db, another_customer, normal_user):
+def another_sale(db, company, another_customer, normal_user):
     return Sale.objects.create(
+        company=company,
         customer=another_customer,
         user=normal_user,
         subtotal=200.00,
@@ -312,8 +327,31 @@ def another_sale_detail(db, another_sale, another_product, another_inventory_mov
 
 
 @pytest.fixture
+def purchase(db, company, supplier, admin_user, product):
+    return Purchase.objects.create(
+        company=company,
+        supplier=supplier,
+        user=admin_user,
+        total_amount="200.00",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
+def another_purchase(db, company, another_supplier, normal_user, another_product):
+    return Purchase.objects.create(
+        company=company,
+        supplier=another_supplier,
+        user=normal_user,
+        total_amount="500.00",
+        state="COMPLETED",
+    )
+
+
+@pytest.fixture
 def invoice_sale(db, sale, admin_user):
     return Invoice.objects.create(
+        company_id=sale.company.pk,
         sale=sale,
         number_invoice=f"SINV-{sale.pk:08d}",
         invoice_type=InvoiceType.SALE,
@@ -325,6 +363,7 @@ def invoice_sale(db, sale, admin_user):
 @pytest.fixture
 def invoice_purchase(db, purchase, admin_user):
     return Invoice.objects.create(
+        company_id=purchase.company.pk,
         purchase=purchase,
         number_invoice=f"PINV-{purchase.pk:08d}",
         invoice_type=InvoiceType.PURCHASE,
@@ -445,6 +484,19 @@ def payload_role_no_description():
 
 
 @pytest.fixture
+def payload_company():
+    return {
+        "tax_id": "A12345678",
+        "name": "Company",
+        "address": "Address",
+        "number_phone": "600000000",
+        "email": "company@company.cat",
+        "website": "https://company.cat",
+        "logo": "",
+    }
+
+
+@pytest.fixture
 def payload_category():
     return {
         "name": "Electronics",
@@ -552,8 +604,9 @@ def payload_another_customer_promotion(db, another_customer, another_promotion):
 
 
 @pytest.fixture
-def payload_sale(customer, product):
+def payload_sale(company, customer, product):
     return {
+        "company_id": company.pk,
         "customer_id": customer.pk,
         "payment_method": "CASH",
         "details": [{"product_id": product.pk, "quantity": 2, "unit_price": "100.00"}],
@@ -561,8 +614,9 @@ def payload_sale(customer, product):
 
 
 @pytest.fixture
-def payload_another_sale(another_customer, another_product):
+def payload_another_sale(company, another_customer, another_product):
     return {
+        "company_id": company.pk,
         "customer_id": another_customer.pk,
         "payment_method": "CARD",
         "details": [
@@ -591,36 +645,18 @@ def payload_supplier_no_email():
 
 
 @pytest.fixture
-def purchase(db, supplier, admin_user, product):
-    return Purchase.objects.create(
-        supplier=supplier,
-        user=admin_user,
-        total_amount="200.00",
-        state="COMPLETED",
-    )
-
-
-@pytest.fixture
-def another_purchase(db, another_supplier, normal_user, another_product):
-    return Purchase.objects.create(
-        supplier=another_supplier,
-        user=normal_user,
-        total_amount="500.00",
-        state="COMPLETED",
-    )
-
-
-@pytest.fixture
-def payload_purchase(supplier, product):
+def payload_purchase(company, supplier, product):
     return {
+        "company_id": company.pk,
         "supplier_id": supplier.pk,
         "details": [{"product_id": product.pk, "quantity": 2, "unit_cost": "100.00"}],
     }
 
 
 @pytest.fixture
-def payload_another_purchase(another_supplier, another_product):
+def payload_another_purchase(company, another_supplier, another_product):
     return {
+        "company_id": company.pk,
         "supplier_id": another_supplier.pk,
         "details": [
             {"product_id": another_product.pk, "quantity": 1, "unit_cost": "250.00"}

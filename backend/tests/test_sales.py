@@ -90,7 +90,13 @@ class TestPostSale:
         response = api_client_auth.post(sales_url, payload_sale, format="json")
         data = response.data
 
-        assert set(data.keys()) == {"id", "customer_id", "payment_method", "details"}
+        assert set(data.keys()) == {
+            "id",
+            "company_id",
+            "customer_id",
+            "payment_method",
+            "details",
+        }
         assert data["payment_method"] == payload_sale["payment_method"]
 
     def test_create_sale_unauthenticated_returns_401(

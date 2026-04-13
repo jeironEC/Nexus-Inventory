@@ -9,6 +9,7 @@ from django.db import transaction
 
 # Models
 from nexus_inventory_backend.db.models import (
+    Company,
     Sale,
     SaleDetail,
     InventoryMovement,
@@ -30,6 +31,12 @@ from .sale_detail_create import SaleDetailCreateSerializer
 
 
 class SaleCreateSerializer(serializers.ModelSerializer):
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(),
+        source="company",
+        required=False,
+        allow_null=True,
+    )
     customer_id = serializers.PrimaryKeyRelatedField(
         queryset=Customer.objects.all(),
         source="customer",
@@ -42,6 +49,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         model = Sale
         fields = [
             "id",
+            "company_id",
             "customer_id",
             "payment_method",
             "details",
@@ -105,6 +113,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         # Crear factura automáticamente
         Invoice.objects.create(
             sale=sale,
+            company=sale.company,
             invoice_type=InvoiceType.SALE,
             number_invoice=f"SINV-{sale.pk:08d}",
             state=InvoiceState.ISSUED,

@@ -91,6 +91,28 @@ class User(DisplayMixin, BaseModel, AbstractUser):
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL COMPANY
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class Company(DisplayMixin, BaseModel):
+    tax_id = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=255)
+    address = models.TextField(blank=True, null=True)
+    number_phone = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(unique=True)
+    website = models.URLField(blank=True, null=True)
+    logo = models.FileField(upload_to="company/", blank=True, null=True)
+
+    def get_display_fields(self):
+        return ["name", lambda obj: f"Tax: {obj.tax_id}"]
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["tax_id"]),
+        ]
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL CATEGORY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Category(DisplayMixin, BaseModel):
@@ -190,6 +212,7 @@ class CustomerPromotion(DisplayMixin, BaseModel):
 # MODEL SALE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Sale(DisplayMixin, AuditModel):
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="sales")
     customer = models.ForeignKey(
         Customer,
         on_delete=models.SET_NULL,
@@ -272,6 +295,9 @@ class Supplier(DisplayMixin, BaseModel):
 # MODEL PURCHASE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Purchase(DisplayMixin, AuditModel):
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="purchases"
+    )
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, related_name="purchases"
     )
@@ -317,6 +343,9 @@ class PurchaseDetail(DisplayMixin, models.Model):
 # MODEL INVOICE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Invoice(DisplayMixin, BaseModel):
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="invoices"
+    )
     sale = models.OneToOneField(
         Sale, on_delete=models.PROTECT, related_name="invoice", null=True, blank=True
     )

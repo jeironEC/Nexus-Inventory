@@ -5,6 +5,7 @@ from django.contrib import admin
 from .models import (
     Role,
     User,
+    Company,
     Category,
     Product,
     Inventory,
@@ -27,6 +28,7 @@ from .models import (
 # Admin Registers
 admin.site.register(Role)
 admin.site.register(User)
+admin.site.register(Company)
 admin.site.register(Category)
 admin.site.register(Product)
 admin.site.register(Inventory)

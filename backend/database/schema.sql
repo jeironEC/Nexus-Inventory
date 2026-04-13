@@ -48,6 +48,30 @@ ALTER TABLE role
     ADD CONSTRAINT fk_role_deleted_by FOREIGN KEY (deleted_by) REFERENCES user(id);
 
 -- ─────────────────────────────────────────
+-- COMPANY
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS company (
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tax_id       VARCHAR(20) UNIQUE NOT NULL,
+    name         VARCHAR(255) NOT NULL,
+    address      TEXT,
+    number_phone VARCHAR(50),
+    email        VARCHAR(120) UNIQUE NOT NULL,
+    website      TEXT,
+    logo         VARCHAR(255),
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    created_by   BIGINT NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
+
+    FOREIGN KEY (created_by) REFERENCES user(id),
+    FOREIGN KEY (updated_by) REFERENCES user(id),
+    FOREIGN KEY (deleted_by) REFERENCES user(id)
+);
+
+-- ─────────────────────────────────────────
 -- CATEGORY
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS category (
@@ -187,6 +211,7 @@ CREATE TABLE IF NOT EXISTS customer_promotion(
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS sale (
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id     BIGINT NOT NULL,
     customer_id    BIGINT NULL,
     user_id        BIGINT NOT NULL,
     subtotal       DECIMAL(12, 2) NOT NULL,
@@ -200,6 +225,7 @@ CREATE TABLE IF NOT EXISTS sale (
     updated_by     BIGINT NULL,
     deleted_by     BIGINT NULL,
 
+    FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (customer_id) REFERENCES customer(id),
     FOREIGN KEY (user_id)     REFERENCES user(id),
     FOREIGN KEY (updated_by)  REFERENCES user(id),
@@ -266,6 +292,7 @@ CREATE TABLE IF NOT EXISTS supplier (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS purchase (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id    BIGINT NOT NULL,
     supplier_id   BIGINT NOT NULL,
     user_id       BIGINT NOT NULL,
     total_amount  DECIMAL(12, 2) NOT NULL,
@@ -276,6 +303,7 @@ CREATE TABLE IF NOT EXISTS purchase (
     updated_by    BIGINT NULL,
     deleted_by    BIGINT NULL,
 
+    FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(id),
     FOREIGN KEY (user_id)     REFERENCES user(id),
     FOREIGN KEY (updated_by)  REFERENCES user(id),
@@ -305,6 +333,7 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS invoice (
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id     BIGINT NOT NULL,
     sale_id        BIGINT UNIQUE NOT NULL,
     purchase_id    BIGINT UNIQUE NOT NULL,
     number_invoice VARCHAR(50) UNIQUE NOT NULL,
@@ -318,6 +347,7 @@ CREATE TABLE IF NOT EXISTS invoice (
     updated_by     BIGINT NULL,
     deleted_by     BIGINT NULL,
 
+    FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (sale_id)     REFERENCES sale(id) ON DELETE CASCADE,
     FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by)  REFERENCES user(id),
@@ -338,8 +368,7 @@ CREATE TABLE IF NOT EXISTS sale_return (
 
     FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
-
-)
+);
 
 -- ─────────────────────────────────────────
 -- SALE RETURN DETAIL
@@ -348,7 +377,7 @@ CREATE TABLE IF NOT EXISTS sale_return_detail (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
     sale_return_id        BIGINT UNIQUE NOT NULL,
     product_id            BIGINT UNIQUE NOT NULL,
-    inventory_movement_id BIGINT UNIQUE NOT NULL
+    inventory_movement_id BIGINT UNIQUE NOT NULL,
     quantity              INT NOT NULL,
     unit_price            DECIMAL(10, 2) NOT NULL,
     subtotal              DECIMAL(12, 2) NOT NULL,
@@ -357,7 +386,7 @@ CREATE TABLE IF NOT EXISTS sale_return_detail (
     FOREIGN KEY (sale_return_id)        REFERENCES sale_return(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id)            REFERENCES product(id),
     FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
-)
+);
 
 -- ─────────────────────────────────────────
 -- PURCHASE RETURN
@@ -372,7 +401,7 @@ CREATE TABLE IF NOT EXISTS purchase_return (
 
     FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
-)
+);
 
 -- ─────────────────────────────────────────
 -- PURCHASE RETURN DETAIL
@@ -381,7 +410,7 @@ CREATE TABLE IF NOT EXISTS purchase_return_detail (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
     purchase_return_id    BIGINT UNIQUE NOT NULL,
     product_id            BIGINT UNIQUE NOT NULL,
-    inventory_movement_id BIGINT UNIQUE NOT NULL
+    inventory_movement_id BIGINT UNIQUE NOT NULL,
     quantity              INT NOT NULL,
     unit_cost             DECIMAL(10, 2) NOT NULL,
     subtotal              DECIMAL(12, 2) NOT NULL,
@@ -390,4 +419,4 @@ CREATE TABLE IF NOT EXISTS purchase_return_detail (
     FOREIGN KEY (purchase_return_id)    REFERENCES purchase_return(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id)            REFERENCES product(id),
     FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
-)
+);

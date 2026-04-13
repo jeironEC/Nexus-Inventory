@@ -35,6 +35,7 @@ class TestGetInvoice:
         data = response.data[0]
         assert set(data.keys()) == {
             "id",
+            "company",
             "sale",
             "purchase",
             "invoice_type",

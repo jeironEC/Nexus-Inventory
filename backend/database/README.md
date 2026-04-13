@@ -49,7 +49,6 @@ Los usuarios pueden realizar diferentes operaciones como gestionar productos, re
 Relaciones:
 ```bash
 role (1) ─── (N) user
-
 user (1) ─── (N) sale
 user (1) ─── (N) invoice
 user (1) ─── (N) purchase
@@ -75,6 +74,30 @@ Reglas de negocio:
 * La fecha de creación del usuario se registra automáticamente.
 * El campo `updated_at` permite registrar modificaciones del usuario.
 * Los campos `created_by` y `updated_by` implementan una **auto-referencia**, ya que un usuario puede crear o modificar a otro usuario. El primer usuario del sistema tendrá `NULL` en ambos campos.
+
+---
+
+### Tabla Company
+La tabla **Company** almacena los datos de la empresa que usa el sistema.
+Estos datos son necesarios para mostrar en facturas, reportes y otros documentos del sistema.
+
+Relaciones:
+```bash
+company (1) ─── (N) sale
+company (1) ─── (N) purchase
+company (1) ─── (N) invoice
+```
+
+* Una empresa puede tener muchas ventas.
+* Una empresa puede tener muchas compras.
+* Una empresa puede tener muchas facturas.
+
+Reglas de negocio:
+* El nombre de la empresa es obligatorio (`NOT NULL`).
+* El tax_id (identificador fiscal) debe ser único (`UNIQUE`).
+* El email debe ser único (`UNIQUE`).
+* Solo puede existir una empresa activa en el sistema.
+* Los datos de la empresa se muestran en los PDFs de facturas y reportes.
 
 ---
 
@@ -232,12 +255,14 @@ Representa el registro central de cada venta, donde se captura el cliente, el us
 
 Relaciones:
 ```bash
+company  (1) ─── (N) sale
 customer (1) ─── (N) sale
 user     (1) ─── (N) sale
 sale     (1) ─── (1) invoice
 sale     (1) ─── (N) sale_detail
 sale     (1) ─── (N) sale_return
 ```
+* Una empresa puede tener múltiples ventas.
 * Un cliente puede tener múltiples ventas.
 * Un usuario puede procesar múltiples ventas.
 * Una venta puede generar como máximo una factura.
@@ -245,6 +270,7 @@ sale     (1) ─── (N) sale_return
 * Una venta puede tener múltiples devoluciones asociadas.
 
 Reglas de negocio:
+* Cada venta debe estar asociada a una empresa (`company_id NOT NULL`).
 * Cada venta debe estar asociada a un usuario que realizó la operación (`user_id NOT NULL`).
 * El cliente es opcional, permitiendo ventas sin cliente registrado (`customer_id NULL`).
 * Los campos `subtotal`, `tax_amount` y `total_amount` son obligatorios.
@@ -252,33 +278,6 @@ Reglas de negocio:
 * El estado de la venta puede ser `completed` o `canceled`.
 * La fecha de la venta se registra automáticamente (`sale_date`).
 * Una venta cancelada no debería generar movimientos de inventario nuevos (regla de negocio a nivel de aplicación).
-
----
-
-### Tabla Invoice
-La tabla **Invoice** almacena los documentos fiscales generados a partir de una venta.
-
-Una factura es opcional y se emite únicamente cuando el cliente la solicita. Siempre está vinculada a una venta existente y no puede existir de forma independiente.
-
-Relaciones:
-```bash
-sale     (1) ─── (1) invoice
-purchase (1) ─── (1) invoice
-user     (1) ─── (N) invoice
-```
-* Cada factura está asociada a exactamente una venta o compra (`sale_id UNIQUE` o `purchase_id UNIQUE`).
-* Una venta puede tener como máximo una factura.
-* Un usuario puede emitir múltiples facturas.
-
-Reglas de negocio:
-* Cada factura debe estar vinculada a una venta existente (`sale_id NOT NULL UNIQUE`).
-* El número de factura debe ser único en el sistema (`number_invoice UNIQUE`).
-* El estado de la factura puede ser `issued` o `canceled`.
-* El tipo de la factura puede ser `sale` o `purchase`
-* La fecha de emisión se registra automáticamente (`issue_date`).
-* El campo `pdf_generated` indica si la factura ya fue exportada en PDF.
-* El campo `created_by` registra el usuario que emitió la factura.
-* Si la venta asociada es eliminada, la factura se elimina automáticamente (`ON DELETE CASCADE`).
 
 ---
 
@@ -376,17 +375,20 @@ Las líneas de productos comprados se almacenan en la tabla **Purchase Detail**.
 
 Relaciones:
 ```bash
+company  (1) ─── (N) purchase
 supplier (1) ─── (N) purchase
 user     (1) ─── (N) purchase
 purchase (1) ─── (N) purchase_detail
 purchase (1) ─── (N) purchase_return
 ```
+* Una empresa puede tener múltiples compras.
 * Un proveedor puede tener múltiples compras.
 * Un usuario puede registrar múltiples compras.
 * Cada compra puede tener múltiples líneas de detalle en `purchase_detail`.
 * Cada compra puede tener múltiples devoluciones asociadas.
 
 Reglas de negocio:
+* Cada venta debe estar asociada a una empresa (`company_id NOT NULL`).
 * Cada compra debe estar asociada a un proveedor (`supplier_id NOT NULL`).
 * Cada compra debe estar registrada por un usuario del sistema (`user_id NOT NULL`).
 * El monto total de la compra es obligatorio (`total_amount NOT NULL`).
@@ -424,6 +426,36 @@ Reglas de negocio:
 * El subtotal se calcula como `quantity × unit_cost`.
 * Cada línea de compra debe generar un movimiento de inventario de entrada (`in`) (regla de negocio a nivel de aplicación).
 * Una compra cancelada no debería generar movimientos de inventario nuevos ni afectar el stock (regla de negocio a nivel de aplicación).
+
+---
+
+### Tabla Invoice
+La tabla **Invoice** almacena los documentos fiscales generados a partir de una venta.
+
+Una factura es opcional y se emite únicamente cuando el cliente la solicita. Siempre está vinculada a una venta existente y no puede existir de forma independiente.
+
+Relaciones:
+```bash
+company  (1) ─── (N) invoice
+sale     (1) ─── (1) invoice
+purchase (1) ─── (1) invoice
+user     (1) ─── (N) invoice
+```
+* Una empresa puede tener múltiples facturas.
+* Cada factura está asociada a exactamente una venta o compra (`sale_id UNIQUE` o `purchase_id UNIQUE`).
+* Una venta puede tener como máximo una factura.
+* Un usuario puede emitir múltiples facturas.
+
+Reglas de negocio:
+* Cada factura debe estar asociada a una empresa (`company_id NOT NULL`).
+* Cada factura debe estar vinculada a una venta existente (`sale_id NOT NULL UNIQUE`).
+* El número de factura debe ser único en el sistema (`number_invoice UNIQUE`).
+* El estado de la factura puede ser `issued` o `canceled`.
+* El tipo de la factura puede ser `sale` o `purchase`
+* La fecha de emisión se registra automáticamente (`issue_date`).
+* El campo `pdf_generated` indica si la factura ya fue exportada en PDF.
+* El campo `created_by` registra el usuario que emitió la factura.
+* Si la venta asociada es eliminada, la factura se elimina automáticamente (`ON DELETE CASCADE`).
 
 ---
 
@@ -593,6 +625,30 @@ ALTER TABLE role
     ADD CONSTRAINT fk_role_deleted_by FOREIGN KEY (deleted_by) REFERENCES user(id);
 
 -- ─────────────────────────────────────────
+-- COMPANY
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS company (
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tax_id       VARCHAR(20) UNIQUE NOT NULL,
+    name         VARCHAR(255) NOT NULL,
+    address      TEXT,
+    number_phone VARCHAR(50),
+    email        VARCHAR(120) UNIQUE NOT NULL,
+    website      TEXT,
+    logo         VARCHAR(255),
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    created_by   BIGINT NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
+
+    FOREIGN KEY (created_by) REFERENCES user(id),
+    FOREIGN KEY (updated_by) REFERENCES user(id),
+    FOREIGN KEY (deleted_by) REFERENCES user(id)
+);
+
+-- ─────────────────────────────────────────
 -- CATEGORY
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS category (
@@ -732,6 +788,7 @@ CREATE TABLE IF NOT EXISTS customer_promotion(
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS sale (
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id     BIGINT NOT NULL,
     customer_id    BIGINT NULL,
     user_id        BIGINT NOT NULL,
     subtotal       DECIMAL(12, 2) NOT NULL,
@@ -745,6 +802,7 @@ CREATE TABLE IF NOT EXISTS sale (
     updated_by     BIGINT NULL,
     deleted_by     BIGINT NULL,
 
+    FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (customer_id) REFERENCES customer(id),
     FOREIGN KEY (user_id)     REFERENCES user(id),
     FOREIGN KEY (updated_by)  REFERENCES user(id),
@@ -811,6 +869,7 @@ CREATE TABLE IF NOT EXISTS supplier (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS purchase (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id    BIGINT NOT NULL,
     supplier_id   BIGINT NOT NULL,
     user_id       BIGINT NOT NULL,
     total_amount  DECIMAL(12, 2) NOT NULL,
@@ -821,6 +880,7 @@ CREATE TABLE IF NOT EXISTS purchase (
     updated_by    BIGINT NULL,
     deleted_by    BIGINT NULL,
 
+    FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(id),
     FOREIGN KEY (user_id)     REFERENCES user(id),
     FOREIGN KEY (updated_by)  REFERENCES user(id),
@@ -850,6 +910,7 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS invoice (
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id     BIGINT NOT NULL,
     sale_id        BIGINT UNIQUE NOT NULL,
     purchase_id    BIGINT UNIQUE NOT NULL,
     number_invoice VARCHAR(50) UNIQUE NOT NULL,
@@ -863,6 +924,7 @@ CREATE TABLE IF NOT EXISTS invoice (
     updated_by     BIGINT NULL,
     deleted_by     BIGINT NULL,
 
+    FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (sale_id)     REFERENCES sale(id) ON DELETE CASCADE,
     FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by)  REFERENCES user(id),
@@ -883,8 +945,7 @@ CREATE TABLE IF NOT EXISTS sale_return (
 
     FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
-
-)
+);
 
 -- ─────────────────────────────────────────
 -- SALE RETURN DETAIL
@@ -893,7 +954,7 @@ CREATE TABLE IF NOT EXISTS sale_return_detail (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
     sale_return_id        BIGINT UNIQUE NOT NULL,
     product_id            BIGINT UNIQUE NOT NULL,
-    inventory_movement_id BIGINT UNIQUE NOT NULL
+    inventory_movement_id BIGINT UNIQUE NOT NULL,
     quantity              INT NOT NULL,
     unit_price            DECIMAL(10, 2) NOT NULL,
     subtotal              DECIMAL(12, 2) NOT NULL,
@@ -902,7 +963,7 @@ CREATE TABLE IF NOT EXISTS sale_return_detail (
     FOREIGN KEY (sale_return_id)        REFERENCES sale_return(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id)            REFERENCES product(id),
     FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
-)
+);
 
 -- ─────────────────────────────────────────
 -- PURCHASE RETURN
@@ -917,7 +978,7 @@ CREATE TABLE IF NOT EXISTS purchase_return (
 
     FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
-)
+);
 
 -- ─────────────────────────────────────────
 -- PURCHASE RETURN DETAIL
@@ -926,7 +987,7 @@ CREATE TABLE IF NOT EXISTS purchase_return_detail (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
     purchase_return_id    BIGINT UNIQUE NOT NULL,
     product_id            BIGINT UNIQUE NOT NULL,
-    inventory_movement_id BIGINT UNIQUE NOT NULL
+    inventory_movement_id BIGINT UNIQUE NOT NULL,
     quantity              INT NOT NULL,
     unit_cost             DECIMAL(10, 2) NOT NULL,
     subtotal              DECIMAL(12, 2) NOT NULL,
@@ -935,5 +996,5 @@ CREATE TABLE IF NOT EXISTS purchase_return_detail (
     FOREIGN KEY (purchase_return_id)    REFERENCES purchase_return(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id)            REFERENCES product(id),
     FOREIGN KEY (inventory_movement_id) REFERENCES inventory_movement(id)
-)
+);
 ```

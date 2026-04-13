@@ -123,6 +123,9 @@ class Base(Configuration):
 
     STATIC_URL = "static/"
 
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
     AUTHENTICATION_BACKENDS = [
         "django.contrib.auth.backends.ModelBackend",
     ]

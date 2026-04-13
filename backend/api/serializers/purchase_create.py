@@ -8,6 +8,7 @@ from django.db import transaction
 
 # Models
 from nexus_inventory_backend.db.models import (
+    Company,
     Purchase,
     PurchaseDetail,
     InventoryMovement,
@@ -26,6 +27,12 @@ from api.serializers.purchase_detail_create import PurchaseDetailCreateSerialize
 
 
 class PurchaseCreateSerializer(serializers.ModelSerializer):
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(),
+        source="company",
+        required=False,
+        allow_null=True,
+    )
     supplier_id = serializers.PrimaryKeyRelatedField(
         queryset=Supplier.objects.all(),
         source="supplier",
@@ -36,6 +43,7 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
         model = Purchase
         fields = [
             "id",
+            "company_id",
             "supplier_id",
             "details",
         ]
@@ -90,6 +98,7 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
 
             Invoice.objects.create(
                 purchase=purchase,
+                company=purchase.company,
                 invoice_type=InvoiceType.PURCHASE,
                 number_invoice=f"PINV-{purchase.pk:08d}",
                 state=InvoiceState.ISSUED,

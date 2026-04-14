@@ -101,6 +101,7 @@ class Company(DisplayMixin, BaseModel):
     email = models.EmailField(unique=True)
     website = models.URLField(blank=True, null=True)
     logo = models.FileField(upload_to="company/", blank=True, null=True)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
 
     def get_display_fields(self):
         return ["name", lambda obj: f"Tax: {obj.tax_id}"]

@@ -13,6 +13,7 @@ from .views import (
     UserRoleViewSet,
     UserViewSet,
     UserMeViewSet,
+    CompanyViewSet,
     CategoryViewSet,
     ProductViewSet,
     InventoryViewSet,
@@ -45,6 +46,7 @@ router = SimpleRouter()
 router.register("users", UserViewSet, basename="users")
 router.register("users", UserMeViewSet, basename="user")
 router.register("roles", UserRoleViewSet, basename="roles")
+router.register("companies", CompanyViewSet, basename="companies")
 router.register("categories", CategoryViewSet, basename="categories")
 router.register("products", ProductViewSet, basename="products")
 router.register("inventories", InventoryViewSet, basename="inventories")

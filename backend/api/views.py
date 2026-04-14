@@ -21,6 +21,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 from .serializers.empty import EmptySerializer
 from .serializers.user_role import RoleSerializer
 from .serializers.user_read import UserReadSerializer
+from .serializers.company import CompanySerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
 from .serializers.token_pair import EmailTokenObtainPairSerializer
@@ -70,6 +71,7 @@ from .serializers.reports import (
 # Filters
 from .filters.user_role import RoleAdminFilter, RoleFilter
 from .filters.user import UserAdminFilter, UserFilter
+from .filters.company import CompanyAdminFilter, CompanyFilter
 from .filters.category import CategoryAdminFilter, CategoryFilter
 from .filters.product import ProductAdminFilter, ProductFilter
 from .filters.inventory import InventoryAdminFilter, InventoryFilter
@@ -138,6 +140,7 @@ from .filters.reports import (
 from nexus_inventory_backend.db.models import (
     Role,
     User,
+    Company,
     Category,
     Product,
     Inventory,
@@ -307,6 +310,42 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     """
 
     serializer_class = EmailTokenObtainPairSerializer
+
+
+@extend_schema_view(
+    list=extend_schema(tags=["Companies"], summary="List companies"),
+    create=extend_schema(tags=["Companies"], summary="Create company"),
+    retrieve=extend_schema(tags=["Companies"], summary="Get company"),
+    partial_update=extend_schema(tags=["Companies"], summary="Partial update company"),
+    destroy=extend_schema(tags=["Companies"], summary="Delete company"),
+    active=extend_schema(tags=["Companies"], summary="List active companies"),
+    inactive=extend_schema(tags=["Companies"], summary="List inactive companies"),
+    activate=extend_schema(tags=["Companies"], summary="Activate company"),
+    deactivate=extend_schema(tags=["Companies"], summary="Deactivate company"),
+)
+class CompanyViewSet(
+    StrictFilterMixin,
+    RoleFilterMixin,
+    StateMixin,
+    NoPutMixin,
+    AuditUserMixin,
+    SoftDeleteQuerysetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    Gestiona las compañias del sistema.
+    Permite activar y desactivar compañias mediante los endpoints /activate y /deactivate.
+    """
+
+    queryset = (
+        Company.objects.select_related("created_by", "updated_by", "deleted_by")
+        .all()
+        .order_by("name")
+    )
+    serializer_class = CompanySerializer
+    permission_classes = [IsAuthenticated]
+    admin_filterset_class = CompanyAdminFilter
+    user_filterset_class = CompanyFilter
 
 
 @extend_schema_view(

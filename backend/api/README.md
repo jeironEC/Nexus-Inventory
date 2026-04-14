@@ -30,6 +30,22 @@
 
 ---
 
+## Companies
+
+| Método | Endpoint | Descripción |
+| ------ | -------- | ----------- |
+| GET | `/companies/` | Listar todas las compañias |
+| POST | `/companies/` | Crear compañia |
+| GET | `/companies/{id}/` | Obtener compañia por ID |
+| PATCH | `/companies/{id}/` | Actualizar compañia |
+| DELETE | `/companies/{id}/` | Eliminar compañia |
+| PATCH | `/companies/{id}/activate/` | Activar compañia |
+| PATCH | `/companies/{id}/deactivate/` | Desactivar compañia |
+| GET | `/companies/active/` | Listar compañias activas |
+| GET | `/companies/inactive/` | Listar compañias inactivas |
+
+---
+
 ## Customer Promotions
 
 | Método | Endpoint | Descripción |

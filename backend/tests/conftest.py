@@ -118,6 +118,7 @@ def company(db, admin_user):
         number_phone="600000000",
         email="company@company.cat",
         website="https://company.cat",
+        state=State.INACTIVE,
     )
 
 
@@ -486,13 +487,12 @@ def payload_role_no_description():
 @pytest.fixture
 def payload_company():
     return {
-        "tax_id": "A12345678",
-        "name": "Company",
+        "tax_id": "A09876543",
+        "name": "Company Payload",
         "address": "Address",
         "number_phone": "600000000",
-        "email": "company@company.cat",
+        "email": "company_payload@company.cat",
         "website": "https://company.cat",
-        "logo": "",
     }
 
 
@@ -755,6 +755,45 @@ def role_detail_url():
         return reverse("roles-detail", kwargs={"pk": pk})
 
     return _url
+
+
+@pytest.fixture
+def companies_url():
+    return reverse("companies-list")
+
+
+@pytest.fixture
+def company_detail_url():
+    def _url(pk):
+        return reverse("companies-detail", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def company_activate_url():
+    def _url(pk):
+        return reverse("companies-activate", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def company_deactivate_url():
+    def _url(pk):
+        return reverse("companies-deactivate", kwargs={"pk": pk})
+
+    return _url
+
+
+@pytest.fixture
+def companies_actives_url():
+    return reverse("companies-active")
+
+
+@pytest.fixture
+def companies_inactives_url():
+    return reverse("companies-inactive")
 
 
 @pytest.fixture

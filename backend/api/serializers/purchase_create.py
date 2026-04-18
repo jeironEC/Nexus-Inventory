@@ -2,6 +2,7 @@
 from rest_framework import serializers
 
 # Python
+import uuid
 
 # Django
 from django.db import transaction
@@ -94,13 +95,13 @@ class PurchaseCreateSerializer(serializers.ModelSerializer):
                 subtotal=quantity * unit_cost,
             )
 
-            Invoice.objects.create(
-                purchase=purchase,
-                company=purchase.company,
-                invoice_type=InvoiceType.PURCHASE,
-                number_invoice=f"PINV-{purchase.pk:08d}",
-                state=InvoiceState.ISSUED,
-                created_by=user,
-            )
+        Invoice.objects.create(
+            purchase=purchase,
+            company=purchase.company,
+            invoice_type=InvoiceType.PURCHASE,
+            number_invoice=f"PINV-{purchase.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
+            state=InvoiceState.ISSUED,
+            created_by=user,
+        )
 
         return purchase

@@ -391,31 +391,6 @@ class TestCustomersTopPDF:
 
 
 @pytest.mark.django_db
-class TestCustomersPromotionsPDF:
-    def test_returns_200(self, api_client_auth, url_reports_customers_promotions_pdf):
-        response = api_client_auth.get(url_reports_customers_promotions_pdf)
-        assert response.status_code == status.HTTP_200_OK
-
-    def test_content_type_pdf(
-        self, api_client_auth, url_reports_customers_promotions_pdf
-    ):
-        response = api_client_auth.get(url_reports_customers_promotions_pdf)
-        assert response["Content-Type"] == "application/pdf"
-
-    def test_unauthorized_returns_401(
-        self, api_client, url_reports_customers_promotions_pdf
-    ):
-        response = api_client.get(url_reports_customers_promotions_pdf)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-    def test_pdf_has_content(
-        self, api_client_auth, url_reports_customers_promotions_pdf
-    ):
-        response = api_client_auth.get(url_reports_customers_promotions_pdf)
-        assert len(response.content) > 0
-
-
-@pytest.mark.django_db
 class TestInvoicesPDF:
     def test_returns_200(self, api_client_auth, url_reports_invoices_pdf):
         response = api_client_auth.get(url_reports_invoices_pdf)

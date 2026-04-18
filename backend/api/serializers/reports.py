@@ -141,13 +141,6 @@ class CustomerTopSerializer(serializers.Serializer):
     total_spent = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
-class CustomerPromotionReportSerializer(serializers.Serializer):
-    customer_id = serializers.IntegerField()
-    customer_name = serializers.CharField()
-    total_promotions = serializers.IntegerField()
-    applied_promotions = serializers.IntegerField()
-
-
 class InvoiceReportSerializer(serializers.Serializer):
     total_invoices = serializers.IntegerField()
     issued_invoices = serializers.IntegerField()

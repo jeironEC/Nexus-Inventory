@@ -63,6 +63,7 @@ class TestGetInventoryMovement:
             "unique_code",
             "sale_price",
             "purchase_price",
+            "discount_percentage",
             "state",
             "created_at",
             "updated_at",
@@ -83,6 +84,7 @@ class TestGetInventoryMovement:
             "first_name",
             "last_name",
             "email",
+            "nif",
             "role",
             "created_at",
             "updated_at",
@@ -93,7 +95,7 @@ class TestGetInventoryMovement:
         }
 
     def test_inventory_movements_user_is_null_when_not_set(
-        self, api_client_auth, inventory_movements_url, another_inventory_movements
+        self, api_client_auth, inventory_movements_url, inventory_movements_without_user
     ):
         response = api_client_auth.get(inventory_movements_url)
         assert response.data[0]["user"] is None

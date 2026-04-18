@@ -24,6 +24,7 @@ class SaleReadSerializer(serializers.ModelSerializer):
             "company",
             "customer",
             "user",
+            "discount_amount",
             "subtotal",
             "tax_percentage",
             "tax_amount",

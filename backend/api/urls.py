@@ -19,8 +19,6 @@ from .views import (
     InventoryViewSet,
     InventoryMovementViewSet,
     CustomerViewSet,
-    PromotionViewSet,
-    CustomerPromotionViewSet,
     SaleViewSet,
     SaleDetailViewSet,
     SaleReturnViewSet,
@@ -54,10 +52,6 @@ router.register(
     "inventory-movements", InventoryMovementViewSet, basename="inventory-movements"
 )
 router.register("customers", CustomerViewSet, basename="customers")
-router.register("promotions", PromotionViewSet, basename="promotions")
-router.register(
-    "customer-promotions", CustomerPromotionViewSet, basename="customer-promotions"
-)
 router.register("sales", SaleViewSet, basename="sales")
 sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")
 sale_router.register("details", SaleDetailViewSet, basename="sale-detail")

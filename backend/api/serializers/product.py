@@ -28,6 +28,7 @@ class ProductSerializer(AuditFieldsMixin):
             "unique_code",
             "sale_price",
             "purchase_price",
+            "discount_percentage",
             "state",
             "created_at",
             "updated_at",

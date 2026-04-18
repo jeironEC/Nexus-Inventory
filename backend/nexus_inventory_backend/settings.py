@@ -26,7 +26,7 @@ class Base(Configuration):
 
     DEBUG = True
 
-    ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost"]
+    ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost", "0.0.0.0"]
 
     INSTALLED_APPS = [
         "django.contrib.admin",

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-soft: #f8fafc;
+            --border: #e2e8f0;
+            --white: #ffffff;
+        }
+
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+            font-size: 11px;
+            color: var(--text-main);
+            background: #fff;
+            line-height: 1.5;
+        }
+
+        .container {
+            padding: 50px;
+            max-width: 100%;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .company-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .company-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .company-logo {
+            height: 32px;
+            min-width: 32px;
+            width: auto;
+            padding: 0 10px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .company-info {
+            text-align: left;
+        }
+
+        .company-name {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.025em;
+            white-space: nowrap;
+        }
+
+        .company-detail {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .invoice-section {
+            text-align: right;
+        }
+
+        .invoice-badge {
+            display: inline-block;
+            background: var(--bg-soft);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .invoice-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.05em;
+            margin-bottom: 12px;
+        }
+
+        .invoice-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .meta-item {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .status-pill {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+        .status-paid { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .info-box {
+            background: var(--bg-soft);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .info-box-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            font-size: 11px;
+        }
+
+        .info-label {
+            width: 90px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .table-container {
+            margin-bottom: 40px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .items-table th {
+            background: var(--bg-soft);
+            color: var(--text-muted);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .items-table th:first-child { border-left: 1px solid var(--border); border-radius: 8px 0 0 0; }
+        .items-table th:last-child { border-right: 1px solid var(--border); border-radius: 0 8px 0 0; }
+
+        .items-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            vertical-align: middle;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .product-name {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 12px;
+        }
+
+        .product-sku {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .totals-box {
+            width: 280px;
+            background: var(--bg-soft);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 11px;
+        }
+
+        .totals-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .totals-value {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .totals-row.total {
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 2px solid var(--border);
+        }
+
+        .total .totals-label {
+            font-size: 12px;
+            color: var(--text-main);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .total .totals-value {
+            font-size: 20px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 30px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .footer-brand {
+            font-weight: 700;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-section">
+                <div class="company-brand">
+                    <div class="company-logo">{{ company.name|slice:":1" }}</div>
+                    <h1 class="company-name">{{ company.name }}</h1>
+                </div>
+                <div class="company-info">
+                    <div class="company-detail">NIF: {{ company.tax_id }}</div>
+                    {% if company.address %}<div class="company-detail">{{ company.address }}</div>{% endif %}
+                    {% if company.number_phone %}<div class="company-detail">Tel: {{ company.number_phone }}</div>{% endif %}
+                    {% if company.email %}<div class="company-detail">{{ company.email }}</div>{% endif %}
+                    {% if company.website %}<div class="company-detail">Web: {{ company.website }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="invoice-section">
+                <div class="invoice-badge">Factura de Venta</div>
+                <div class="invoice-number">#{{ invoice.number_invoice }}</div>
+                <div class="invoice-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Fecha:</span>
+                        <span>{{ invoice.created_at|date:"d M, Y" }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Estado:</span>
+                        <span class="status-pill {% if invoice.state == 'PAID' %}status-paid{% elif invoice.state == 'PENDING' %}status-pending{% else %}status-cancelled{% endif %}">
+                            {{ invoice.get_state_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="info-box-title">Facturar a</div>
+                <div class="info-content">
+                {% if invoice.sale and invoice.sale.customer %}
+                    <div class="info-row"><span class="info-label">Nombre:</span><span class="info-value">{{ invoice.sale.customer.first_name }} {{ invoice.sale.customer.last_name }}</span></div>
+                    <div class="info-row"><span class="info-label">Email:</span><span class="info-value">{{ invoice.sale.customer.email }}</span></div>
+                    {% if invoice.sale.customer.number_phone %}<div class="info-row"><span class="info-label">Teléfono:</span><span class="info-value">{{ invoice.sale.customer.number_phone }}</span></div>{% endif %}
+                    {% if invoice.sale.customer.address %}<div class="info-row"><span class="info-label">Dirección:</span><span class="info-value">{{ invoice.sale.customer.address }}</span></div>{% endif %}
+                {% else %}
+                    <div class="info-value">Sin datos</div>
+                {% endif %}
+                </div>
+            </div>
+            <div class="info-box">
+                <div class="info-box-title">Detalles del pago</div>
+                <div class="info-content">
+                    <div class="info-row"><span class="info-label">Método:</span><span class="info-value">{{ invoice.sale.get_payment_method_display }}</span></div>
+                    <div class="info-row"><span class="info-label">Atendido por:</span><span class="info-value">{% if invoice.sale.user %}{{ invoice.sale.user.first_name }} {{ invoice.sale.user.last_name }}{% else %}Sistema{% endif %}</span></div>
+                    <div class="info-row"><span class="info-label">Emitido:</span><span class="info-value">{{ invoice.created_at|date:"H:i" }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Producto</th>
+                        <th style="text-align: right;">Cantidad</th>
+                        <th style="text-align: right;">Precio Unit.</th>
+                        <th style="text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.sale.details.all %}
+                    <tr>
+                        <td>
+                            <div class="product-info">
+                                <span class="product-name">{{ item.product.name }}</span>
+                                {% if item.product.sku %}<span class="product-sku">{{ item.product.sku }}</span>{% endif %}
+                            </div>
+                        </td>
+                        <td style="text-align: right; font-weight: 600;">{{ item.quantity }}</td>
+                        <td style="text-align: right;">{{ item.unit_price }}</td>
+                        <td style="text-align: right; font-weight: 700;">{{ item.subtotal}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="totals-row">
+                    <span class="totals-label">Subtotal</span>
+                    <span class="totals-value">{{ invoice.sale.subtotal }}</span>
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">Impuesto (<span>{% widthratio invoice.sale.tax_rate 1 100 %}</span>%)</span>
+                    <span class="totals-value">{{ invoice.sale.tax_amount }}</span>
+                </div>
+                <div class="totals-row total">
+                    <span class="totals-label">Total a Pagar</span>
+                    <span class="totals-value">{{ invoice.sale.total_amount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-text">Documento generado automáticamente por <span class="footer-brand">Nexus Inventory</span></div>
+        </div>
+    </div>
+</body>
+</html>

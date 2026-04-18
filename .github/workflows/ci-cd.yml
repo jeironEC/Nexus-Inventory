@@ -43,7 +43,7 @@ jobs:
               run: pip install -r backend/test-requirements.txt
             - name: Run tests
               working-directory: backend
-              run: pytest -v
+              run: pytest -n auto -vv --dist=loadscope
 
     security:
         needs: test

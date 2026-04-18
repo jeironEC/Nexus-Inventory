@@ -30,11 +30,3 @@ class SaleReturnReadSerializer(serializers.ModelSerializer):
             "updated_by",
             "deleted_by",
         ]
-        read_only_fields = [
-            "id",
-            "total_amount",
-            "state",
-            "created_at",
-            "updated_at",
-            "deleted_at",
-        ]

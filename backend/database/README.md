@@ -792,6 +792,7 @@ CREATE TABLE IF NOT EXISTS sale (
     customer_id    BIGINT NULL,
     user_id        BIGINT NOT NULL,
     subtotal       DECIMAL(12, 2) NOT NULL,
+    tax_percentage DECIMAL(5, 2) DEFAULT 21.00,
     tax_amount     DECIMAL(12, 2) DEFAULT 0,
     total_amount   DECIMAL(12, 2) NOT NULL,
     payment_method ENUM('cash', 'card', 'transfer') DEFAULT 'cash',

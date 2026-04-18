@@ -21,7 +21,6 @@ from nexus_inventory_backend.db.models import (
 # Enums
 from nexus_inventory_backend.db.enums import (
     MovementType,
-    TaxRate,
     InvoiceState,
     InvoiceType,
 )
@@ -52,6 +51,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             "company_id",
             "customer_id",
             "payment_method",
+            "tax_percentage",
             "details",
         ]
         read_only_fields = ["id"]
@@ -70,7 +70,8 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         subtotal = sum(
             detail["quantity"] * detail["unit_price"] for detail in details_data
         )
-        tax_amount = (subtotal * TaxRate.ESP).quantize(Decimal("0.01"))
+        tax_percentage = validated_data.get("tax_percentage", Decimal("21.00"))
+        tax_amount = (subtotal * tax_percentage / 100).quantize(Decimal("0.01"))
         total_amount = subtotal + tax_amount
 
         # Crear venta
@@ -78,6 +79,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             **validated_data,
             user=user,
             subtotal=subtotal,
+            tax_percentage=tax_percentage,
             tax_amount=tax_amount,
             total_amount=total_amount,
         )

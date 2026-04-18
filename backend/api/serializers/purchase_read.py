@@ -6,10 +6,12 @@ from nexus_inventory_backend.db.models import Purchase
 
 # Serializers
 from api.serializers.user_read import UserReadSerializer
+from api.serializers.company import CompanySerializer
 from api.serializers.supplier import SupplierSerializer
 
 
 class PurchaseReadSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
     supplier = SupplierSerializer(read_only=True)
     user = UserReadSerializer(read_only=True)
     updated_by = UserReadSerializer(read_only=True)
@@ -19,6 +21,7 @@ class PurchaseReadSerializer(serializers.ModelSerializer):
         model = Purchase
         fields = [
             "id",
+            "company",
             "supplier",
             "user",
             "total_amount",

@@ -54,9 +54,11 @@ class TestGetInvoice:
         data = response.data[0]["sale"]
         assert set(data.keys()) == {
             "id",
+            "company",
             "customer",
             "user",
             "subtotal",
+            "tax_percentage",
             "tax_amount",
             "total_amount",
             "payment_method",
@@ -75,6 +77,7 @@ class TestGetInvoice:
         data = response.data[0]["purchase"]
         assert set(data.keys()) == {
             "id",
+            "company",
             "supplier",
             "user",
             "total_amount",

@@ -1274,3 +1274,118 @@ def url_reports_sale_returns():
 @pytest.fixture
 def url_reports_purchase_returns():
     return reverse("purchase-return-reports-purchase-returns")
+
+
+@pytest.fixture
+def url_reports_sales_pdf():
+    return reverse("sale-reports-sales-pdf")
+
+
+@pytest.fixture
+def url_reports_sales_by_customer_pdf():
+    return reverse("sale-reports-sales-by-customer-pdf")
+
+
+@pytest.fixture
+def url_reports_sales_by_payment_method_pdf():
+    return reverse("sale-reports-sales-by-payment-method-pdf")
+
+
+@pytest.fixture
+def url_reports_sales_by_period_pdf():
+    return reverse("sale-reports-sales-by-period-pdf")
+
+
+@pytest.fixture
+def url_reports_purchases_pdf():
+    return reverse("purchase-reports-purchases-pdf")
+
+
+@pytest.fixture
+def url_reports_purchases_by_supplier_pdf():
+    return reverse("purchase-reports-purchases-by-supplier-pdf")
+
+
+@pytest.fixture
+def url_reports_purchases_by_period_pdf():
+    return reverse("purchase-reports-purchases-by-period-pdf")
+
+
+@pytest.fixture
+def url_reports_inventory_pdf():
+    return reverse("inventory-reports-inventory-pdf")
+
+
+@pytest.fixture
+def url_reports_inventory_low_stock_pdf():
+    return reverse("inventory-reports-low-stock-pdf")
+
+
+@pytest.fixture
+def url_reports_inventory_movements_pdf():
+    return reverse("inventory-reports-movements-pdf")
+
+
+@pytest.fixture
+def url_reports_products_pdf():
+    return reverse("product-reports-products-pdf")
+
+
+@pytest.fixture
+def url_reports_products_top_selling_pdf():
+    return reverse("product-reports-top-selling-pdf")
+
+
+@pytest.fixture
+def url_reports_products_low_selling_pdf():
+    return reverse("product-reports-low-selling-pdf")
+
+
+@pytest.fixture
+def url_reports_products_most_purchased_pdf():
+    return reverse("product-reports-most-purchased-pdf")
+
+
+@pytest.fixture
+def url_reports_products_by_category_pdf():
+    return reverse("product-reports-by-category-pdf")
+
+
+@pytest.fixture
+def url_reports_customers_pdf():
+    return reverse("customer-reports-customers-pdf")
+
+
+@pytest.fixture
+def url_reports_customers_top_pdf():
+    return reverse("customer-reports-top-customers-pdf")
+
+
+@pytest.fixture
+def url_reports_customers_promotions_pdf():
+    return reverse("customer-reports-customer-promotions-pdf")
+
+
+@pytest.fixture
+def url_reports_invoices_pdf():
+    return reverse("invoice-reports-invoices-pdf")
+
+
+@pytest.fixture
+def url_reports_invoices_sales_pdf():
+    return reverse("invoice-reports-invoices-sales-pdf")
+
+
+@pytest.fixture
+def url_reports_invoices_purchases_pdf():
+    return reverse("invoice-reports-invoices-purchases-pdf")
+
+
+@pytest.fixture
+def url_reports_sale_returns_pdf():
+    return reverse("sale-return-reports-sale-returns-pdf")
+
+
+@pytest.fixture
+def url_reports_purchase_returns_pdf():
+    return reverse("purchase-return-reports-purchase-returns-pdf")

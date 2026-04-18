@@ -225,6 +225,7 @@ class Sale(DisplayMixin, AuditModel):
         User, on_delete=models.SET_NULL, related_name="created_sales", null=True
     )
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=21.00)
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     payment_method = models.CharField(

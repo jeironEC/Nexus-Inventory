@@ -24,9 +24,3 @@ class SaleReturnDetailReadSerializer(serializers.ModelSerializer):
             "subtotal",
             "created_at",
         ]
-        read_only_fields = [
-            "id",
-            "inventory_movement",
-            "subtotal",
-            "created_at",
-        ]

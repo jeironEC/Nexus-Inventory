@@ -36,6 +36,7 @@ class TestGetPurchase:
         data = response.data[0]
         assert set(data.keys()) == {
             "id",
+            "company",
             "supplier",
             "user",
             "total_amount",

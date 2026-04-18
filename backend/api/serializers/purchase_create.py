@@ -23,8 +23,6 @@ from nexus_inventory_backend.db.enums import MovementType, InvoiceType, InvoiceS
 # Serializers
 from api.serializers.purchase_detail_create import PurchaseDetailCreateSerializer
 
-# Models
-
 
 class PurchaseCreateSerializer(serializers.ModelSerializer):
     company_id = serializers.PrimaryKeyRelatedField(

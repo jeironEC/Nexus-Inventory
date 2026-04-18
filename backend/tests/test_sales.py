@@ -36,9 +36,11 @@ class TestGetSale:
         data = response.data[0]
         assert set(data.keys()) == {
             "id",
+            "company",
             "customer",
             "user",
             "subtotal",
+            "tax_percentage",
             "tax_amount",
             "total_amount",
             "payment_method",
@@ -94,6 +96,7 @@ class TestPostSale:
             "id",
             "company_id",
             "customer_id",
+            "tax_percentage",
             "payment_method",
             "details",
         }

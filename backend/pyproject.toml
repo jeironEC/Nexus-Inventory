@@ -27,6 +27,7 @@ test = [
     "pytest-django",
     "pytest-cov",
     "pytest-xdist",
+    "bandit",
 ]
 
 [tool.pytest.ini_options]

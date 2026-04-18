@@ -17,12 +17,15 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - name: Set up Python
-              uses: actions/setup-python@v5
+            - uses: actions/setup-python@v5
               with:
-                  python-version: "3.13"
-            - name: Install flake8
-              run: pip install flake8
+                python-version: "3.13"
+                cache: "pip"
+                cache-dependency-path: backend/test-requirements.txt
+
+            - run: |
+                python -m pip install --upgrade pip
+                pip install flake8
             - name: Run flake8
               run: flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
@@ -33,16 +36,23 @@ jobs:
             - uses: actions/checkout@v4
             - uses: actions/setup-python@v5
               with:
-                  python-version: "3.13"
-            - name: Cache pip
-              uses: actions/cache@v4
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('backend/test-requirements.txt') }}
+                python-version: "3.13"
+                cache: "pip"
+                cache-dependency-path: backend/test-requirements.txt
+            - name: Setup locale
+              run: |
+                sudo apt-get update
+                sudo apt-get install -y locales
+                sudo locale-gen es_ES.UTF-8
             - name: Install dependencies
-              run: pip install -r backend/test-requirements.txt
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r backend/test-requirements.txt
             - name: Run tests
               working-directory: backend
+              env:
+                LANG: es_ES.UTF-8
+                LC_ALL: es_ES.UTF-8
               run: pytest -n auto -vv --dist=loadscope
 
     security:
@@ -50,14 +60,17 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - name: Set up Python
-              uses: actions/setup-python@v5
+            - uses: actions/setup-python@v5
               with:
-                  python-version: "3.13"
+                python-version: "3.13"
+                cache: "pip"
+                cache-dependency-path: backend/test-requirements.txt
             - name: Install dependencies
-              run: pip install -r backend/test-requirements.txt
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r backend/test-requirements.txt
             - name: Run Bandit
-              run: pip install bandit && bandit -r ./backend -x ./backend/venv,./backend/tests
+              run: bandit -r ./backend -x ./backend/venv,./backend/tests
 
     build:
         needs: security

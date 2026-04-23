@@ -2,6 +2,7 @@
 from rest_framework import serializers
 
 # Python
+import uuid
 from decimal import Decimal
 
 # Django
@@ -52,9 +53,10 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             "customer_id",
             "payment_method",
             "tax_percentage",
+            "tax_percentage",
             "details",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "tax_percentage"]
 
     def validate_details(self, value):
         if not value:
@@ -67,17 +69,78 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
 
         # Calcular totales
-        subtotal = sum(
-            detail["quantity"] * detail["unit_price"] for detail in details_data
-        )
+        subtotal = Decimal("0.00")
+        discount_amount = Decimal("0.00")
+
+        # Pre-validar stock de productos
+        stock_errors = []
+
+        for detail in details_data:
+            product = detail["product"]
+            quantity = detail["quantity"]
+            unit_price = detail["unit_price"]
+
+            # Verificar stock disponible
+            try:
+                inventory = Inventory.objects.get(product=product)
+
+                if inventory.quantity < quantity:
+                    stock_errors.append(
+                        {
+                            "product_id": product.id,
+                            "product_name": product.name,
+                            "requested": quantity,
+                            "available": inventory.quantity,
+                        }
+                    )
+            except Inventory.DoesNotExist:
+                stock_errors.append(
+                    {
+                        "product_id": product.id,
+                        "product_name": product.name,
+                        "error": "Product without inventory",
+                    }
+                )
+
+        if stock_errors:
+            raise serializers.ValidationError(
+                {"details": "Stock insufficient", "errors": stock_errors}
+            )
+
+        # Calcular descuentos y totales
+        for detail in details_data:
+            product = detail["product"]
+            quantity = detail["quantity"]
+            unit_price = detail["unit_price"]
+
+            # Descuento de producto
+            product_discount = Decimal("0.00")
+
+            if product.discount_percentage and product.discount_percentage > 0:
+                product_discount = (
+                    unit_price * product.discount_percentage / 100
+                ) * quantity
+
+            # Precio con descuento
+            unit_price_final = unit_price - (
+                unit_price * (product.discount_percentage or 0) / 100
+            )
+
+            subtotal += quantity * unit_price_final
+            discount_amount += product_discount
+
+        total_discount = discount_amount
+        tax_base = subtotal - total_discount
+
         tax_percentage = validated_data.get("tax_percentage", Decimal("21.00"))
-        tax_amount = (subtotal * tax_percentage / 100).quantize(Decimal("0.01"))
-        total_amount = subtotal + tax_amount
+        tax_amount = (tax_base * tax_percentage / 100).quantize(Decimal("0.01"))
+        total_amount = tax_base + tax_amount
 
         # Crear venta
         sale = Sale.objects.create(
             **validated_data,
             user=user,
+            discount_amount=total_discount,
             subtotal=subtotal,
             tax_percentage=tax_percentage,
             tax_amount=tax_amount,
@@ -90,6 +153,14 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             quantity = detail["quantity"]
             unit_price = detail["unit_price"]
 
+            # Precio con descuento aplicado
+            unit_price_final = unit_price
+
+            if product.discount_percentage and product.discount_percentage > 0:
+                unit_price_final = unit_price - (
+                    unit_price * product.discount_percentage / 100
+                )
+
             inventory_movement = InventoryMovement.objects.create(
                 product=product,
                 user=user,
@@ -97,9 +168,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
                 quantity=quantity,
             )
 
-            inventory, created = Inventory.objects.get_or_create(
-                product=product, defaults={"quantity": 0}
-            )
+            inventory = Inventory.objects.get(product=product)
             inventory.quantity -= quantity
             inventory.save()
 
@@ -108,8 +177,8 @@ class SaleCreateSerializer(serializers.ModelSerializer):
                 product=product,
                 inventory_movement=inventory_movement,
                 quantity=quantity,
-                unit_price=unit_price,
-                subtotal=quantity * unit_price,
+                unit_price=unit_price_final,
+                subtotal=quantity * unit_price_final,
             )
 
         # Crear factura automáticamente
@@ -117,7 +186,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             sale=sale,
             company=sale.company,
             invoice_type=InvoiceType.SALE,
-            number_invoice=f"SINV-{sale.pk:08d}",
+            number_invoice=f"SINV-{sale.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
             state=InvoiceState.ISSUED,
             created_by=user,
         )

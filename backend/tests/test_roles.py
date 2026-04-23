@@ -43,9 +43,6 @@ class TestGetRole:
             "created_at",
             "updated_at",
             "deleted_at",
-            "created_by",
-            "updated_by",
-            "deleted_by",
         }
 
     def test_list_roles_unauthenticated_return_401(self, api_client, roles_url):

@@ -10,19 +10,7 @@ from nexus_inventory_backend.db.enums import State
 
 
 class StateMixin:
-    """Mixin para viewsets que manejan un campo 'state' (ACTIVE/INACTIVE)."""
-
-    @action(detail=False, methods=["get"])
-    def active(self, request):
-        qs = self.get_queryset().filter(state=State.ACTIVE)
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=["get"])
-    def inactive(self, request):
-        qs = self.get_queryset().filter(state=State.INACTIVE)
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
+    """Mixin para viewsets que manejan el campo 'state' (ACTIVE/INACTIVE)."""
 
     @action(detail=True, methods=["patch"], serializer_class=EmptySerializer)
     def activate(self, request, pk=None):

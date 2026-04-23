@@ -15,6 +15,7 @@ class SupplierSerializer(AuditFieldsMixin):
             "id",
             "name",
             "email",
+            "nif",
             "number_phone",
             "address",
             "state",
@@ -35,6 +36,7 @@ class SupplierSerializer(AuditFieldsMixin):
 
     def validate(self, data):
         name = data.get("name")
+        nif = data.get("nif")
         is_create = not self.instance
 
         if is_create and not name:
@@ -47,6 +49,15 @@ class SupplierSerializer(AuditFieldsMixin):
             if queryset.exists():
                 raise serializers.ValidationError(
                     {"name": "A supplier with this name already exists."}
+                )
+
+        if nif:
+            queryset = Supplier.objects.filter(nif__iexact=nif)
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            if queryset.exists():
+                raise serializers.ValidationError(
+                    {"nif": "A supplier with this nif already exists."}
                 )
 
         return data

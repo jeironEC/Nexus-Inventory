@@ -1,5 +1,6 @@
 # Internal
 import pytest
+import uuid
 
 # DRF
 from rest_framework.test import APIClient
@@ -7,7 +8,6 @@ from rest_framework.test import APIClient
 # Django
 from django.urls import reverse
 from django.test import Client
-from django.utils import timezone
 
 # Models
 from nexus_inventory_backend.db.models import (
@@ -19,8 +19,6 @@ from nexus_inventory_backend.db.models import (
     Inventory,
     InventoryMovement,
     Customer,
-    Promotion,
-    CustomerPromotion,
     Sale,
     SaleDetail,
     Invoice,
@@ -36,7 +34,6 @@ from nexus_inventory_backend.db.models import (
 from nexus_inventory_backend.db.enums import State, InvoiceState, InvoiceType
 
 # Datetime
-from datetime import timedelta
 
 
 # ======================================================================================================================================================================
@@ -98,21 +95,31 @@ def purchasing_manager_role(db):
 @pytest.fixture
 def admin_user(db, admin_role):
     return User.objects.create_user(
-        email="admin@test.com", password="StrongPass123!", role=admin_role
+        first_name="admin",
+        last_name="test",
+        email="admin@test.com",
+        nif=str(uuid.uuid4())[:10],
+        password="StrongPass123!",
+        role=admin_role,
     )
 
 
 @pytest.fixture
 def normal_user(db, cashier_role):
     return User.objects.create_user(
-        email="user@test.com", password="StrongPass123!", role=cashier_role
+        first_name="user",
+        last_name="test",
+        email="user@test.com",
+        nif=str(uuid.uuid4())[:10],
+        password="StrongPass123!",
+        role=cashier_role,
     )
 
 
 @pytest.fixture
 def company(db, admin_user):
     return Company.objects.create(
-        tax_id="A12345678",
+        nif=str(uuid.uuid4())[:10],
         name="Company",
         address="Address",
         number_phone="600000000",
@@ -183,7 +190,16 @@ def inventory_movements(db, product, admin_user):
 
 
 @pytest.fixture
-def another_inventory_movements(db, another_product):
+def another_inventory_movements(db, another_product, admin_user):
+    return InventoryMovement.objects.create(
+        product=another_product,
+        user=admin_user,
+        quantity=20,
+    )
+
+
+@pytest.fixture
+def inventory_movements_without_user(db, another_product):
     return InventoryMovement.objects.create(
         product=another_product,
         user=None,
@@ -196,6 +212,7 @@ def customer(db):
     return Customer.objects.create(
         first_name="Eduardo",
         last_name="Bonilla",
+        nif=str(uuid.uuid4())[:10],
         email="eduardobonilla@gmail.com",
         number_phone="640664411",
         address="Av. Espaillat 123, Bj 2",
@@ -207,6 +224,7 @@ def customer_inactive(db):
     return Customer.objects.create(
         first_name="Cliente",
         last_name="Inactivo",
+        nif=str(uuid.uuid4())[:10],
         email="inactivo@test.com",
         number_phone="640000000",
         address="Dirección inactiva",
@@ -219,59 +237,10 @@ def another_customer(db):
     return Customer.objects.create(
         first_name="Rafael",
         last_name="Estrella",
+        nif=str(uuid.uuid4())[:10],
         email="rafaelestrella@gmail.com",
         number_phone="640443322",
         address="Av. Argentina 12, Piso 4A",
-    )
-
-
-@pytest.fixture
-def promotion(db):
-    return Promotion.objects.create(
-        name="promotion 2027",
-        description="promotion description 2027",
-        discount_percentage=20,
-        start_date=timezone.now().date().isoformat(),
-        end_date=(timezone.now() + timedelta(days=30)).date().isoformat(),
-    )
-
-
-@pytest.fixture
-def promotion_inactive(db):
-    return Promotion.objects.create(
-        name="Promotion Inactive",
-        description="Inactive promotion",
-        discount_percentage=15,
-        start_date=timezone.now().date().isoformat(),
-        end_date=(timezone.now() + timedelta(days=30)).date().isoformat(),
-        state=State.INACTIVE,
-    )
-
-
-@pytest.fixture
-def another_promotion(db):
-    return Promotion.objects.create(
-        name="promotion 2028",
-        description="promotion description 2028",
-        discount_percentage=30,
-        start_date=timezone.now().date().isoformat(),
-        end_date=(timezone.now() + timedelta(days=30)).date().isoformat(),
-    )
-
-
-@pytest.fixture
-def customer_promotion(db, customer, promotion):
-    return CustomerPromotion.objects.create(
-        customer=customer,
-        promotion=promotion,
-    )
-
-
-@pytest.fixture
-def another_customer_promotion(db, another_customer, another_promotion):
-    return CustomerPromotion.objects.create(
-        customer=another_customer,
-        promotion=another_promotion,
     )
 
 
@@ -281,7 +250,9 @@ def sale(db, company, customer, admin_user):
         company=company,
         customer=customer,
         user=admin_user,
+        discount_amount=0,
         subtotal=100.00,
+        tax_percentage=21.00,
         tax_amount=21.00,
         total_amount=121.00,
         payment_method="CASH",
@@ -295,7 +266,9 @@ def another_sale(db, company, another_customer, normal_user):
         company=company,
         customer=another_customer,
         user=normal_user,
+        discount_amount=0,
         subtotal=200.00,
+        tax_percentage=21.00,
         tax_amount=42.00,
         total_amount=242.00,
         payment_method="CARD",
@@ -333,7 +306,7 @@ def purchase(db, company, supplier, admin_user, product):
         company=company,
         supplier=supplier,
         user=admin_user,
-        total_amount="200.00",
+        total_amount=200.00,
         state="COMPLETED",
     )
 
@@ -344,7 +317,7 @@ def another_purchase(db, company, another_supplier, normal_user, another_product
         company=company,
         supplier=another_supplier,
         user=normal_user,
-        total_amount="500.00",
+        total_amount=500.00,
         state="COMPLETED",
     )
 
@@ -354,7 +327,7 @@ def invoice_sale(db, sale, admin_user):
     return Invoice.objects.create(
         company_id=sale.company.pk,
         sale=sale,
-        number_invoice=f"SINV-{sale.pk:08d}",
+        number_invoice=f"SINV-{sale.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
         invoice_type=InvoiceType.SALE,
         state=InvoiceState.ISSUED,
         created_by=admin_user,
@@ -366,7 +339,7 @@ def invoice_purchase(db, purchase, admin_user):
     return Invoice.objects.create(
         company_id=purchase.company.pk,
         purchase=purchase,
-        number_invoice=f"PINV-{purchase.pk:08d}",
+        number_invoice=f"PINV-{purchase.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
         invoice_type=InvoiceType.PURCHASE,
         state=InvoiceState.ISSUED,
         created_by=admin_user,
@@ -378,6 +351,7 @@ def supplier(db):
     return Supplier.objects.create(
         name="Tech Supplies Inc",
         email="contact@techsupplies.com",
+        nif=str(uuid.uuid4())[:10],
         number_phone="5551234567",
         address="123 Tech Lane, Silicon Valley",
     )
@@ -388,6 +362,7 @@ def another_supplier(db):
     return Supplier.objects.create(
         name="Global Gadgets",
         email="sales@globalgadgets.net",
+        nif=str(uuid.uuid4())[:10],
         number_phone="5559876543",
         address="456 Gadget Blvd, New York",
     )
@@ -461,8 +436,11 @@ def purchase_return_detail(db, purchase_return, product, admin_user):
 @pytest.fixture
 def payload_user(cashier_role):
     return {
+        "first_name": "new",
+        "last_name": "test",
         "email": "new@test.com",
         "password": "StrongPass123!",
+        "nif": str(uuid.uuid4())[:10],
         "role": cashier_role.id,
     }
 
@@ -487,7 +465,7 @@ def payload_role_no_description():
 @pytest.fixture
 def payload_company():
     return {
-        "tax_id": "A09876543",
+        "nif": "A09876543",
         "name": "Company Payload",
         "address": "Address",
         "number_phone": "600000000",
@@ -523,9 +501,10 @@ def payload_product(category):
         "category_id": category.pk,
         "name": "Product",
         "description": "Test product",
-        "unique_code": "1234abcd",
+        "unique_code": str(uuid.uuid4())[:10],
         "sale_price": 260.00,
         "purchase_price": 200.00,
+        "discount_percentage": 20,
     }
 
 
@@ -535,7 +514,7 @@ def payload_another_product(another_category):
         "category_id": another_category.pk,
         "name": "Product 2",
         "description": "Test product 2",
-        "unique_code": "4321dcba",
+        "unique_code": str(uuid.uuid4())[:10],
         "sale_price": 330.00,
         "purchase_price": 250.00,
     }
@@ -553,10 +532,24 @@ def payload_product_no_unique_code(category):
 
 
 @pytest.fixture
+def payload_product_with_same_name(category):
+    return {
+        "category_id": category.pk,
+        "name": "LAPTOP",
+        "description": "Laptop Product",
+        "unique_code": str(uuid.uuid4())[:10],
+        "sale_price": 300.00,
+        "purchase_price": 200.00,
+        "discount_percentage": 10,
+    }
+
+
+@pytest.fixture
 def payload_customer():
     return {
         "first_name": "Abel",
         "last_name": "Torres",
+        "nif": str(uuid.uuid4())[:10],
         "email": "abeltorres@gmail.com",
         "number_phone": "666313110",
         "address": "Carrer De Albacete 54, Atico A",
@@ -564,47 +557,7 @@ def payload_customer():
 
 
 @pytest.fixture
-def payload_promotion():
-    return {
-        "name": "promotion 2026",
-        "description": "promotion description",
-        "discount_percentage": 20,
-        "start_date": timezone.now().date().isoformat(),
-        "end_date": (timezone.now() + timedelta(days=30)).date().isoformat(),
-    }
-
-
-@pytest.fixture
-def another_payload_promotion():
-    return {
-        "name": "promotion 2028",
-        "description": "promotion description",
-        "discount_percentage": 20,
-        "start_date": timezone.now().date().isoformat(),
-        "end_date": (timezone.now() + timedelta(days=30)).date().isoformat(),
-    }
-
-
-@pytest.fixture
-def payload_customer_promotion(db, customer, promotion):
-    return {
-        "customer_id": customer.pk,
-        "promotion_id": promotion.pk,
-        "applied": True,
-    }
-
-
-@pytest.fixture
-def payload_another_customer_promotion(db, another_customer, another_promotion):
-    return {
-        "customer_id": another_customer.pk,
-        "promotion_id": another_promotion.pk,
-        "applied": False,
-    }
-
-
-@pytest.fixture
-def payload_sale(company, customer, product):
+def payload_sale(company, customer, product, inventory):
     return {
         "company_id": company.pk,
         "customer_id": customer.pk,
@@ -614,7 +567,7 @@ def payload_sale(company, customer, product):
 
 
 @pytest.fixture
-def payload_another_sale(company, another_customer, another_product):
+def payload_another_sale(company, another_customer, another_product, inventory):
     return {
         "company_id": company.pk,
         "customer_id": another_customer.pk,
@@ -630,6 +583,7 @@ def payload_supplier():
     return {
         "name": "New Tech Supplier",
         "email": "new@techsupplies.com",
+        "nif": str(uuid.uuid4())[:10],
         "number_phone": "5551112233",
         "address": "789 Tech Road",
     }
@@ -639,13 +593,14 @@ def payload_supplier():
 def payload_supplier_no_email():
     return {
         "name": "New Tech Supplier 2",
+        "nif": str(uuid.uuid4())[:10],
         "number_phone": "5551112233",
         "address": "789 Tech Road",
     }
 
 
 @pytest.fixture
-def payload_purchase(company, supplier, product):
+def payload_purchase(company, supplier, product, inventory):
     return {
         "company_id": company.pk,
         "supplier_id": supplier.pk,
@@ -654,7 +609,9 @@ def payload_purchase(company, supplier, product):
 
 
 @pytest.fixture
-def payload_another_purchase(company, another_supplier, another_product):
+def payload_another_purchase(
+    company, another_supplier, another_product, another_inventory
+):
     return {
         "company_id": company.pk,
         "supplier_id": another_supplier.pk,
@@ -787,28 +744,8 @@ def company_deactivate_url():
 
 
 @pytest.fixture
-def companies_actives_url():
-    return reverse("companies-active")
-
-
-@pytest.fixture
-def companies_inactives_url():
-    return reverse("companies-inactive")
-
-
-@pytest.fixture
 def categories_url():
     return reverse("categories-list")
-
-
-@pytest.fixture
-def categories_actives_url():
-    return reverse("categories-active")
-
-
-@pytest.fixture
-def categories_inactives_url():
-    return reverse("categories-inactive")
 
 
 @pytest.fixture
@@ -838,16 +775,6 @@ def category_deactivate_url():
 @pytest.fixture
 def products_url():
     return reverse("products-list")
-
-
-@pytest.fixture
-def products_actives_url():
-    return reverse("products-active")
-
-
-@pytest.fixture
-def products_inactives_url():
-    return reverse("products-inactive")
 
 
 @pytest.fixture
@@ -927,56 +854,6 @@ def customer_detail_url():
 
 
 @pytest.fixture
-def promotions_url():
-    return reverse("promotions-list")
-
-
-@pytest.fixture
-def promotion_detail_url():
-    def _url(pk):
-        return reverse("promotions-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def customer_promotions_url():
-    return reverse("customer-promotions-list")
-
-
-@pytest.fixture
-def customer_promotion_detail_url():
-    def _url(pk):
-        return reverse("customer-promotions-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def customer_list_promotions_url():
-    def _url(pk):
-        return reverse("customers-list-promotions", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def customer_promotion_assign_url():
-    def _url(pk):
-        return reverse("customers-add-promotion", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def customer_promotion_apply_url():
-    def _url(pk):
-        return reverse("customer-promotions-apply", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
 def sales_url():
     return reverse("sales-list")
 
@@ -985,14 +862,6 @@ def sales_url():
 def sale_detail_url():
     def _url(pk):
         return reverse("sales-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def sale_cancel_url():
-    def _url(pk):
-        return reverse("sales-cancel", kwargs={"pk": pk})
 
     return _url
 
@@ -1061,14 +930,6 @@ def purchase_detail_url():
 
 
 @pytest.fixture
-def purchase_cancel_url():
-    def _url(pk):
-        return reverse("purchases-cancel", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
 def purchase_details_url():
     def _url(purchase_pk):
         return reverse("purchase-detail-list", kwargs={"purchases_pk": purchase_pk})
@@ -1095,14 +956,6 @@ def sale_returns_url():
 def sale_return_detail_url():
     def _url(pk):
         return reverse("sale-returns-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def sale_return_cancel_url():
-    def _url(pk):
-        return reverse("sale-returns-cancel", kwargs={"pk": pk})
 
     return _url
 
@@ -1137,14 +990,6 @@ def purchase_returns_url():
 def purchase_return_detail_url():
     def _url(pk):
         return reverse("purchase-returns-detail", kwargs={"pk": pk})
-
-    return _url
-
-
-@pytest.fixture
-def purchase_return_cancel_url():
-    def _url(pk):
-        return reverse("purchase-returns-cancel", kwargs={"pk": pk})
 
     return _url
 
@@ -1244,11 +1089,6 @@ def url_reports_products_by_category():
 @pytest.fixture
 def url_reports_customers_top():
     return reverse("customer-reports-top-customers")
-
-
-@pytest.fixture
-def url_reports_customers_promotions():
-    return reverse("customer-reports-customer-promotions")
 
 
 @pytest.fixture
@@ -1359,11 +1199,6 @@ def url_reports_customers_pdf():
 @pytest.fixture
 def url_reports_customers_top_pdf():
     return reverse("customer-reports-top-customers-pdf")
-
-
-@pytest.fixture
-def url_reports_customers_promotions_pdf():
-    return reverse("customer-reports-customer-promotions-pdf")
 
 
 @pytest.fixture

@@ -28,6 +28,7 @@ class TestGetSupplier:
         assert set(data.keys()) == {
             "id",
             "name",
+            "nif",
             "email",
             "number_phone",
             "address",
@@ -87,6 +88,7 @@ class TestPostSupplier:
         assert set(data.keys()) == {
             "id",
             "name",
+            "nif",
             "email",
             "number_phone",
             "address",

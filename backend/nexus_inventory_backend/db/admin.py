@@ -10,8 +10,6 @@ from .models import (
     Product,
     Inventory,
     Customer,
-    Promotion,
-    CustomerPromotion,
     Sale,
     Invoice,
     InventoryMovement,
@@ -33,8 +31,6 @@ admin.site.register(Category)
 admin.site.register(Product)
 admin.site.register(Inventory)
 admin.site.register(Customer)
-admin.site.register(Promotion)
-admin.site.register(CustomerPromotion)
 admin.site.register(Sale)
 admin.site.register(Invoice)
 admin.site.register(InventoryMovement)

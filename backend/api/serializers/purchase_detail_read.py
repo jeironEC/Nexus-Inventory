@@ -24,11 +24,3 @@ class PurchaseDetailReadSerializer(serializers.ModelSerializer):
             "subtotal",
             "created_at",
         ]
-        read_only_fields = [
-            "id",
-            "inventory_movement",
-            "quantity",
-            "unit_cost",
-            "subtotal",
-            "created_at",
-        ]

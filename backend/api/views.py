@@ -1,7 +1,6 @@
 # Django
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-from django.db import IntegrityError
 from django.utils import timezone
 from django.template.loader import render_to_string
 from django.http.response import HttpResponse
@@ -34,8 +33,6 @@ from .serializers.product import ProductSerializer
 from .serializers.inventory import InventorySerializer
 from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
-from .serializers.promotion import PromotionSerializer
-from .serializers.customer_promotion import CustomerPromotionSerializer
 from .serializers.sale_read import SaleReadSerializer
 from .serializers.sale_create import SaleCreateSerializer
 from .serializers.sale_detail_read import SaleDetailReadSerializer
@@ -68,7 +65,6 @@ from .serializers.reports import (
     ProductByCategorySerializer,
     CustomerReportSerializer,
     CustomerTopSerializer,
-    CustomerPromotionReportSerializer,
     InvoiceReportSerializer,
     SaleReturnReportSerializer,
     PurchaseReturnReportSerializer,
@@ -86,11 +82,6 @@ from .filters.inventory_movements import (
     InventoryMovementFilter,
 )
 from .filters.customer import CustomerAdminFilter, CustomerFilter
-from .filters.promotion import PromotionAdminFilter, PromotionFilter
-from .filters.customer_promotions import (
-    CustomerPromotionAdminFilter,
-    CustomerPromotionFilter,
-)
 from .filters.sale import (
     SaleAdminFilter,
     SaleFilter,
@@ -152,8 +143,6 @@ from nexus_inventory_backend.db.models import (
     Inventory,
     InventoryMovement,
     Customer,
-    Promotion,
-    CustomerPromotion,
     Sale,
     SaleDetail,
     Invoice,
@@ -175,14 +164,12 @@ from .mixins.state import StateMixin
 from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
-from .mixins.operation_state import OperationStateMixin
 from .mixins.report_filter import ReportFilterMixin
 from .mixins.audit_fields import AuditUserMixin, AuditOperationUserMixin
 from .mixins.is_active import UserStateMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import (
-    State,
     OperationState,
     InvoiceState,
     InvoiceType,
@@ -206,7 +193,6 @@ from api.services.util_service import format_currency
 from api.utils import get_trunc_func
 
 # Date
-from datetime import date
 
 
 @extend_schema(tags=["Health"])
@@ -231,8 +217,6 @@ class HealthCheckView(APIView):
     retrieve=extend_schema(tags=["Roles"], summary="Get role"),
     partial_update=extend_schema(tags=["Roles"], summary="Partial update role"),
     destroy=extend_schema(tags=["Roles"], summary="Delete role"),
-    active=extend_schema(tags=["Roles"], summary="List active roles"),
-    inactive=extend_schema(tags=["Roles"], summary="List inactive roles"),
     activate=extend_schema(tags=["Roles"], summary="Activate role"),
     deactivate=extend_schema(tags=["Roles"], summary="Deactivate role"),
 )
@@ -241,7 +225,6 @@ class UserRoleViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
-    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -250,11 +233,7 @@ class UserRoleViewSet(
     Solo los administradores pueden gestionar todo el sistema.
     """
 
-    queryset = (
-        Role.objects.select_related("created_by", "updated_by", "deleted_by")
-        .all()
-        .order_by("name")
-    )
+    queryset = Role.objects.all().order_by("name")
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
     admin_filterset_class = RoleAdminFilter
@@ -343,8 +322,6 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     retrieve=extend_schema(tags=["Companies"], summary="Get company"),
     partial_update=extend_schema(tags=["Companies"], summary="Partial update company"),
     destroy=extend_schema(tags=["Companies"], summary="Delete company"),
-    active=extend_schema(tags=["Companies"], summary="List active companies"),
-    inactive=extend_schema(tags=["Companies"], summary="List inactive companies"),
     activate=extend_schema(tags=["Companies"], summary="Activate company"),
     deactivate=extend_schema(tags=["Companies"], summary="Deactivate company"),
 )
@@ -381,8 +358,6 @@ class CompanyViewSet(
         tags=["Categories"], summary="Partial update category"
     ),
     destroy=extend_schema(tags=["Categories"], summary="Delete category"),
-    active=extend_schema(tags=["Categories"], summary="List active categories"),
-    inactive=extend_schema(tags=["Categories"], summary="List inactive categories"),
     activate=extend_schema(tags=["Categories"], summary="Activate category"),
     deactivate=extend_schema(tags=["Categories"], summary="Deactivate category"),
 )
@@ -417,8 +392,6 @@ class CategoryViewSet(
     retrieve=extend_schema(tags=["Products"], summary="Get product"),
     partial_update=extend_schema(tags=["Products"], summary="Partial update product"),
     destroy=extend_schema(tags=["Products"], summary="Delete product"),
-    active=extend_schema(tags=["Products"], summary="List active products"),
-    inactive=extend_schema(tags=["Products"], summary="List inactive products"),
     activate=extend_schema(tags=["Products"], summary="Activate product"),
     deactivate=extend_schema(tags=["Products"], summary="Deactivate product"),
 )
@@ -533,13 +506,8 @@ class InventoryMovementViewSet(
     retrieve=extend_schema(tags=["Customers"], summary="Get customer"),
     partial_update=extend_schema(tags=["Customers"], summary="Partial update customer"),
     destroy=extend_schema(tags=["Customers"], summary="Delete customer"),
-    active=extend_schema(tags=["Customers"], summary="List active customers"),
-    inactive=extend_schema(tags=["Customers"], summary="List inactive customers"),
     activate=extend_schema(tags=["Customers"], summary="Activate customer"),
     deactivate=extend_schema(tags=["Customers"], summary="Deactivate customer"),
-    list_promotions=extend_schema(
-        tags=["Customers"], summary="List customer promotions"
-    ),
 )
 class CustomerViewSet(
     StrictFilterMixin,
@@ -565,171 +533,6 @@ class CustomerViewSet(
     admin_filterset_class = CustomerAdminFilter
     user_filterset_class = CustomerFilter
 
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="list-promotions",
-    )
-    def list_promotions(self, request, pk=None):
-        customer = self.get_object()
-
-        promotions = CustomerPromotion.objects.filter(customer=customer).select_related(
-            "promotion"
-        )
-
-        serializer = CustomerPromotionSerializer(promotions, many=True)
-        return Response(serializer.data)
-
-
-@extend_schema_view(
-    list=extend_schema(tags=["Promotions"], summary="List promotions"),
-    create=extend_schema(tags=["Promotions"], summary="Create promotion"),
-    retrieve=extend_schema(tags=["Promotions"], summary="Get promotion"),
-    partial_update=extend_schema(
-        tags=["Promotions"], summary="Partial update promotion"
-    ),
-    destroy=extend_schema(tags=["Promotions"], summary="Delete promotion"),
-    active=extend_schema(tags=["Promotions"], summary="List active promotions"),
-    inactive=extend_schema(tags=["Promotions"], summary="List inactive promotions"),
-    activate=extend_schema(tags=["Promotions"], summary="Activate promotion"),
-    deactivate=extend_schema(tags=["Promotions"], summary="Deactivate promotion"),
-)
-class PromotionViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    StateMixin,
-    NoPutMixin,
-    AuditUserMixin,
-    SoftDeleteQuerysetMixin,
-    viewsets.ModelViewSet,
-):
-    """
-    Gestiona las promociones del sistema.
-    """
-
-    queryset = (
-        Promotion.objects.select_related("created_by", "updated_by", "deleted_by")
-        .all()
-        .order_by("name")
-    )
-    serializer_class = PromotionSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = PromotionAdminFilter
-    user_filterset_class = PromotionFilter
-
-
-@extend_schema_view(
-    list=extend_schema(
-        tags=["Customer Promotions"], summary="List customer promotions"
-    ),
-    create=extend_schema(
-        tags=["Customer Promotions"], summary="Create customer promotion"
-    ),
-    retrieve=extend_schema(
-        tags=["Customer Promotions"], summary="Get customer promotion"
-    ),
-    partial_update=extend_schema(
-        tags=["Customer Promotions"], summary="Partial update customer promotion"
-    ),
-    destroy=extend_schema(
-        tags=["Customer Promotions"], summary="Delete customer promotion"
-    ),
-    apply=extend_schema(
-        tags=["Customer Promotions"], summary="Apply promotion to customer"
-    ),
-)
-class CustomerPromotionViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    NoPutMixin,
-    AuditUserMixin,
-    SoftDeleteQuerysetMixin,
-    viewsets.ModelViewSet,
-):
-    """
-    Gestiona la asignación de promociones a clientes.
-    Evita duplicados: si la promoción ya está asignada retorna 400.
-    Valida que el cliente esté activo y la promoción no haya expirado.
-    """
-
-    queryset = (
-        CustomerPromotion.objects.select_related(
-            "customer", "promotion", "created_by", "updated_by", "deleted_by"
-        )
-        .all()
-        .order_by("customer__first_name", "promotion__name")
-    )
-    serializer_class = CustomerPromotionSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = CustomerPromotionAdminFilter
-    user_filterset_class = CustomerPromotionFilter
-
-    def create(self, request, *args, **kwargs):
-        customer_id = request.data.get("customer_id")
-        promotion_id = request.data.get("promotion_id")
-
-        if customer_id and promotion_id:
-            from nexus_inventory_backend.db.models import Customer, Promotion
-
-            try:
-                customer = Customer.objects.get(pk=customer_id)
-            except Customer.DoesNotExist:
-                return Response(
-                    {"detail": "Customer not found."},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-
-            if customer.state != State.ACTIVE:
-                return Response(
-                    {"detail": "Customer is not active."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            try:
-                promotion = Promotion.objects.get(pk=promotion_id)
-            except Promotion.DoesNotExist:
-                return Response(
-                    {"detail": "Promotion not found."},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-
-            if promotion.state != State.ACTIVE:
-                return Response(
-                    {"detail": "Promotion is not active."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if promotion.end_date < date.today():
-                return Response(
-                    {"detail": "Promotion has expired."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            self.perform_create(serializer)
-        except IntegrityError:
-            return Response(
-                {"detail": "This promotion is already assigned to the customer."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-    @action(detail=True, methods=["patch"])
-    def apply(self, request, pk=None):
-        customer_promotion = self.get_object()
-        customer_promotion.applied = True
-        customer_promotion.save(update_fields=["applied"])
-
-        serializer = self.get_serializer(customer_promotion)
-        return Response(serializer.data)
-
 
 @extend_schema_view(
     list=extend_schema(tags=["Sales"], summary="List sales"),
@@ -743,7 +546,6 @@ class CustomerPromotionViewSet(
 class SaleViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -958,8 +760,6 @@ class InvoiceViewSet(
     retrieve=extend_schema(tags=["Suppliers"], summary="Get supplier"),
     partial_update=extend_schema(tags=["Suppliers"], summary="Partial update supplier"),
     destroy=extend_schema(tags=["Suppliers"], summary="Delete supplier"),
-    active=extend_schema(tags=["Suppliers"], summary="List active suppliers"),
-    inactive=extend_schema(tags=["Suppliers"], summary="List inactive suppliers"),
     activate=extend_schema(tags=["Suppliers"], summary="Activate supplier"),
     deactivate=extend_schema(tags=["Suppliers"], summary="Deactivate supplier"),
 )
@@ -999,7 +799,6 @@ class SupplierViewSet(
 class PurchaseViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -1119,7 +918,6 @@ class PurchaseDetailViewSet(
 class SaleReturnViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -1245,7 +1043,6 @@ class SaleReturnDetailViewSet(
 class PurchaseReturnViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -2198,17 +1995,6 @@ class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         serializer = CustomerTopSerializer(result, many=True)
         return Response(serializer.data)
 
-    @extend_schema(responses=CustomerPromotionReportSerializer(many=True))
-    @action(detail=False, methods=["get"], url_path="customers/promotions")
-    def customer_promotions(self, request):
-        qs = self.get_filtered_queryset(
-            CustomerPromotion.objects.select_related("customer").all(),
-            CustomerReportFilter,
-        )
-        result = CustomerReportService.get_customer_promotions(qs)
-        serializer = CustomerPromotionReportSerializer(result, many=True)
-        return Response(serializer.data)
-
     @action(
         detail=False,
         methods=["get"],
@@ -2281,39 +2067,6 @@ class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
 
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="reporte_clientes_top.pdf"'
-        return response
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="customers/promotions/pdf",
-    )
-    def customer_promotions_pdf(self, request):
-        qs = self.get_filtered_queryset(
-            CustomerPromotion.objects.select_related("customer").all(),
-            CustomerReportFilter,
-        )
-
-        result = CustomerReportService.get_customer_promotions(qs)
-
-        totals = CustomerReportService.get_totals_from_promotions(result)
-
-        company = CompanyService.get_active_company()
-        html_content = render_to_string(
-            "pdf/customers_promotions_report.html",
-            {
-                "data": result,
-                "company": company,
-                "total_customers": totals["total_customers"],
-                "total_promotions": totals["total_promotions"],
-                "total_applied": totals["total_applied"],
-            },
-        )
-        pdf_file = HTML(string=html_content).write_pdf()
-        response = HttpResponse(pdf_file, content_type="application/pdf")
-        response["Content-Disposition"] = (
-            'inline; filename="reporte_promociones_clientes.pdf"'
-        )
         return response
 
 

@@ -13,7 +13,7 @@ class CompanySerializer(AuditFieldsMixin):
         model = Company
         fields = [
             "id",
-            "tax_id",
+            "nif",
             "name",
             "address",
             "number_phone",
@@ -36,14 +36,12 @@ class CompanySerializer(AuditFieldsMixin):
             "deleted_at",
         ]
 
-    def validate_tax_id(self, value):
-        queryset = Company.objects.filter(tax_id__iexact=value)
+    def validate_nif(self, value):
+        queryset = Company.objects.filter(nif__iexact=value)
 
         if self.instance:
             queryset = queryset.exclude(pk=self.instance.pk)
 
         if queryset.exists():
-            raise serializers.ValidationError(
-                "A Company with this tax id already exists."
-            )
+            raise serializers.ValidationError("A Company with this nif already exists.")
         return value

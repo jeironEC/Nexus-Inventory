@@ -38,6 +38,7 @@ class TestGetCustomer:
             "id",
             "first_name",
             "last_name",
+            "nif",
             "email",
             "number_phone",
             "address",
@@ -67,16 +68,6 @@ class TestGetCustomer:
     ):
         response = api_client_auth.get(customer_detail_url(customer.pk))
         assert response.data["id"] == customer.pk
-
-    def test_get_promotions_customer_returns_list(
-        self,
-        api_client_auth,
-        customer_list_promotions_url,
-        customer_promotion,
-        customer,
-    ):
-        response = api_client_auth.get(customer_list_promotions_url(customer.pk))
-        assert len(response.data) >= 1
 
     def test_get_customer_by_id_unauthenticated_returns_401(
         self, api_client, customer_detail_url, customer

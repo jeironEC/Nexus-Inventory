@@ -11,7 +11,6 @@ from django.utils import timezone
 from nexus_inventory_backend.db.models import Purchase, PurchaseDetail
 
 # Enums
-from nexus_inventory_backend.db.enums import OperationState
 
 # Datetime
 from datetime import timedelta
@@ -56,6 +55,7 @@ class TestGetPurchase:
         assert set(supplier_data.keys()) == {
             "id",
             "name",
+            "nif",
             "email",
             "number_phone",
             "address",
@@ -190,32 +190,6 @@ class TestDeletePurchase:
         self, api_client, purchase_detail_url, purchase
     ):
         response = api_client.delete(purchase_detail_url(purchase.pk))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
-class TestStatePurchase:
-    def test_cancel_purchase_returns_200(
-        self, api_client_auth, purchase_cancel_url, purchase
-    ):
-        response = api_client_auth.patch(purchase_cancel_url(purchase.pk))
-        purchase.refresh_from_db()
-        assert response.status_code == status.HTTP_200_OK
-        assert purchase.state == OperationState.CANCELED
-        assert response.data["state"] == "CANCELED"
-
-    def test_cancel_already_canceled_returns_400(
-        self, api_client_auth, purchase_cancel_url, purchase
-    ):
-        purchase.state = OperationState.CANCELED
-        purchase.save()
-        response = api_client_auth.patch(purchase_cancel_url(purchase.pk))
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_cancel_unauthenticated_returns_401(
-        self, api_client, purchase_cancel_url, purchase
-    ):
-        response = api_client.patch(purchase_cancel_url(purchase.pk))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 

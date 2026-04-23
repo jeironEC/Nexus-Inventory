@@ -224,18 +224,6 @@ class TestStateCategory:
 
 @pytest.mark.django_db
 class TestFiltersCategory:
-    def test_returns_list_categories_actives(
-        self, api_client_auth, categories_actives_url
-    ):
-        response = api_client_auth.get(categories_actives_url)
-        assert response.status_code == status.HTTP_200_OK
-
-    def test_returns_list_categories_inactives(
-        self, api_client_auth, categories_inactives_url
-    ):
-        response = api_client_auth.get(categories_inactives_url)
-        assert response.status_code == status.HTTP_200_OK
-
     def test_search_categories(self, api_client_auth, categories_url, category):
         response = api_client_auth.get(f"{categories_url}?search={category.name}")
         assert len(response.data) >= 1

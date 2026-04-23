@@ -1,7 +1,14 @@
 # Internal
+import os
 import locale
 
-locale.setlocale(locale.LC_ALL, "es_ES.UTF-8")
+try:
+    for env_var in ["LC_ALL", "LANG"]:
+        if env_var not in os.environ:
+            os.environ[env_var] = "C.UTF-8"
+    locale.setlocale(locale.LC_ALL, "")
+except locale.Error:
+    pass
 
 
 def format_currency(value):

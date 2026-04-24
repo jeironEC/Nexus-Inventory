@@ -5,36 +5,53 @@ CREATE TABLE IF NOT EXISTS role (
     id          BIGINT PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(30) UNIQUE NOT NULL,
     description TEXT,
-    state       ENUM('active', 'inactive') DEFAULT 'active',
+    is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NULL,
-    deleted_at  TIMESTAMP NULL,
+    deleted_at  TIMESTAMP NULL
 );
 
 -- ─────────────────────────────────────────
 -- USER
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS user (
-    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    role_id       BIGINT NOT NULL,
-    avatar        VARCHAR(500) NULL,
-    first_name    VARCHAR(100) NOT NULL,
-    last_name     VARCHAR(100) NOT NULL,
-    email         VARCHAR(120) UNIQUE NOT NULL,
-    nif           VARCHAR(20) UNIQUE NOT NULL,
-    password      VARCHAR(255) NOT NULL,
-    state         ENUM('active', 'inactive') DEFAULT 'active',
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP NULL,
-    deleted_at    TIMESTAMP NULL,
-    created_by    BIGINT NULL,
-    updated_by    BIGINT NULL,
-    deleted_by    BIGINT NULL,
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    role_id    BIGINT NOT NULL,
+    avatar     VARCHAR(500) NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name  VARCHAR(100) NOT NULL,
+    email      VARCHAR(120) UNIQUE NOT NULL,
+    nif        VARCHAR(20) UNIQUE NOT NULL,
+    password   VARCHAR(255) NOT NULL,
+    is_active  BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    created_by BIGINT NULL,
+    updated_by BIGINT NULL,
+    deleted_by BIGINT NULL,
 
     FOREIGN KEY (role_id)    REFERENCES role(id),
     FOREIGN KEY (created_by) REFERENCES user(id),
     FOREIGN KEY (updated_by) REFERENCES user(id),
     FOREIGN KEY (deleted_by) REFERENCES user(id)
+);
+
+-- ─────────────────────────────────────────
+-- PASSWORD RESET OTP
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS password_reset_otp (
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id     BIGINT NOT NULL,
+    email       VARCHAR(255) NOT NULL,
+    otp_hash    VARCHAR(128) NOT NULL,
+    is_used     BOOLEAN NOT NULL DEFAULT FALSE,
+    reset_token UUID NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    deleted_at  TIMESTAMP NULL,
+
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 -- ─────────────────────────────────────────
@@ -49,7 +66,7 @@ CREATE TABLE IF NOT EXISTS company (
     email        VARCHAR(120) UNIQUE NOT NULL,
     website      TEXT,
     logo         VARCHAR(255),
-    state         ENUM('active', 'inactive') DEFAULT 'active',
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NULL,
     deleted_at   TIMESTAMP NULL,
@@ -69,7 +86,7 @@ CREATE TABLE IF NOT EXISTS category (
     id          BIGINT PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(100) NOT NULL,
     description TEXT,
-    state       ENUM('active', 'inactive') DEFAULT 'active',
+    is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NULL,
     deleted_at  TIMESTAMP NULL,
@@ -94,7 +111,7 @@ CREATE TABLE IF NOT EXISTS product (
     sale_price          DECIMAL(10, 2) NOT NULL,
     purchase_price      DECIMAL(10, 2) NOT NULL,
     discount_percentage DECIMAL(5, 2) DEFAULT 0,
-    state               ENUM('active', 'inactive') DEFAULT 'active',
+    is_active           BOOLEAN NOT NULL DEFAULT TRUE,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NULL,
     deleted_at          TIMESTAMP NULL,
@@ -139,7 +156,7 @@ CREATE TABLE IF NOT EXISTS customer (
     email        VARCHAR(120) UNIQUE NOT NULL,
     phone_number VARCHAR(50),
     address      TEXT,
-    state        ENUM('active', 'inactive') DEFAULT 'active',
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NULL,
     deleted_at   TIMESTAMP NULL,
@@ -223,7 +240,7 @@ CREATE TABLE IF NOT EXISTS supplier (
     email        VARCHAR(120) UNIQUE NOT NULL,
     phone_number VARCHAR(50),
     address      TEXT,
-    state        ENUM('active', 'inactive') DEFAULT 'active',
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NULL,
     deleted_at   TIMESTAMP NULL,
@@ -240,17 +257,17 @@ CREATE TABLE IF NOT EXISTS supplier (
 -- PURCHASE
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS purchase (
-    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    company_id    BIGINT NOT NULL,
-    supplier_id   BIGINT NOT NULL,
-    user_id       BIGINT NOT NULL,
-    total_amount  DECIMAL(12, 2) NOT NULL,
-    state         ENUM('completed', 'canceled') DEFAULT 'completed',
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP NULL,
-    deleted_at    TIMESTAMP NULL,
-    updated_by    BIGINT NULL,
-    deleted_by    BIGINT NULL,
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id   BIGINT NOT NULL,
+    supplier_id  BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    state        ENUM('completed', 'canceled') DEFAULT 'completed',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
 
     FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(id),
@@ -319,16 +336,16 @@ CREATE TABLE IF NOT EXISTS sale_return (
     reason       TEXT,
     total_amount DECIMAL(12, 2) NOT NULL,
     state        ENUM('completed', 'canceled') DEFAULT 'completed',
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NULL,
-    deleted_at     TIMESTAMP NULL,
-    updated_by     BIGINT NULL,
-    deleted_by     BIGINT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
 
-    FOREIGN KEY (sale_id) REFERENCES sale(id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (updated_by)  REFERENCES user(id),
-    FOREIGN KEY (deleted_by)  REFERENCES user(id)
+    FOREIGN KEY (sale_id)    REFERENCES sale(id),
+    FOREIGN KEY (user_id)    REFERENCES user(id),
+    FOREIGN KEY (updated_by) REFERENCES user(id),
+    FOREIGN KEY (deleted_by) REFERENCES user(id)
 );
 
 -- ─────────────────────────────────────────
@@ -359,14 +376,14 @@ CREATE TABLE IF NOT EXISTS purchase_return (
     reason       TEXT,
     total_amount DECIMAL(12, 2) NOT NULL,
     state        ENUM('completed', 'canceled') DEFAULT 'completed',
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NULL,
-    deleted_at     TIMESTAMP NULL,
-    updated_by     BIGINT NULL,
-    deleted_by     BIGINT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
 
     FOREIGN KEY (purchase_id) REFERENCES purchase(id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (user_id)     REFERENCES user(id),
     FOREIGN KEY (updated_by)  REFERENCES user(id),
     FOREIGN KEY (deleted_by)  REFERENCES user(id)
 );

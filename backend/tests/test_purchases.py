@@ -59,7 +59,7 @@ class TestGetPurchase:
             "email",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",

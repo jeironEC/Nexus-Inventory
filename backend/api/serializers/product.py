@@ -29,7 +29,7 @@ class ProductSerializer(AuditFieldsMixin):
             "sale_price",
             "purchase_price",
             "discount_percentage",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -39,7 +39,7 @@ class ProductSerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",

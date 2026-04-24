@@ -10,7 +10,6 @@ from .base import TimestampModel, BaseModel, AuditModel, DisplayModel
 
 # Enums
 from .enums import (
-    State,
     OperationState,
     PaymentMethod,
     InvoiceState,
@@ -55,7 +54,7 @@ class UserManager(BaseUserManager):
 class Role(DisplayModel, TimestampModel):
     name = models.CharField(max_length=30)
     description = models.TextField()
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name"]
@@ -89,6 +88,22 @@ class User(DisplayModel, BaseModel, AbstractUser):
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL PASSWORD RESET OTP
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class PasswordResetOTP(DisplayModel, TimestampModel):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="password_otps"
+    )
+    email = models.EmailField()
+    otp_hash = models.CharField(max_length=128)
+    is_used = models.BooleanField(default=False)
+    reset_token = models.UUIDField(null=True, blank=True)
+
+    def get_display_fields(self):
+        return ["email", "created_at"]
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL COMPANY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Company(DisplayModel, BaseModel):
@@ -99,7 +114,7 @@ class Company(DisplayModel, BaseModel):
     email = models.EmailField(unique=True)
     website = models.URLField(blank=True, null=True)
     logo = models.FileField(upload_to="company/", blank=True, null=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name", lambda obj: f"NIF: {obj.nif}"]
@@ -117,7 +132,7 @@ class Company(DisplayModel, BaseModel):
 class Category(DisplayModel, BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name"]
@@ -136,7 +151,7 @@ class Product(DisplayModel, BaseModel):
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name"]
@@ -165,7 +180,7 @@ class Customer(DisplayModel, BaseModel):
     nif = models.CharField(max_length=20, unique=True)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["first_name", "email"]
@@ -251,7 +266,7 @@ class Supplier(DisplayModel, BaseModel):
     nif = models.CharField(max_length=20, unique=True)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name", "email"]

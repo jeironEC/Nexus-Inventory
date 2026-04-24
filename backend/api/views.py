@@ -1,3 +1,7 @@
+# Internal
+import uuid
+from hashlib import sha256
+
 # Django
 from django.shortcuts import get_object_or_404
 from django.conf import settings
@@ -24,6 +28,11 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 from .serializers.empty import EmptySerializer
 from .serializers.user_role import RoleSerializer
 from .serializers.user_read import UserReadSerializer
+from .serializers.password_reset import (
+    PasswordResetRequestSerializer,
+    PasswordResetVerifySerializer,
+    PasswordResetConfirmSerializer,
+)
 from .serializers.company import CompanySerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
@@ -137,6 +146,7 @@ from .filters.reports import (
 from nexus_inventory_backend.db.models import (
     Role,
     User,
+    PasswordResetOTP,
     Company,
     Category,
     Product,
@@ -160,13 +170,12 @@ from .permissions import CanCreateUsers
 
 # Mixins
 from .mixins.filter import StrictFilterMixin
-from .mixins.state import StateMixin
 from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
 from .mixins.report_filter import ReportFilterMixin
 from .mixins.audit_fields import AuditUserMixin, AuditOperationUserMixin
-from .mixins.is_active import UserStateMixin
+from .mixins.is_active import StateMixin
 
 # Enums
 from nexus_inventory_backend.db.enums import (
@@ -176,6 +185,7 @@ from nexus_inventory_backend.db.enums import (
 )
 
 # Services
+from api.services.email_service import send_reset_password_email
 from api.services.company_service import CompanyService
 from api.services.reports.sale_report_service import SaleReportService
 from api.services.reports.purchase_report_service import PurchaseReportService
@@ -187,12 +197,13 @@ from api.services.reports.sale_return_report_service import SaleReturnReportServ
 from api.services.reports.purchase_return_report_service import (
     PurchaseReturnReportService,
 )
-from api.services.util_service import format_currency
+from api.services.util_service import format_currency, generate_otp
 
 # Utils
 from api.utils import get_trunc_func
 
 # Date
+from datetime import timedelta
 
 
 @extend_schema(tags=["Health"])
@@ -243,11 +254,13 @@ class UserRoleViewSet(
 @extend_schema_view(
     list=extend_schema(tags=["Users"], summary="List users"),
     create=extend_schema(tags=["Users"], summary="Create user"),
+    activate=extend_schema(tags=["Users"], summary="Activate user"),
+    deactivate=extend_schema(tags=["Users"], summary="Deactivate user"),
 )
 class UserViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    UserStateMixin,
+    StateMixin,
     AuditUserMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -314,6 +327,126 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     """
 
     serializer_class = EmailTokenObtainPairSerializer
+
+
+class PasswordResetViewSet(viewsets.ViewSet):
+    """
+    Recuperación de contraseña mediante email.
+    Envia un correo con un código OTP y retorna un mensaje de seguridad.
+    Valida el código y retorna un token de recuperación.
+    Valida el token y permite cambiar la contraseña.
+    """
+
+    permission_classes = [IsAuthenticated, CanCreateUsers]
+
+    def get_serializer_class(self):
+        if self.action == "request":
+            return PasswordResetRequestSerializer
+        elif self.action == "verify":
+            return PasswordResetVerifySerializer
+        elif self.action == "confirm":
+            return PasswordResetConfirmSerializer
+        return None
+
+    @action(detail=False, methods=["post"])
+    def request(self, request):
+        serializer = self.get_serializer_class()(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "If the email address exists, you will receive a code."},
+                status=status.HTTP_200_OK,
+            )
+
+        PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
+
+        otp = generate_otp()
+        otp_hash = sha256(otp.encode()).hexdigest()
+
+        PasswordResetOTP.objects.create(user=user, email=email, otp_hash=otp_hash)
+
+        send_reset_password_email(email, otp, user)
+
+        return Response(
+            {"detail": "If the email address exists, you will receive a code."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["post"])
+    def verify(self, request):
+        serializer = self.get_serializer_class()(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        otp = serializer.validated_data["otp"]
+
+        record = PasswordResetOTP.objects.filter(email=email, is_used=False).first()
+
+        if not record:
+            return Response(
+                {"detail": "Invalid or expired code."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if timezone.now() - record.created_at > timedelta(minutes=5):
+            return Response(
+                {"detail": "Expired code."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if sha256(otp.encode()).hexdigest() != record.otp_hash:
+            return Response(
+                {"detail": "Invalid code."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        record.reset_token = uuid.uuid4()
+        record.save(update_fields=["reset_token"])
+
+        return Response(
+            {"reset_token": str(record.reset_token)}, status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["post"])
+    def confirm(self, request):
+        serializer = self.get_serializer_class()(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reset_token = serializer.validated_data["reset_token"]
+        new_password = serializer.validated_data["new_password"]
+
+        record = PasswordResetOTP.objects.filter(
+            reset_token=reset_token, is_used=False
+        ).first()
+
+        if not record:
+            return Response(
+                {"detail": "Invalid or expired reset token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email=record.email).first()
+
+        if not user:
+            return Response(
+                {"detail": "Invalid user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save()
+
+        record.is_used = True
+        record.reset_token = None
+        record.save(update_fields=["is_used", "reset_token"])
+
+        return Response(
+            {"detail": "Password updated successfully"},
+            status=status.HTTP_200_OK,
+        )
 
 
 @extend_schema_view(

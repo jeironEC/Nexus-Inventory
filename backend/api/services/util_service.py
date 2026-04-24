@@ -1,6 +1,7 @@
 # Internal
 import os
 import locale
+import secrets
 
 try:
     for env_var in ["LC_ALL", "LANG"]:
@@ -9,6 +10,10 @@ try:
     locale.setlocale(locale.LC_ALL, "")
 except locale.Error:
     pass
+
+
+def generate_otp():
+    return str(secrets.randbelow(900000) + 100000)
 
 
 def format_currency(value):

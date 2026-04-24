@@ -4,9 +4,6 @@ import django_filters
 # Models
 from nexus_inventory_backend.db.models import Product
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Filters
 from .base import AuditFilter
 
@@ -14,7 +11,7 @@ from .base import AuditFilter
 class ProductFilter(django_filters.FilterSet):
     # Filters
     category_id = django_filters.NumberFilter(field_name="category_id")
-    state = django_filters.ChoiceFilter(field_name="state", choices=State.choices)
+    is_active = django_filters.BooleanFilter(field_name="is_active")
 
     # Searchs
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
@@ -40,7 +37,7 @@ class ProductFilter(django_filters.FilterSet):
         model = Product
         fields = [
             "category_id",
-            "state",
+            "is_active",
             "name",
             "unique_code",
             "date_from",

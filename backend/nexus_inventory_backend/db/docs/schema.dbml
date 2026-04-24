@@ -9,12 +9,6 @@ Project nexus_inventory {
 //////////////////////
 // ENUMS
 //////////////////////
-
-Enum state {
-  active
-  inactive
-}
-
 Enum sale_state {
   completed
   canceled
@@ -46,86 +40,98 @@ Enum invoice_type_enum {
 //////////////////////
 
 Table role {
-    id bigint [pk, increment]
-    name varchar(30) [unique, not null]
+    id          bigint [pk, increment]
+    name        varchar(30) [unique, not null]
     description text
-    state state [default: 'active']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
+    is_active   booelan [not null, default: true]
+    created_at  timestamp [default: 'now()']
+    updated_at  timestamp
+    deleted_at  timestamp
 }
 
 Table user {
-    id bigint [pk, increment]
-    role_id bigint [not null, ref: > role.id]
-    avatar varchar(500)
+    id         bigint [pk, increment]
+    role_id    bigint [not null, ref: > role.id]
+    avatar     varchar(500)
     first_name varchar(100) [not null]
-    last_name varchar(100) [not null]
-    email varchar(120) [unique, not null]
-    nif varchar(20) [unique, not null]
-    password varchar(255) [not null]
-    state state [default: 'active']
+    last_name  varchar(100) [not null]
+    email      varchar(120) [unique, not null]
+    nif        varchar(20) [unique, not null]
+    password   varchar(255) [not null]
+    is_active  booelan [not null, default: true]
     created_at timestamp [default: 'now()']
     updated_at timestamp
     deleted_at timestamp
     created_by bigint [ref: > user.id]
     updated_by bigint [ref: > user.id]
     deleted_by bigint [ref: > user.id]
+}
+
+Table password_reset_otp {
+    id          bigint [pk, increment]
+    user_id     bigint [not null, ref: > user.id]
+    email       varchar(255) [not null]
+    otp_hash    varchar(128) [not null]
+    is_used     boolean [not null, default: false]
+    reset_token UUID
+    created_at  timestamp [default: 'now()']
+    updated_at  TIMESTAMP
+    deleted_at  TIMESTAMP
 }
 
 Table company {
-    id bigint [pk, increment]
-    nif varchar(20) [unique, not null]
-    name varchar(255) [not null]
-    address text
+    id           bigint [pk, increment]
+    nif          varchar(20) [unique, not null]
+    name         varchar(255) [not null]
+    address      text
     phone_number varchar(50)
-    email varchar(120) [unique, not null]
-    website text
-    logo varchar(255)
-    state state [default: 'active']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    created_by bigint [ref: > user.id]
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    email        varchar(120) [unique, not null]
+    website      text
+    logo         varchar(255)
+    is_active    booelan [not null, default: true]
+    created_at   timestamp [default: 'now()']
+    updated_at   timestamp
+    deleted_at   timestamp
+    created_by   bigint [ref: > user.id]
+    updated_by   bigint [ref: > user.id]
+    deleted_by   bigint [ref: > user.id]
 }
 
 Table category {
-    id bigint [pk, increment]
-    name varchar(100) [not null]
+    id          bigint [pk, increment]
+    name        varchar(100) [not null]
     description text
-    state state [default: 'active']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    created_by bigint [ref: > user.id]
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    is_active   booelan [not null, default: true]
+    created_at  timestamp [default: 'now()']
+    updated_at  timestamp
+    deleted_at  timestamp
+    created_by  bigint [ref: > user.id]
+    updated_by  bigint [ref: > user.id]
+    deleted_by  bigint [ref: > user.id]
 }
 
 Table product {
-    id bigint [pk, increment]
-    category_id bigint [not null, ref: > category.id]
-    name varchar(150) [not null]
-    description text
-    unique_code varchar(50) [unique, not null]
-    sale_price decimal(10,2) [not null]
-    purchase_price decimal(10,2) [not null]
+    id                  bigint [pk, increment]
+    category_id         bigint [not null, ref: > category.id]
+    name                varchar(150) [not null]
+    description         text
+    unique_code         varchar(50) [unique, not null]
+    sale_price          decimal(10,2) [not null]
+    purchase_price      decimal(10,2) [not null]
     discount_percentage decimal(5,2) [default: 0]
-    state state [default: 'active']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    created_by bigint [ref: > user.id]
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    is_active           booelan [not null, default: true]
+    created_at          timestamp [default: 'now()']
+    updated_at          timestamp
+    deleted_at          timestamp
+    created_by          bigint [ref: > user.id]
+    updated_by          bigint [ref: > user.id]
+    deleted_by          bigint [ref: > user.id]
 }
 
 Table inventory {
-    id bigint [pk, increment]
+    id         bigint [pk, increment]
     product_id bigint [unique, not null, ref: > product.id]
-    quantity int [not null, default: 0]
+    quantity   int [not null, default: 0]
     created_at timestamp [default: 'now()']
     updated_at timestamp
     deleted_at timestamp
@@ -137,171 +143,171 @@ Table inventory {
 }
 
 Table customer {
-    id bigint [pk, increment]
-    nif varchar(20) [unique, not null]
-    first_name varchar(100) [not null]
-    last_name varchar(100) [not null]
-    email varchar(120) [unique, not null]
+    id           bigint [pk, increment]
+    nif          varchar(20) [unique, not null]
+    first_name   varchar(100) [not null]
+    last_name    varchar(100) [not null]
+    email        varchar(120) [unique, not null]
     phone_number varchar(50)
-    address text
-    state state [default: 'active']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    created_by bigint [ref: > user.id]
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    address      text
+    is_active    booelan [not null, default: true]
+    created_at   timestamp [default: 'now()']
+    updated_at   timestamp
+    deleted_at   timestamp
+    created_by   bigint [ref: > user.id]
+    updated_by   bigint [ref: > user.id]
+    deleted_by   bigint [ref: > user.id]
 }
 
 Table supplier {
-    id bigint [pk, increment]
-    nif varchar(20) [unique, not null]
-    name varchar(100) [not null]
-    email varchar(120) [unique, not null]
+    id           bigint [pk, increment]
+    nif          varchar(20) [unique, not null]
+    name         varchar(100) [not null]
+    email        varchar(120) [unique, not null]
     phone_number varchar(50)
-    address text
-    state state [default: 'active']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    created_by bigint [ref: > user.id]
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    address      text
+    is_active    booelan [not null, default: true]
+    created_at   timestamp [default: 'now()']
+    updated_at   timestamp
+    deleted_at   timestamp
+    created_by   bigint [ref: > user.id]
+    updated_by   bigint [ref: > user.id]
+    deleted_by   bigint [ref: > user.id]
 }
 
 Table sale {
-    id bigint [pk, increment]
-    company_id bigint [not null, ref: > company.id]
-    customer_id bigint [ref: > customer.id]
-    user_id bigint [not null, ref: > user.id]
+    id              bigint [pk, increment]
+    company_id      bigint [not null, ref: > company.id]
+    customer_id     bigint [ref: > customer.id]
+    user_id         bigint [not null, ref: > user.id]
     discount_amount decimal(12,2) [default: 0]
-    subtotal decimal(12,2) [not null]
-    tax_percentage decimal(5,2) [default: 21.00]
-    tax_amount decimal(12,2) [default: 0]
-    total_amount decimal(12,2) [not null]
-    payment_method payment_method [default: 'cash']
-    state sale_state [default: 'completed']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    subtotal        decimal(12,2) [not null]
+    tax_percentage  decimal(5,2) [default: 21.00]
+    tax_amount      decimal(12,2) [default: 0]
+    total_amount    decimal(12,2) [not null]
+    payment_method  payment_method [default: 'cash']
+    state           sale_state [default: 'completed']
+    created_at      timestamp [default: 'now()']
+    updated_at      timestamp
+    deleted_at      timestamp
+    updated_by      bigint [ref: > user.id]
+    deleted_by      bigint [ref: > user.id]
 }
 
 Table inventory_movement {
-    id bigint [pk, increment]
-    product_id bigint [not null, ref: > product.id]
-    user_id bigint [not null, ref: > user.id]
+    id            bigint [pk, increment]
+    product_id    bigint [not null, ref: > product.id]
+    user_id       bigint [not null, ref: > user.id]
     movement_type movement_type [not null]
-    quantity int [not null]
-    created_at timestamp [default: 'now()']
+    quantity      int [not null]
+    created_at    timestamp [default: 'now()']
 }
 
 Table sale_detail {
-    id bigint [pk, increment]
-    sale_id bigint [not null, ref: > sale.id]
-    product_id bigint [not null, ref: > product.id]
+    id                    bigint [pk, increment]
+    sale_id               bigint [not null, ref: > sale.id]
+    product_id            bigint [not null, ref: > product.id]
     inventory_movement_id bigint [unique, not null, ref: > inventory_movement.id]
-    quantity int [not null]
-    unit_price decimal(10,2) [not null]
-    subtotal decimal(12,2) [not null]
-    created_at timestamp [default: 'now()']
+    quantity              int [not null]
+    unit_price            decimal(10,2) [not null]
+    subtotal              decimal(12,2) [not null]
+    created_at            timestamp [default: 'now()']
 }
 
 Table purchase {
-    id bigint [pk, increment]
-    company_id bigint [not null, ref: > company.id]
-    supplier_id bigint [not null, ref: > supplier.id]
-    user_id bigint [not null, ref: > user.id]
+    id           bigint [pk, increment]
+    company_id   bigint [not null, ref: > company.id]
+    supplier_id  bigint [not null, ref: > supplier.id]
+    user_id      bigint [not null, ref: > user.id]
     total_amount decimal(12,2) [not null]
-    state sale_state [default: 'completed']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    state        sale_state [default: 'completed']
+    created_at   timestamp [default: 'now()']
+    updated_at   timestamp
+    deleted_at   timestamp
+    updated_by   bigint [ref: > user.id]
+    deleted_by   bigint [ref: > user.id]
 }
 
 Table purchase_detail {
-    id bigint [pk, increment]
-    purchase_id bigint [not null, ref: > purchase.id]
-    product_id bigint [not null, ref: > product.id]
+    id                    bigint [pk, increment]
+    purchase_id           bigint [not null, ref: > purchase.id]
+    product_id            bigint [not null, ref: > product.id]
     inventory_movement_id bigint [unique, not null, ref: > inventory_movement.id]
-    quantity int [not null]
-    unit_cost decimal(10,2) [not null]
-    subtotal decimal(12,2) [not null]
-    created_at timestamp [default: 'now()']
+    quantity              int [not null]
+    unit_cost             decimal(10,2) [not null]
+    subtotal              decimal(12,2) [not null]
+    created_at            timestamp [default: 'now()']
 }
 
 Table invoice {
-    id bigint [pk, increment]
-    company_id bigint [not null, ref: > company.id]
-    sale_id bigint [unique, ref: > sale.id]
-    purchase_id bigint [unique, ref: > purchase.id]
+    id             bigint [pk, increment]
+    company_id     bigint [not null, ref: > company.id]
+    sale_id        bigint [unique, ref: > sale.id]
+    purchase_id    bigint [unique, ref: > purchase.id]
     number_invoice varchar(50) [unique, not null]
-    state invoice_state [default: 'issued']
-    invoice_type invoice_type_enum [not null]
-    pdf_generated boolean [default: false]
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    created_by bigint [ref: > user.id]
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    state          invoice_state [default: 'issued']
+    invoice_type   invoice_type_enum [not null]
+    pdf_generated  boolean [default: false]
+    created_at     timestamp [default: 'now()']
+    updated_at     timestamp
+    deleted_at     timestamp
+    created_by     bigint [ref: > user.id]
+    updated_by     bigint [ref: > user.id]
+    deleted_by     bigint [ref: > user.id]
 
     Note: '''
-    CHECK (lógica en SQL real):
+    CHECK (lógica):
     - sale → sale_id NOT NULL, purchase_id NULL
     - purchase → purchase_id NOT NULL, sale_id NULL
     '''
 }
 
 Table sale_return {
-    id bigint [pk, increment]
-    sale_id bigint [not null, ref: > sale.id]
-    user_id bigint [not null, ref: > user.id]
-    reason text
+    id           bigint [pk, increment]
+    sale_id      bigint [not null, ref: > sale.id]
+    user_id      bigint [not null, ref: > user.id]
+    reason       text
     total_amount decimal(12,2) [not null]
-    state sale_state [default: 'completed']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    state        sale_state [default: 'completed']
+    created_at   timestamp [default: 'now()']
+    updated_at   timestamp
+    deleted_at   timestamp
+    updated_by   bigint [ref: > user.id]
+    deleted_by   bigint [ref: > user.id]
 }
 
 Table sale_return_detail {
-    id bigint [pk, increment]
-    sale_return_id bigint [not null, ref: > sale_return.id]
-    product_id bigint [not null, ref: > product.id]
+    id                    bigint [pk, increment]
+    sale_return_id        bigint [not null, ref: > sale_return.id]
+    product_id            bigint [not null, ref: > product.id]
     inventory_movement_id bigint [unique, not null, ref: > inventory_movement.id]
-    quantity int [not null]
-    unit_price decimal(10,2) [not null]
-    subtotal decimal(12,2) [not null]
-    created_at timestamp [default: 'now()']
+    quantity              int [not null]
+    unit_price            decimal(10,2) [not null]
+    subtotal              decimal(12,2) [not null]
+    created_at            timestamp [default: 'now()']
 }
 
 Table purchase_return {
-    id bigint [pk, increment]
-    purchase_id bigint [not null, ref: > purchase.id]
-    user_id bigint [not null, ref: > user.id]
-    reason text
+    id           bigint [pk, increment]
+    purchase_id  bigint [not null, ref: > purchase.id]
+    user_id      bigint [not null, ref: > user.id]
+    reason       text
     total_amount decimal(12,2) [not null]
-    state sale_state [default: 'completed']
-    created_at timestamp [default: 'now()']
-    updated_at timestamp
-    deleted_at timestamp
-    updated_by bigint [ref: > user.id]
-    deleted_by bigint [ref: > user.id]
+    state        sale_state [default: 'completed']
+    created_at   timestamp [default: 'now()']
+    updated_at   timestamp
+    deleted_at   timestamp
+    updated_by   bigint [ref: > user.id]
+    deleted_by   bigint [ref: > user.id]
 }
 
 Table purchase_return_detail {
-    id bigint [pk, increment]
-    purchase_return_id bigint [not null, ref: > purchase_return.id]
-    product_id bigint [not null, ref: > product.id]
+    id                    bigint [pk, increment]
+    purchase_return_id    bigint [not null, ref: > purchase_return.id]
+    product_id            bigint [not null, ref: > product.id]
     inventory_movement_id bigint [unique, not null, ref: > inventory_movement.id]
-    quantity int [not null]
-    unit_cost decimal(10,2) [not null]
-    subtotal decimal(12,2) [not null]
-    created_at timestamp [default: 'now()']
+    quantity              int [not null]
+    unit_cost             decimal(10,2) [not null]
+    subtotal              decimal(12,2) [not null]
+    created_at            timestamp [default: 'now()']
 }

@@ -20,7 +20,7 @@ class CompanySerializer(AuditFieldsMixin):
             "email",
             "website",
             "logo",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -30,7 +30,7 @@ class CompanySerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",

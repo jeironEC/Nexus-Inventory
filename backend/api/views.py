@@ -1297,6 +1297,7 @@ class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=SaleReportSerializer)
     @action(detail=False, methods=["get"], url_path="sales")
@@ -1502,6 +1503,7 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=PurchaseReportSerializer)
     @action(detail=False, methods=["get"], url_path="purchases")
@@ -1653,6 +1655,7 @@ class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=InventoryReportSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="inventory")
@@ -1810,6 +1813,7 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     def _base_sale_detail_qs(self):
         return self.get_filtered_queryset(
@@ -2102,6 +2106,7 @@ class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=CustomerReportSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="customers")
@@ -2211,6 +2216,7 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=InvoiceReportSerializer)
     @action(detail=False, methods=["get"], url_path="invoices")
@@ -2380,6 +2386,7 @@ class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=SaleReturnReportSerializer)
     @action(detail=False, methods=["get"], url_path="sale-returns")
@@ -2432,6 +2439,7 @@ class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=PurchaseReturnReportSerializer)
     @action(detail=False, methods=["get"], url_path="purchase-returns")

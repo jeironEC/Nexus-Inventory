@@ -157,7 +157,6 @@ class Base(Configuration):
 
     SPECTACULAR_SETTINGS = {
         "ENUM_NAME_OVERRIDES": {
-            "StateEnum": "nexus_inventory_backend.db.enums.State",
             "OperationStateEnum": "nexus_inventory_backend.db.enums.OperationState",
             "InvoiceStateEnum": "nexus_inventory_backend.db.enums.InvoiceState",
         },

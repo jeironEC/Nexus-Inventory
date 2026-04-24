@@ -12,7 +12,7 @@ Los filtros se implementan en dos niveles:
 
 **Campos filtrables:**
 - `role_id` - ID del rol (NumberFilter)
-- `state` - Estado del usuario (ChoiceFilter - State choices)
+- `is_active` - Estado del usuario (Valor booleano)
 - `full_name` - Nombre completo (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)
 - `date_to` - Fecha hasta (DateFilter)
@@ -25,7 +25,7 @@ Los filtros se implementan en dos niveles:
 **Filtro Estándar**: `RoleFilter`
 
 **Campos filtrables:**
-- `state` - Estado del rol (ChoiceFilter - State choices)
+- `is_active` - Estado del rol (Valor booleano)
 - `name` - Nombre del rol (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)
 - `date_to` - Fecha hasta (DateFilter)
@@ -38,7 +38,7 @@ Los filtros se implementan en dos niveles:
 **Filtro Estándar**: `CategoryFilter`
 
 **Campos filtrables:**
-- `state` - Estado de la categoría (ChoiceFilter - State choices)
+- `is_active` - Estado de la categoría (Valor booleano)
 - `name` - Nombre de la categoría (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)
 - `date_to` - Fecha hasta (DateFilter)
@@ -51,7 +51,7 @@ Los filtros se implementan en dos niveles:
 **Filtro Estándar**: `CompanyFilter`
 
 **Campos filtrables:**
-- `state` - Estado de la empresa (ChoiceFilter - State choices)
+- `is_active` - Estado de la empresa (Valor booleano)
 - `name` - Nombre de la empresa (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)
 - `date_to` - Fecha hasta (DateFilter)
@@ -64,7 +64,7 @@ Los filtros se implementan en dos niveles:
 **Filtro Estándar**: `CustomerFilter`
 
 **Campos filtrables:**
-- `state` - Estado del usuario (ChoiceFilter - State choices)
+- `is_active` - Estado del usuario (Valor booleano)
 - `full_name` - Nombre completo (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)
 - `date_to` - Fecha hasta (DateFilter)
@@ -77,7 +77,7 @@ Los filtros se implementan en dos niveles:
 **Filtro Estándar**: `SupplierFilter`
 
 **Campos filtrables:**
-- `state` - Estado del proveedor (ChoiceFilter - State choices)
+- `is_active` - Estado del proveedor (Valor booleano)
 - `name` - Nombre del proveedor (CharFilter con búsqueda icontains)
 - `email` - Email del proveedor (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)
@@ -92,7 +92,7 @@ Los filtros se implementan en dos niveles:
 
 **Campos filtrables:**
 - `category_id` - ID de categoría (NumberFilter)
-- `state` - Estado del producto (ChoiceFilter - State choices)
+- `is_active` - Estado del producto (Valor booleano)
 - `name` - Nombre del producto (CharFilter con búsqueda icontains)
 - `unique_code` - Código único (CharFilter con búsqueda icontains)
 - `date_from` - Fecha desde (DateFilter)

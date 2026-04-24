@@ -10,9 +10,6 @@ from django.utils import timezone
 # Models
 from nexus_inventory_backend.db.models import Customer
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Datetime
 from datetime import timedelta
 
@@ -42,7 +39,7 @@ class TestGetCustomer:
             "email",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -188,14 +185,8 @@ class TestFiltersCustomer:
     def test_customers_filters_by_state_active(
         self, api_client_auth, customers_url, customer, another_customer
     ):
-        response = api_client_auth.get(customers_url, {"state": State.ACTIVE})
+        response = api_client_auth.get(customers_url, {"is_active": True})
         assert len(response.data) == 2
-
-    def test_customers_filters_by_state_invalid_returns_400(
-        self, api_client_auth, customers_url, customer
-    ):
-        response = api_client_auth.get(customers_url, {"state": "PRIVATE"})
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_customers_filters_date_from_correctly(
         self, api_client_auth, customers_url, customer
@@ -254,7 +245,7 @@ class TestFiltersCustomer:
         response = api_client_auth.get(
             customers_url,
             {
-                "state": State.ACTIVE,
+                "is_active": True,
                 "date_from": str(today),
             },
         )

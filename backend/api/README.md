@@ -12,6 +12,16 @@
 | POST | `/auth/token/refresh/` | Refrescar token de acceso |
 | POST | `/auth/token/verify/` | Verificar token válido |
 | **Total:** | | **3 Endpoints** |
+
+---
+
+## Password Reset
+
+| Método | Endpoint | Descripción |
+| ------ | -------- | ----------- |
+| POST | `/password-reset/confirm/` | Confirmar reset token y recibir nueva contraseña |
+| POST | `/password-reset/request/` | Requerir código OTP mediante email |
+| POST | `/password-reset/verify/` | Verificar OTP válido |
 | **Total:** | | **3 Endpoints** |
 
 ---
@@ -69,7 +79,6 @@
 | GET | `/inventories/low-stock/` | Listar productos con bajo stock |
 | GET | `/inventories/product/{product_id}/` | Obtener inventario por producto |
 | **Total:** | | **3 Endpoints** |
-| **Total:** | | **3 Endpoints** |
 
 ---
 
@@ -79,7 +88,6 @@
 | ------ | -------- | ----------- |
 | GET | `/inventory-movements/` | Listar todos los movimientos |
 | GET | `/inventory-movements/{id}/` | Obtener movimiento por ID |
-| **Total:** | | **2 Endpoints** |
 | **Total:** | | **2 Endpoints** |
 
 ---
@@ -91,7 +99,6 @@
 | GET | `/invoices/` | Listar todas las facturas |
 | GET | `/invoices/{id}/` | Obtener factura por ID |
 | PATCH | `/invoices/{id}/cancel/` | Cancelar factura |
-| **Total:** | | **3 Endpoints** |
 | **Total:** | | **3 Endpoints** |
 
 ---
@@ -159,7 +166,6 @@
 | GET | `/reports/inventory/low-stock/` | Inventario con bajo stock |
 | GET | `/reports/inventory/movements/` | Movimientos de inventario |
 | **Total:** | | **3 Endpoints** |
-| **Total:** | | **3 Endpoints** |
 
 ### Invoices
 | Método | Endpoint | Descripción |
@@ -167,7 +173,6 @@
 | GET | `/reports/invoices/` | Reporte de facturas |
 | GET | `/reports/invoices/purchases/` | Facturas de compras |
 | GET | `/reports/invoices/sales/` | Facturas de ventas |
-| **Total:** | | **3 Endpoints** |
 | **Total:** | | **3 Endpoints** |
 
 ### Products
@@ -186,7 +191,6 @@
 | ------ | -------- | ----------- |
 | GET | `/reports/purchase-returns/` | Devoluciones de compras |
 | **Total:** | | **1 Endpoints** |
-| **Total:** | | **5 Endpoints** |
 
 ### Purchase Returns
 | Método | Endpoint | Descripción |
@@ -201,13 +205,11 @@
 | GET | `/reports/purchases/by-period/` | Compras por período |
 | GET | `/reports/purchases/by-supplier/` | Compras por proveedor |
 | **Total:** | | **3 Endpoints** |
-| **Total:** | | **3 Endpoints** |
 
 ### Sale Returns
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/sale-returns/` | Devoluciones de ventas |
-| **Total:** | | **1 Endpoints** |
 | **Total:** | | **1 Endpoints** |
 
 ### Sales
@@ -303,7 +305,6 @@
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/schema/` | OpenAPI Schema |
-| **Total:** | | **1 Endpoints** |
 | **Total:** | | **1 Endpoints** |
 
 ---

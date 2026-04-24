@@ -12,14 +12,14 @@ class RoleSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
         ]
         read_only_fields = [
             "id",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",

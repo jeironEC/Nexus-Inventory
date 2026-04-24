@@ -18,7 +18,7 @@ class SupplierSerializer(AuditFieldsMixin):
             "nif",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -28,7 +28,7 @@ class SupplierSerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",

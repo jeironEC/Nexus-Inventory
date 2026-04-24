@@ -5,16 +5,13 @@ from django.db.models import Q
 # Models
 from nexus_inventory_backend.db.models import Customer
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Filters
 from .base import AuditFilter
 
 
 class CustomerFilter(django_filters.FilterSet):
     # Filters
-    state = django_filters.ChoiceFilter(field_name="state", choices=State.choices)
+    is_active = django_filters.BooleanFilter(field_name="is_active")
 
     # Searchs
     full_name = django_filters.CharFilter(method="filter_full_name")
@@ -36,7 +33,7 @@ class CustomerFilter(django_filters.FilterSet):
     class Meta:
         model = Customer
         fields = [
-            "state",
+            "is_active",
             "full_name",
             "email",
             "date_from",

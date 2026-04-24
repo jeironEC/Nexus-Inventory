@@ -7,9 +7,6 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import Company
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 
 @pytest.mark.django_db
 class TestGetCompany:
@@ -47,7 +44,7 @@ class TestGetCompany:
             "email",
             "website",
             "logo",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -154,7 +151,7 @@ class TestStateCompany:
     def test_activate_company_returns_200(
         self, api_client_auth, company_activate_url, company
     ):
-        company.state = State.INACTIVE
+        company.is_active = False
         company.save()
         response = api_client_auth.patch(company_activate_url(company.pk))
         company.refresh_from_db()
@@ -163,7 +160,7 @@ class TestStateCompany:
     def test_deactivate_company_returns_200(
         self, api_client_auth, company_deactivate_url, company
     ):
-        company.state = State.ACTIVE
+        company.is_active = True
         company.save()
         response = api_client_auth.patch(company_deactivate_url(company.pk))
         company.refresh_from_db()
@@ -189,5 +186,5 @@ class TestFiltersCompany:
         assert len(response.data) >= 1
 
     def test_filter_state_companies(self, api_client_auth, companies_url, company):
-        response = api_client_auth.get(f"{companies_url}?state={company.state}")
+        response = api_client_auth.get(f"{companies_url}?is_active={company.is_active}")
         assert len(response.data) >= 1

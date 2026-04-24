@@ -7,9 +7,6 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import Product
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 
 @pytest.mark.django_db
 class TestGetProduct:
@@ -47,7 +44,7 @@ class TestGetProduct:
             "sale_price",
             "purchase_price",
             "discount_percentage",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -194,7 +191,7 @@ class TestStateProduct:
     def test_activate_product_returns_200(
         self, api_client_auth, product_activate_url, product
     ):
-        product.state = State.INACTIVE
+        product.is_active = False
         product.save()
         response = api_client_auth.patch(product_activate_url(product.pk))
         product.refresh_from_db()
@@ -203,7 +200,7 @@ class TestStateProduct:
     def test_deactivate_product_returns_200(
         self, api_client_auth, product_deactivate_url, product
     ):
-        product.state = State.ACTIVE
+        product.is_active = True
         product.save()
         response = api_client_auth.patch(product_deactivate_url(product.pk))
         product.refresh_from_db()

@@ -1,6 +1,7 @@
 # Internal
 import pytest
 import uuid
+from hashlib import sha256
 
 # DRF
 from rest_framework.test import APIClient
@@ -13,6 +14,7 @@ from django.test import Client
 from nexus_inventory_backend.db.models import (
     User,
     Role,
+    PasswordResetOTP,
     Company,
     Category,
     Product,
@@ -31,7 +33,7 @@ from nexus_inventory_backend.db.models import (
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import State, InvoiceState, InvoiceType
+from nexus_inventory_backend.db.enums import InvoiceState, InvoiceType
 
 # Datetime
 
@@ -117,6 +119,54 @@ def normal_user(db, cashier_role):
 
 
 @pytest.fixture
+def valid_otp(admin_user):
+    otp_code = "123456"
+    otp_hash = sha256(otp_code.encode()).hexdigest()
+
+    record = PasswordResetOTP.objects.create(
+        user=admin_user,
+        email=admin_user.email,
+        otp_hash=otp_hash,
+    )
+
+    return otp_code, record
+
+
+@pytest.fixture
+def valid_token(admin_user, valid_otp):
+    otp_code = valid_otp[0]
+    token = uuid.uuid4()
+    otp_hash = sha256(otp_code.encode()).hexdigest()
+
+    PasswordResetOTP.objects.create(
+        user=admin_user,
+        email=admin_user.email,
+        otp_hash=otp_hash,
+        is_used=False,
+        reset_token=token,
+    )
+
+    return token
+
+
+@pytest.fixture
+def used_token(admin_user, valid_otp):
+    otp_code = valid_otp[0]
+    token = uuid.uuid4()
+    otp_hash = sha256(otp_code.encode()).hexdigest()
+
+    PasswordResetOTP.objects.create(
+        user=admin_user,
+        email=admin_user.email,
+        otp_hash=otp_hash,
+        is_used=True,
+        reset_token=token,
+    )
+
+    return token
+
+
+@pytest.fixture
 def company(db, admin_user):
     return Company.objects.create(
         nif=str(uuid.uuid4())[:10],
@@ -125,7 +175,7 @@ def company(db, admin_user):
         number_phone="600000000",
         email="company@company.cat",
         website="https://company.cat",
-        state=State.INACTIVE,
+        is_active=False,
     )
 
 
@@ -228,7 +278,7 @@ def customer_inactive(db):
         email="inactivo@test.com",
         number_phone="640000000",
         address="Dirección inactiva",
-        state=State.INACTIVE,
+        is_active=False,
     )
 
 
@@ -712,6 +762,21 @@ def role_detail_url():
         return reverse("roles-detail", kwargs={"pk": pk})
 
     return _url
+
+
+@pytest.fixture
+def url_password_reset_request():
+    return reverse("password-reset-request")
+
+
+@pytest.fixture
+def url_password_reset_verify():
+    return reverse("password-reset-verify")
+
+
+@pytest.fixture
+def url_password_reset_confirm():
+    return reverse("password-reset-confirm")
 
 
 @pytest.fixture

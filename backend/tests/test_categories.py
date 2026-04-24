@@ -7,9 +7,6 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import Category
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 
 @pytest.mark.django_db
 class TestGetCategory:
@@ -44,7 +41,7 @@ class TestGetCategory:
             "id",
             "name",
             "description",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -194,7 +191,7 @@ class TestStateCategory:
     def test_activate_category_returns_200(
         self, api_client_auth, category_activate_url, category
     ):
-        category.state = State.INACTIVE
+        category.is_active = False
         category.save()
         response = api_client_auth.patch(category_activate_url(category.pk))
         category.refresh_from_db()
@@ -203,7 +200,7 @@ class TestStateCategory:
     def test_deactivate_category_returns_200(
         self, api_client_auth, category_deactivate_url, category
     ):
-        category.state = State.ACTIVE
+        category.is_state = True
         category.save()
         response = api_client_auth.patch(category_deactivate_url(category.pk))
         category.refresh_from_db()
@@ -229,5 +226,7 @@ class TestFiltersCategory:
         assert len(response.data) >= 1
 
     def test_filter_state_categories(self, api_client_auth, categories_url, category):
-        response = api_client_auth.get(f"{categories_url}?state={category.state}")
+        response = api_client_auth.get(
+            f"{categories_url}?is_active={category.is_active}"
+        )
         assert len(response.data) >= 1

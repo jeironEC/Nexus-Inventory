@@ -1,0 +1,52 @@
+/* ========================================
+ * INVENTORY.CSS
+ * Estilos específicos de la página de Inventario
+ * ======================================== */
+
+/* ─── Barra de filtros horizontal ─── */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.filter-grid .form-group {
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
+    height: 44px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1400px) {
+    .filter-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .filter-actions .btn {
+        width: 100%;
+    }
+}

@@ -89,28 +89,34 @@ class InventoryMovementReportSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField()
 
 
+class ProductReportSerializer(serializers.Serializer):
+    top_selling = serializers.ListField()
+    most_purchased = serializers.ListField()
+    by_category = serializers.ListField()
+
+
 class ProductTopSellingSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     product_name = serializers.CharField()
     category = serializers.CharField()
-    total_quantity_sold = serializers.IntegerField()
-    total_revenue = serializers.DecimalField(max_digits=14, decimal_places=2)
+    total_quantity = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
 class ProductLowSellingSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     product_name = serializers.CharField()
     category = serializers.CharField()
-    total_quantity_sold = serializers.IntegerField()
-    total_revenue = serializers.DecimalField(max_digits=14, decimal_places=2)
+    total_quantity = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
 class ProductMostPurchasedSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     product_name = serializers.CharField()
     category = serializers.CharField()
-    total_quantity_purchased = serializers.IntegerField()
-    total_spent = serializers.DecimalField(max_digits=14, decimal_places=2)
+    total_quantity = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
 class ProductByCategorySerializer(serializers.Serializer):
@@ -121,18 +127,18 @@ class ProductByCategorySerializer(serializers.Serializer):
     total_revenue = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
-class CustomerTopSerializer(serializers.Serializer):
+class CustomerReportSerializer(serializers.Serializer):
     customer_id = serializers.IntegerField()
     customer_name = serializers.CharField()
     total_purchases = serializers.IntegerField()
     total_spent = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
-class CustomerPromotionReportSerializer(serializers.Serializer):
+class CustomerTopSerializer(serializers.Serializer):
     customer_id = serializers.IntegerField()
     customer_name = serializers.CharField()
-    total_promotions = serializers.IntegerField()
-    applied_promotions = serializers.IntegerField()
+    total_purchases = serializers.IntegerField()
+    total_spent = serializers.DecimalField(max_digits=14, decimal_places=2)
 
 
 class InvoiceReportSerializer(serializers.Serializer):

@@ -362,30 +362,6 @@ class TestCustomerReportViewSet:
         response = api_client.get(url_reports_customers_top)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_customer_promotions_report_returns_200(
-        self, api_client_auth, url_reports_customers_promotions
-    ):
-        response = api_client_auth.get(url_reports_customers_promotions)
-        assert response.status_code == status.HTTP_200_OK
-
-    def test_customer_promotions_report_returns_list(
-        self, api_client_auth, customer_promotion, url_reports_customers_promotions
-    ):
-        response = api_client_auth.get(url_reports_customers_promotions)
-        assert isinstance(response.data, list)
-
-    def test_customer_promotions_report_fields_present(
-        self, api_client_auth, customer_promotion, url_reports_customers_promotions
-    ):
-        response = api_client_auth.get(url_reports_customers_promotions)
-        if response.data:
-            assert set(response.data[0].keys()) == {
-                "customer_id",
-                "customer_name",
-                "total_promotions",
-                "applied_promotions",
-            }
-
 
 @pytest.mark.django_db
 class TestInvoiceReportViewSet:

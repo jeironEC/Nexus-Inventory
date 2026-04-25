@@ -6,20 +6,16 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from rest_framework.exceptions import ValidationError
 
 # Base Models
-from .base import BaseModel, AuditModel
+from .base import TimestampModel, BaseModel, AuditModel, DisplayModel
 
 # Enums
 from .enums import (
-    State,
     OperationState,
     PaymentMethod,
     InvoiceState,
     MovementType,
     InvoiceType,
 )
-
-# Mixins
-from api.mixins.display import DisplayMixin
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -55,10 +51,10 @@ class UserManager(BaseUserManager):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL ROLE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Role(DisplayMixin, BaseModel):
+class Role(DisplayModel, TimestampModel):
     name = models.CharField(max_length=30)
     description = models.TextField()
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name"]
@@ -67,9 +63,10 @@ class Role(DisplayMixin, BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL USER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class User(DisplayMixin, BaseModel, AbstractUser):
+class User(DisplayModel, BaseModel, AbstractUser):
     username = None
     email = models.EmailField(unique=True)
+    nif = models.CharField(max_length=15, unique=True)
     role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name="users")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -91,35 +88,51 @@ class User(DisplayMixin, BaseModel, AbstractUser):
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# MODEL PASSWORD RESET OTP
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+class PasswordResetOTP(DisplayModel, TimestampModel):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="password_otps"
+    )
+    email = models.EmailField()
+    otp_hash = models.CharField(max_length=128)
+    is_used = models.BooleanField(default=False)
+    reset_token = models.UUIDField(null=True, blank=True)
+
+    def get_display_fields(self):
+        return ["email", "created_at"]
+
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL COMPANY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Company(DisplayMixin, BaseModel):
-    tax_id = models.CharField(max_length=20, unique=True)
+class Company(DisplayModel, BaseModel):
+    nif = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=255)
     address = models.TextField(blank=True, null=True)
     number_phone = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True)
     website = models.URLField(blank=True, null=True)
     logo = models.FileField(upload_to="company/", blank=True, null=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
-        return ["name", lambda obj: f"Tax: {obj.tax_id}"]
+        return ["name", lambda obj: f"NIF: {obj.nif}"]
 
     class Meta:
         indexes = [
             models.Index(fields=["name"]),
-            models.Index(fields=["tax_id"]),
+            models.Index(fields=["nif"]),
         ]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL CATEGORY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Category(DisplayMixin, BaseModel):
+class Category(DisplayModel, BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name"]
@@ -128,7 +141,7 @@ class Category(DisplayMixin, BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PRODUCT
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Product(DisplayMixin, BaseModel):
+class Product(DisplayModel, BaseModel):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name="products", null=True
     )
@@ -137,7 +150,8 @@ class Product(DisplayMixin, BaseModel):
     unique_code = models.CharField(max_length=50, unique=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name"]
@@ -146,7 +160,7 @@ class Product(DisplayMixin, BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVENTORY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Inventory(DisplayMixin, BaseModel):
+class Inventory(DisplayModel, BaseModel):
     product = models.OneToOneField(
         Product, on_delete=models.PROTECT, related_name="inventory"
     )
@@ -159,60 +173,23 @@ class Inventory(DisplayMixin, BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL CUSTOMER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Customer(DisplayMixin, BaseModel):
+class Customer(DisplayModel, BaseModel):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=120, unique=True)
+    nif = models.CharField(max_length=20, unique=True)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["first_name", "email"]
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# MODEL PROMOTION
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Promotion(DisplayMixin, BaseModel):
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
-
-    def get_display_fields(self):
-        return ["name", lambda obj: f"Discount: {obj.discount_percentage}%"]
-
-
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# MODEL CUSTOMER PROMOTION
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class CustomerPromotion(DisplayMixin, BaseModel):
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name="customer_promotions"
-    )
-    promotion = models.ForeignKey(
-        Promotion, on_delete=models.CASCADE, related_name="customer_promotions"
-    )
-    applied = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["customer", "promotion"], name="unique_customer_promotion"
-            )
-        ]
-
-    def get_display_fields(self):
-        return ["customer", "promotion", lambda obj: f"Applied: {obj.applied}"]
-
-
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL SALE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Sale(DisplayMixin, AuditModel):
+class Sale(DisplayModel, AuditModel):
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="sales")
     customer = models.ForeignKey(
         Customer,
@@ -224,7 +201,9 @@ class Sale(DisplayMixin, AuditModel):
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, related_name="created_sales", null=True
     )
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=21.00)
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     payment_method = models.CharField(
@@ -241,7 +220,7 @@ class Sale(DisplayMixin, AuditModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVENTORY MOVEMENT
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class InventoryMovement(DisplayMixin, models.Model):
+class InventoryMovement(DisplayModel, models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="inventory_movements"
     )
@@ -261,7 +240,7 @@ class InventoryMovement(DisplayMixin, models.Model):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL SALE DETAIL
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class SaleDetail(DisplayMixin, models.Model):
+class SaleDetail(DisplayModel, models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="details")
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="sale_details"
@@ -281,12 +260,13 @@ class SaleDetail(DisplayMixin, models.Model):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL SUPPLIER
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Supplier(DisplayMixin, BaseModel):
+class Supplier(DisplayModel, BaseModel):
     name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=120)
+    email = models.EmailField(max_length=120, unique=True)
+    nif = models.CharField(max_length=20, unique=True)
     number_phone = models.CharField(max_length=50)
     address = models.TextField(blank=True)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.ACTIVE)
+    is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):
         return ["name", "email"]
@@ -295,7 +275,7 @@ class Supplier(DisplayMixin, BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PURCHASE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Purchase(DisplayMixin, AuditModel):
+class Purchase(DisplayModel, AuditModel):
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, related_name="purchases"
     )
@@ -317,7 +297,7 @@ class Purchase(DisplayMixin, AuditModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL PURCHASE DETAIL
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class PurchaseDetail(DisplayMixin, models.Model):
+class PurchaseDetail(DisplayModel, models.Model):
     purchase = models.ForeignKey(
         Purchase, on_delete=models.CASCADE, related_name="details"
     )
@@ -343,7 +323,7 @@ class PurchaseDetail(DisplayMixin, models.Model):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL INVOICE
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class Invoice(DisplayMixin, BaseModel):
+class Invoice(DisplayModel, BaseModel):
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, related_name="invoices"
     )
@@ -359,29 +339,50 @@ class Invoice(DisplayMixin, BaseModel):
     )
     number_invoice = models.CharField(max_length=50, unique=True)
     pdf_generated = models.BooleanField(default=False)
-    invoice_type = models.CharField(max_length=10, choices=InvoiceType.choices)
+    invoice_type = models.CharField(
+        max_length=10, choices=InvoiceType.choices, blank=False
+    )
     state = models.CharField(
         max_length=20, choices=InvoiceState.choices, default=InvoiceState.ISSUED
     )
 
     def clean(self):
-        if self.sale and self.purchase:
-            raise ValidationError(
-                "Invoice cannot be linked to both a sale and a purchase."
-            )
-        if not self.sale and not self.purchase:
-            raise ValidationError(
-                "Invoice must be linked to either a sale or a purchase."
-            )
+        errors = {}
+
+        if self.invoice_type.lower() == "sale":
+            if not self.sale:
+                errors["sale"] = "A sale-type invoice must be linked to a sale."
+            if self.purchase:
+                errors["purchase"] = (
+                    "A sale-type invoice cannot be linked to a purchase."
+                )
+
+        elif self.invoice_type.lower() == "purchase":
+            if not self.purchase:
+                errors["purchase"] = (
+                    "A purchase-type invoice must be linked to a purchase."
+                )
+            if self.sale:
+                errors["sale"] = "A purchase-type invoice cannot be linked to a sale."
+
+        else:
+            errors["invoice_type"] = "Invoice type must be either 'sale' or 'purchase'."
+
+        if errors:
+            raise ValidationError(errors)
 
     def get_display_fields(self):
         return ["number_invoice", "state"]
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 # ───────────────────────────────────────────────────────────────────────────────
 # MODEL SALE RETURN
 # ───────────────────────────────────────────────────────────────────────────────
-class SaleReturn(DisplayMixin, AuditModel):
+class SaleReturn(DisplayModel, AuditModel):
     sale = models.ForeignKey(Sale, on_delete=models.PROTECT, related_name="returns")
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="sale_returns"
@@ -399,7 +400,7 @@ class SaleReturn(DisplayMixin, AuditModel):
 # ───────────────────────────────────────────────────────────────────────────────
 # MODEL SALE RETURN DETAIL
 # ───────────────────────────────────────────────────────────────────────────────
-class SaleReturnDetail(DisplayMixin, models.Model):
+class SaleReturnDetail(DisplayModel, models.Model):
     sale_return = models.ForeignKey(
         SaleReturn, on_delete=models.CASCADE, related_name="details"
     )
@@ -425,7 +426,7 @@ class SaleReturnDetail(DisplayMixin, models.Model):
 # ───────────────────────────────────────────────────────────────────────────────
 # MODEL PURCHASE RETURN
 # ───────────────────────────────────────────────────────────────────────────────
-class PurchaseReturn(DisplayMixin, AuditModel):
+class PurchaseReturn(DisplayModel, AuditModel):
     purchase = models.ForeignKey(
         Purchase, on_delete=models.PROTECT, related_name="returns"
     )
@@ -449,7 +450,7 @@ class PurchaseReturn(DisplayMixin, AuditModel):
 # ───────────────────────────────────────────────────────────────────────────────
 # MODEL PURCHASE RETURN DETAIL
 # ───────────────────────────────────────────────────────────────────────────────
-class PurchaseReturnDetail(DisplayMixin, models.Model):
+class PurchaseReturnDetail(DisplayModel, models.Model):
     purchase_return = models.ForeignKey(
         PurchaseReturn, on_delete=models.CASCADE, related_name="details"
     )

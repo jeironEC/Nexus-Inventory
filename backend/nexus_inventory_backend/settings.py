@@ -130,6 +130,15 @@ class Base(Configuration):
         "django.contrib.auth.backends.ModelBackend",
     ]
 
+    EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+    EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+    EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+    EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
+    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="admin@localhost")
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
     REST_FRAMEWORK = {
         "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
         "DEFAULT_THROTTLE_CLASSES": [
@@ -148,7 +157,6 @@ class Base(Configuration):
 
     SPECTACULAR_SETTINGS = {
         "ENUM_NAME_OVERRIDES": {
-            "StateEnum": "nexus_inventory_backend.db.enums.State",
             "OperationStateEnum": "nexus_inventory_backend.db.enums.OperationState",
             "InvoiceStateEnum": "nexus_inventory_backend.db.enums.InvoiceState",
         },
@@ -272,3 +280,5 @@ class Test(Base):
             "NAME": ":memory:",
         }
     }
+
+    EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"

@@ -18,13 +18,16 @@ dependencies = [
     "psycopg2-binary",
     "gunicorn",
     "django-prometheus",
+    "weasyprint",
 ]
 
 [project.optional-dependencies]
 test = [
     "pytest",
     "pytest-django",
-    "pytest-cov"
+    "pytest-cov",
+    "pytest-xdist",
+    "bandit",
 ]
 
 [tool.pytest.ini_options]

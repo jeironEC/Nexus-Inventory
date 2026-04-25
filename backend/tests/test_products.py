@@ -7,9 +7,6 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import Product
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 
 @pytest.mark.django_db
 class TestGetProduct:
@@ -46,7 +43,8 @@ class TestGetProduct:
             "unique_code",
             "sale_price",
             "purchase_price",
-            "state",
+            "discount_percentage",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -81,16 +79,15 @@ class TestPostProduct:
         assert response.data["name"] == "Product"
 
     def test_create_product_duplicate_name_returns_400(
-        self, api_client_auth, products_url, product, payload_product
+        self, api_client_auth, products_url, product, payload_product_with_same_name
     ):
-        response = api_client_auth.post(products_url, payload_product)
+        response = api_client_auth.post(products_url, payload_product_with_same_name)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_product_duplicate_name_case_insensitive_returns_400(
-        self, api_client_auth, products_url, product, payload_product
+        self, api_client_auth, products_url, product, payload_product_with_same_name
     ):
-        payload_product["name"] = product.name.upper()
-        response = api_client_auth.post(products_url, payload_product)
+        response = api_client_auth.post(products_url, payload_product_with_same_name)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_product_missing_unique_code_returns_400(
@@ -194,7 +191,7 @@ class TestStateProduct:
     def test_activate_product_returns_200(
         self, api_client_auth, product_activate_url, product
     ):
-        product.state = State.INACTIVE
+        product.is_active = False
         product.save()
         response = api_client_auth.patch(product_activate_url(product.pk))
         product.refresh_from_db()
@@ -203,7 +200,7 @@ class TestStateProduct:
     def test_deactivate_product_returns_200(
         self, api_client_auth, product_deactivate_url, product
     ):
-        product.state = State.ACTIVE
+        product.is_active = True
         product.save()
         response = api_client_auth.patch(product_deactivate_url(product.pk))
         product.refresh_from_db()
@@ -224,16 +221,6 @@ class TestStateProduct:
 
 @pytest.mark.django_db
 class TestFiltersProduct:
-    def test_returns_list_products_actives(self, api_client_auth, products_actives_url):
-        response = api_client_auth.get(products_actives_url)
-        assert response.status_code == status.HTTP_200_OK
-
-    def test_returns_list_products_inactives(
-        self, api_client_auth, products_inactives_url
-    ):
-        response = api_client_auth.get(products_inactives_url)
-        assert response.status_code == status.HTTP_200_OK
-
     def test_filter_products_by_category(self, api_client_auth, products_url, product):
         response = api_client_auth.get(f"{products_url}?category={product.category_id}")
         assert len(response.data) >= 1

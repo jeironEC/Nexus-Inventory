@@ -3,9 +3,10 @@ FROM python:3.13-slim
 
 # Enviroment
 ENV \
-    PATH=/app/venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
 
 # Working directory
 WORKDIR /app
@@ -14,6 +15,15 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
+    libgobject-2.0-0 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libcairo2 \
+    libffi-dev \
+    shared-mime-info \
+    locales \
+    && locale-gen es_ES.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies file

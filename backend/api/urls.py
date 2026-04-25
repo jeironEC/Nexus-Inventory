@@ -13,14 +13,13 @@ from .views import (
     UserRoleViewSet,
     UserViewSet,
     UserMeViewSet,
+    PasswordResetViewSet,
     CompanyViewSet,
     CategoryViewSet,
     ProductViewSet,
     InventoryViewSet,
     InventoryMovementViewSet,
     CustomerViewSet,
-    PromotionViewSet,
-    CustomerPromotionViewSet,
     SaleViewSet,
     SaleDetailViewSet,
     SaleReturnViewSet,
@@ -45,6 +44,7 @@ router = SimpleRouter()
 
 router.register("users", UserViewSet, basename="users")
 router.register("users", UserMeViewSet, basename="user")
+router.register(r"password-reset", PasswordResetViewSet, basename="password-reset")
 router.register("roles", UserRoleViewSet, basename="roles")
 router.register("companies", CompanyViewSet, basename="companies")
 router.register("categories", CategoryViewSet, basename="categories")
@@ -54,10 +54,6 @@ router.register(
     "inventory-movements", InventoryMovementViewSet, basename="inventory-movements"
 )
 router.register("customers", CustomerViewSet, basename="customers")
-router.register("promotions", PromotionViewSet, basename="promotions")
-router.register(
-    "customer-promotions", CustomerPromotionViewSet, basename="customer-promotions"
-)
 router.register("sales", SaleViewSet, basename="sales")
 sale_router = routers.NestedSimpleRouter(router, "sales", lookup="sales")
 sale_router.register("details", SaleDetailViewSet, basename="sale-detail")

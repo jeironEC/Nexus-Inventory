@@ -5,11 +5,13 @@ from rest_framework import serializers
 from nexus_inventory_backend.db.models import Invoice
 
 # Serializers
+from .company import CompanySerializer
 from .sale_read import SaleReadSerializer
 from .purchase_read import PurchaseReadSerializer
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
     sale = SaleReadSerializer(read_only=True)
     purchase = PurchaseReadSerializer(read_only=True)
 

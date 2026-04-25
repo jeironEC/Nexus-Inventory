@@ -11,7 +11,6 @@ from django.utils import timezone
 from nexus_inventory_backend.db.models import Sale, SaleDetail, Invoice
 
 # Enums
-from nexus_inventory_backend.db.enums import OperationState
 
 # Datetime
 from datetime import timedelta
@@ -36,9 +35,12 @@ class TestGetSale:
         data = response.data[0]
         assert set(data.keys()) == {
             "id",
+            "company",
             "customer",
             "user",
+            "discount_amount",
             "subtotal",
+            "tax_percentage",
             "tax_amount",
             "total_amount",
             "payment_method",
@@ -85,7 +87,7 @@ class TestPostSale:
         assert Invoice.objects.count() == 1
 
     def test_create_sale_response_contains_fields(
-        self, api_client_auth, sales_url, payload_sale
+        self, api_client_auth, sales_url, purchase, payload_sale
     ):
         response = api_client_auth.post(sales_url, payload_sale, format="json")
         data = response.data
@@ -94,6 +96,7 @@ class TestPostSale:
             "id",
             "company_id",
             "customer_id",
+            "tax_percentage",
             "payment_method",
             "details",
         }
@@ -163,30 +166,6 @@ class TestDeleteSale:
         self, api_client, sale_detail_url, sale
     ):
         response = api_client.delete(sale_detail_url(sale.pk))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
-class TestStateSale:
-    def test_cancel_sale_returns_200(self, api_client_auth, sale_cancel_url, sale):
-        response = api_client_auth.patch(sale_cancel_url(sale.pk))
-        sale.refresh_from_db()
-        assert response.status_code == status.HTTP_200_OK
-        assert sale.state == OperationState.CANCELED
-        assert response.data["state"] == "CANCELED"
-
-    def test_cancel_already_canceled_returns_400(
-        self, api_client_auth, sale_cancel_url, sale
-    ):
-        sale.state = OperationState.CANCELED
-        sale.save()
-        response = api_client_auth.patch(sale_cancel_url(sale.pk))
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_cancel_unauthenticated_returns_401(
-        self, api_client, sale_cancel_url, sale
-    ):
-        response = api_client.patch(sale_cancel_url(sale.pk))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 

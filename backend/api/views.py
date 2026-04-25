@@ -1,9 +1,16 @@
+# Internal
+import uuid
+from hashlib import sha256
+
 # Django
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-from django.db import IntegrityError
-from django.db.models import Sum, Count, Avg, Q
 from django.utils import timezone
+from django.template.loader import render_to_string
+from django.http.response import HttpResponse
+
+# Weasyprint
+from weasyprint import HTML
 
 # DRF
 from rest_framework import mixins, status, viewsets
@@ -21,6 +28,11 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 from .serializers.empty import EmptySerializer
 from .serializers.user_role import RoleSerializer
 from .serializers.user_read import UserReadSerializer
+from .serializers.password_reset import (
+    PasswordResetRequestSerializer,
+    PasswordResetVerifySerializer,
+    PasswordResetConfirmSerializer,
+)
 from .serializers.company import CompanySerializer
 from .serializers.user_create import UserCreateSerializer
 from .serializers.user_update import UserUpdateSerializer
@@ -30,8 +42,6 @@ from .serializers.product import ProductSerializer
 from .serializers.inventory import InventorySerializer
 from .serializers.inventory_movement import InventoryMovementSerializer
 from .serializers.customer import CustomerSerializer
-from .serializers.promotion import PromotionSerializer
-from .serializers.customer_promotion import CustomerPromotionSerializer
 from .serializers.sale_read import SaleReadSerializer
 from .serializers.sale_create import SaleCreateSerializer
 from .serializers.sale_detail_read import SaleDetailReadSerializer
@@ -57,12 +67,13 @@ from .serializers.reports import (
     InventoryReportSerializer,
     InventoryLowStockSerializer,
     InventoryMovementReportSerializer,
+    ProductReportSerializer,
     ProductTopSellingSerializer,
     ProductLowSellingSerializer,
     ProductMostPurchasedSerializer,
     ProductByCategorySerializer,
+    CustomerReportSerializer,
     CustomerTopSerializer,
-    CustomerPromotionReportSerializer,
     InvoiceReportSerializer,
     SaleReturnReportSerializer,
     PurchaseReturnReportSerializer,
@@ -80,11 +91,6 @@ from .filters.inventory_movements import (
     InventoryMovementFilter,
 )
 from .filters.customer import CustomerAdminFilter, CustomerFilter
-from .filters.promotion import PromotionAdminFilter, PromotionFilter
-from .filters.customer_promotions import (
-    CustomerPromotionAdminFilter,
-    CustomerPromotionFilter,
-)
 from .filters.sale import (
     SaleAdminFilter,
     SaleFilter,
@@ -140,14 +146,13 @@ from .filters.reports import (
 from nexus_inventory_backend.db.models import (
     Role,
     User,
+    PasswordResetOTP,
     Company,
     Category,
     Product,
     Inventory,
     InventoryMovement,
     Customer,
-    Promotion,
-    CustomerPromotion,
     Sale,
     SaleDetail,
     Invoice,
@@ -165,23 +170,40 @@ from .permissions import CanCreateUsers
 
 # Mixins
 from .mixins.filter import StrictFilterMixin
-from .mixins.state import StateMixin
 from .mixins.noput import NoPutMixin
 from .mixins.role_filter import RoleFilterMixin
 from .mixins.soft_delete_queryset import SoftDeleteQuerysetMixin
-from .mixins.operation_state import OperationStateMixin
 from .mixins.report_filter import ReportFilterMixin
 from .mixins.audit_fields import AuditUserMixin, AuditOperationUserMixin
-from .mixins.is_active import UserStateMixin
+from .mixins.is_active import StateMixin
 
 # Enums
-from nexus_inventory_backend.db.enums import OperationState, InvoiceState, InvoiceType
+from nexus_inventory_backend.db.enums import (
+    OperationState,
+    InvoiceState,
+    InvoiceType,
+)
+
+# Services
+from api.services.email_service import send_reset_password_email
+from api.services.company_service import CompanyService
+from api.services.reports.sale_report_service import SaleReportService
+from api.services.reports.purchase_report_service import PurchaseReportService
+from api.services.reports.inventory_report_service import InventoryReportService
+from api.services.reports.product_report_service import ProductReportService
+from api.services.reports.customer_report_service import CustomerReportService
+from api.services.reports.invoice_report_service import InvoiceReportService
+from api.services.reports.sale_return_report_service import SaleReturnReportService
+from api.services.reports.purchase_return_report_service import (
+    PurchaseReturnReportService,
+)
+from api.services.util_service import format_currency, generate_otp
 
 # Utils
 from api.utils import get_trunc_func
 
 # Date
-from datetime import date
+from datetime import timedelta
 
 
 @extend_schema(tags=["Health"])
@@ -206,8 +228,6 @@ class HealthCheckView(APIView):
     retrieve=extend_schema(tags=["Roles"], summary="Get role"),
     partial_update=extend_schema(tags=["Roles"], summary="Partial update role"),
     destroy=extend_schema(tags=["Roles"], summary="Delete role"),
-    active=extend_schema(tags=["Roles"], summary="List active roles"),
-    inactive=extend_schema(tags=["Roles"], summary="List inactive roles"),
     activate=extend_schema(tags=["Roles"], summary="Activate role"),
     deactivate=extend_schema(tags=["Roles"], summary="Deactivate role"),
 )
@@ -216,7 +236,6 @@ class UserRoleViewSet(
     RoleFilterMixin,
     StateMixin,
     NoPutMixin,
-    AuditUserMixin,
     SoftDeleteQuerysetMixin,
     viewsets.ModelViewSet,
 ):
@@ -225,11 +244,7 @@ class UserRoleViewSet(
     Solo los administradores pueden gestionar todo el sistema.
     """
 
-    queryset = (
-        Role.objects.select_related("created_by", "updated_by", "deleted_by")
-        .all()
-        .order_by("name")
-    )
+    queryset = Role.objects.all().order_by("name")
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
     admin_filterset_class = RoleAdminFilter
@@ -239,11 +254,13 @@ class UserRoleViewSet(
 @extend_schema_view(
     list=extend_schema(tags=["Users"], summary="List users"),
     create=extend_schema(tags=["Users"], summary="Create user"),
+    activate=extend_schema(tags=["Users"], summary="Activate user"),
+    deactivate=extend_schema(tags=["Users"], summary="Deactivate user"),
 )
 class UserViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    UserStateMixin,
+    StateMixin,
     AuditUserMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -312,14 +329,132 @@ class EmailTokenObtainPairViewSet(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
 
 
+class PasswordResetViewSet(viewsets.ViewSet):
+    """
+    Recuperación de contraseña mediante email.
+    Envia un correo con un código OTP y retorna un mensaje de seguridad.
+    Valida el código y retorna un token de recuperación.
+    Valida el token y permite cambiar la contraseña.
+    """
+
+    permission_classes = [IsAuthenticated, CanCreateUsers]
+
+    def get_serializer_class(self):
+        if self.action == "request":
+            return PasswordResetRequestSerializer
+        elif self.action == "verify":
+            return PasswordResetVerifySerializer
+        elif self.action == "confirm":
+            return PasswordResetConfirmSerializer
+        return None
+
+    @action(detail=False, methods=["post"])
+    def request(self, request):
+        serializer = self.get_serializer_class()(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "If the email address exists, you will receive a code."},
+                status=status.HTTP_200_OK,
+            )
+
+        PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
+
+        otp = generate_otp()
+        otp_hash = sha256(otp.encode()).hexdigest()
+
+        PasswordResetOTP.objects.create(user=user, email=email, otp_hash=otp_hash)
+
+        send_reset_password_email(email, otp, user)
+
+        return Response(
+            {"detail": "If the email address exists, you will receive a code."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["post"])
+    def verify(self, request):
+        serializer = self.get_serializer_class()(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        otp = serializer.validated_data["otp"]
+
+        record = PasswordResetOTP.objects.filter(email=email, is_used=False).first()
+
+        if not record:
+            return Response(
+                {"detail": "Invalid or expired code."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if timezone.now() - record.created_at > timedelta(minutes=5):
+            return Response(
+                {"detail": "Expired code."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if sha256(otp.encode()).hexdigest() != record.otp_hash:
+            return Response(
+                {"detail": "Invalid code."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        record.reset_token = uuid.uuid4()
+        record.save(update_fields=["reset_token"])
+
+        return Response(
+            {"reset_token": str(record.reset_token)}, status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["post"])
+    def confirm(self, request):
+        serializer = self.get_serializer_class()(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reset_token = serializer.validated_data["reset_token"]
+        new_password = serializer.validated_data["new_password"]
+
+        record = PasswordResetOTP.objects.filter(
+            reset_token=reset_token, is_used=False
+        ).first()
+
+        if not record:
+            return Response(
+                {"detail": "Invalid or expired reset token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email=record.email).first()
+
+        if not user:
+            return Response(
+                {"detail": "Invalid user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save()
+
+        record.is_used = True
+        record.reset_token = None
+        record.save(update_fields=["is_used", "reset_token"])
+
+        return Response(
+            {"detail": "Password updated successfully"},
+            status=status.HTTP_200_OK,
+        )
+
+
 @extend_schema_view(
     list=extend_schema(tags=["Companies"], summary="List companies"),
     create=extend_schema(tags=["Companies"], summary="Create company"),
     retrieve=extend_schema(tags=["Companies"], summary="Get company"),
     partial_update=extend_schema(tags=["Companies"], summary="Partial update company"),
     destroy=extend_schema(tags=["Companies"], summary="Delete company"),
-    active=extend_schema(tags=["Companies"], summary="List active companies"),
-    inactive=extend_schema(tags=["Companies"], summary="List inactive companies"),
     activate=extend_schema(tags=["Companies"], summary="Activate company"),
     deactivate=extend_schema(tags=["Companies"], summary="Deactivate company"),
 )
@@ -356,8 +491,6 @@ class CompanyViewSet(
         tags=["Categories"], summary="Partial update category"
     ),
     destroy=extend_schema(tags=["Categories"], summary="Delete category"),
-    active=extend_schema(tags=["Categories"], summary="List active categories"),
-    inactive=extend_schema(tags=["Categories"], summary="List inactive categories"),
     activate=extend_schema(tags=["Categories"], summary="Activate category"),
     deactivate=extend_schema(tags=["Categories"], summary="Deactivate category"),
 )
@@ -392,8 +525,6 @@ class CategoryViewSet(
     retrieve=extend_schema(tags=["Products"], summary="Get product"),
     partial_update=extend_schema(tags=["Products"], summary="Partial update product"),
     destroy=extend_schema(tags=["Products"], summary="Delete product"),
-    active=extend_schema(tags=["Products"], summary="List active products"),
-    inactive=extend_schema(tags=["Products"], summary="List inactive products"),
     activate=extend_schema(tags=["Products"], summary="Activate product"),
     deactivate=extend_schema(tags=["Products"], summary="Deactivate product"),
 )
@@ -508,13 +639,8 @@ class InventoryMovementViewSet(
     retrieve=extend_schema(tags=["Customers"], summary="Get customer"),
     partial_update=extend_schema(tags=["Customers"], summary="Partial update customer"),
     destroy=extend_schema(tags=["Customers"], summary="Delete customer"),
-    active=extend_schema(tags=["Customers"], summary="List active customers"),
-    inactive=extend_schema(tags=["Customers"], summary="List inactive customers"),
     activate=extend_schema(tags=["Customers"], summary="Activate customer"),
     deactivate=extend_schema(tags=["Customers"], summary="Deactivate customer"),
-    list_promotions=extend_schema(
-        tags=["Customers"], summary="List customer promotions"
-    ),
 )
 class CustomerViewSet(
     StrictFilterMixin,
@@ -540,172 +666,6 @@ class CustomerViewSet(
     admin_filterset_class = CustomerAdminFilter
     user_filterset_class = CustomerFilter
 
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="list-promotions",
-    )
-    def list_promotions(self, request, pk=None):
-        customer = self.get_object()
-
-        promotions = CustomerPromotion.objects.filter(customer=customer).select_related(
-            "promotion"
-        )
-
-        serializer = CustomerPromotionSerializer(promotions, many=True)
-        return Response(serializer.data)
-
-
-@extend_schema_view(
-    list=extend_schema(tags=["Promotions"], summary="List promotions"),
-    create=extend_schema(tags=["Promotions"], summary="Create promotion"),
-    retrieve=extend_schema(tags=["Promotions"], summary="Get promotion"),
-    partial_update=extend_schema(
-        tags=["Promotions"], summary="Partial update promotion"
-    ),
-    destroy=extend_schema(tags=["Promotions"], summary="Delete promotion"),
-    active=extend_schema(tags=["Promotions"], summary="List active promotions"),
-    inactive=extend_schema(tags=["Promotions"], summary="List inactive promotions"),
-    activate=extend_schema(tags=["Promotions"], summary="Activate promotion"),
-    deactivate=extend_schema(tags=["Promotions"], summary="Deactivate promotion"),
-)
-class PromotionViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    StateMixin,
-    NoPutMixin,
-    AuditUserMixin,
-    SoftDeleteQuerysetMixin,
-    viewsets.ModelViewSet,
-):
-    """
-    Gestiona las promociones del sistema.
-    """
-
-    queryset = (
-        Promotion.objects.select_related("created_by", "updated_by", "deleted_by")
-        .all()
-        .order_by("name")
-    )
-    serializer_class = PromotionSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = PromotionAdminFilter
-    user_filterset_class = PromotionFilter
-
-
-@extend_schema_view(
-    list=extend_schema(
-        tags=["Customer Promotions"], summary="List customer promotions"
-    ),
-    create=extend_schema(
-        tags=["Customer Promotions"], summary="Create customer promotion"
-    ),
-    retrieve=extend_schema(
-        tags=["Customer Promotions"], summary="Get customer promotion"
-    ),
-    partial_update=extend_schema(
-        tags=["Customer Promotions"], summary="Partial update customer promotion"
-    ),
-    destroy=extend_schema(
-        tags=["Customer Promotions"], summary="Delete customer promotion"
-    ),
-    apply=extend_schema(
-        tags=["Customer Promotions"], summary="Apply promotion to customer"
-    ),
-)
-class CustomerPromotionViewSet(
-    StrictFilterMixin,
-    RoleFilterMixin,
-    NoPutMixin,
-    AuditUserMixin,
-    SoftDeleteQuerysetMixin,
-    viewsets.ModelViewSet,
-):
-    """
-    Gestiona la asignación de promociones a clientes.
-    Evita duplicados: si la promoción ya está asignada retorna 400.
-    Valida que el cliente esté activo y la promoción no haya expirado.
-    """
-
-    queryset = (
-        CustomerPromotion.objects.select_related(
-            "customer", "promotion", "created_by", "updated_by", "deleted_by"
-        )
-        .all()
-        .order_by("customer__first_name", "promotion__name")
-    )
-    serializer_class = CustomerPromotionSerializer
-    permission_classes = [IsAuthenticated]
-    admin_filterset_class = CustomerPromotionAdminFilter
-    user_filterset_class = CustomerPromotionFilter
-
-    def create(self, request, *args, **kwargs):
-        customer_id = request.data.get("customer_id")
-        promotion_id = request.data.get("promotion_id")
-
-        if customer_id and promotion_id:
-            from nexus_inventory_backend.db.models import Customer, Promotion
-            from nexus_inventory_backend.db.enums import State
-
-            try:
-                customer = Customer.objects.get(pk=customer_id)
-            except Customer.DoesNotExist:
-                return Response(
-                    {"detail": "Customer not found."},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-
-            if customer.state != State.ACTIVE:
-                return Response(
-                    {"detail": "Customer is not active."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            try:
-                promotion = Promotion.objects.get(pk=promotion_id)
-            except Promotion.DoesNotExist:
-                return Response(
-                    {"detail": "Promotion not found."},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-
-            if promotion.state != State.ACTIVE:
-                return Response(
-                    {"detail": "Promotion is not active."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if promotion.end_date < date.today():
-                return Response(
-                    {"detail": "Promotion has expired."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            self.perform_create(serializer)
-        except IntegrityError:
-            return Response(
-                {"detail": "This promotion is already assigned to the customer."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-    @action(detail=True, methods=["patch"])
-    def apply(self, request, pk=None):
-        customer_promotion = self.get_object()
-        customer_promotion.applied = True
-        customer_promotion.save(update_fields=["applied"])
-
-        serializer = self.get_serializer(customer_promotion)
-        return Response(serializer.data)
-
 
 @extend_schema_view(
     list=extend_schema(tags=["Sales"], summary="List sales"),
@@ -719,7 +679,6 @@ class CustomerPromotionViewSet(
 class SaleViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -883,6 +842,50 @@ class InvoiceViewSet(
         serializer = InvoiceSerializer(invoice, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(
+        detail=True,
+        methods=["get"],
+        url_name="pdf",
+        url_path="pdf",
+        serializer_class=EmptySerializer,
+    )
+    def pdf(self, request, pk=None):
+        invoice = get_object_or_404(
+            Invoice.objects.select_related(
+                "sale",
+                "sale__customer",
+                "sale__user",
+                "purchase",
+                "purchase__supplier",
+                "purchase__user",
+            ),
+            pk=pk,
+        )
+        company = CompanyService.get_active_company()
+
+        template = (
+            "pdf/invoice_sale.html"
+            if invoice.invoice_type == "SALE"
+            else "pdf/invoice_puchase.html"
+        )
+
+        html_content = render_to_string(
+            template,
+            {
+                "invoice": invoice,
+                "company": company,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            f'inline; filename="factura_{invoice.number_invoice}.pdf"'
+        )
+
+        return response
+
 
 @extend_schema_view(
     list=extend_schema(tags=["Suppliers"], summary="List suppliers"),
@@ -890,8 +893,6 @@ class InvoiceViewSet(
     retrieve=extend_schema(tags=["Suppliers"], summary="Get supplier"),
     partial_update=extend_schema(tags=["Suppliers"], summary="Partial update supplier"),
     destroy=extend_schema(tags=["Suppliers"], summary="Delete supplier"),
-    active=extend_schema(tags=["Suppliers"], summary="List active suppliers"),
-    inactive=extend_schema(tags=["Suppliers"], summary="List inactive suppliers"),
     activate=extend_schema(tags=["Suppliers"], summary="Activate supplier"),
     deactivate=extend_schema(tags=["Suppliers"], summary="Deactivate supplier"),
 )
@@ -931,7 +932,6 @@ class SupplierViewSet(
 class PurchaseViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -1051,7 +1051,6 @@ class PurchaseDetailViewSet(
 class SaleReturnViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -1177,7 +1176,6 @@ class SaleReturnDetailViewSet(
 class PurchaseReturnViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
-    OperationStateMixin,
     NoPutMixin,
     AuditOperationUserMixin,
     SoftDeleteQuerysetMixin,
@@ -1299,20 +1297,13 @@ class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=SaleReportSerializer)
     @action(detail=False, methods=["get"], url_path="sales")
     def sales(self, request):
         qs = self.get_filtered_queryset(Sale.objects.all(), SaleReportFilter)
-        data = qs.aggregate(
-            total_sales=Count("id", filter=Q(state=OperationState.COMPLETED)),
-            total_revenue=Sum("total_amount", filter=Q(state=OperationState.COMPLETED)),
-            total_tax=Sum("tax_amount", filter=Q(state=OperationState.COMPLETED)),
-            average_ticket=Avg(
-                "total_amount", filter=Q(state=OperationState.COMPLETED)
-            ),
-            canceled_sales=Count("id", filter=Q(state=OperationState.CANCELED)),
-        )
+        data = SaleReportService.get_summary(qs)
         serializer = SaleReportSerializer(data)
         return Response(serializer.data)
 
@@ -1322,21 +1313,7 @@ class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         qs = self.get_filtered_queryset(
             Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
         )
-        data = (
-            qs.values("customer__id", "customer__first_name", "customer__last_name")
-            .annotate(total_sales=Count("id"), total_revenue=Sum("total_amount"))
-            .order_by("-total_revenue")
-        )
-        result = [
-            {
-                "customer_id": r["customer__id"],
-                "customer_name": f"{r['customer__first_name'] or ''} {r['customer__last_name'] or ''}".strip()
-                or "Anonymous",
-                "total_sales": r["total_sales"],
-                "total_revenue": r["total_revenue"],
-            }
-            for r in data
-        ]
+        result = SaleReportService.get_by_customer(qs)
         serializer = SaleByCustomerSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1346,19 +1323,7 @@ class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         qs = self.get_filtered_queryset(
             Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
         )
-        data = (
-            qs.values("payment_method")
-            .annotate(total_sales=Count("id"), total_revenue=Sum("total_amount"))
-            .order_by("-total_revenue")
-        )
-        result = [
-            {
-                "payment_method": r["payment_method"],
-                "total_sales": r["total_sales"],
-                "total_revenue": r["total_revenue"],
-            }
-            for r in data
-        ]
+        result = SaleReportService.get_by_payment_method(qs)
         serializer = SaleByPaymentMethodSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1370,22 +1335,165 @@ class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         qs = self.get_filtered_queryset(
             Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
         )
-        data = (
-            qs.annotate(period=trunc_func("created_at"))
-            .values("period")
-            .annotate(total_sales=Count("id"), total_revenue=Sum("total_amount"))
-            .order_by("period")
-        )
-        result = [
-            {
-                "period": r["period"].strftime("%Y-%m-%d") if r["period"] else None,
-                "total_sales": r["total_sales"],
-                "total_revenue": r["total_revenue"],
-            }
-            for r in data
-        ]
+        result = SaleReportService.get_by_period(qs, trunc_func)
         serializer = SaleByPeriodSerializer(result, many=True)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="sales/pdf",
+    )
+    def sales_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Sale.objects.select_related("customer", "user").all(), SaleReportFilter
+        )
+
+        data = SaleReportService.build_sales_pdf(qs)
+
+        company = CompanyService.get_active_company()
+
+        for sale in data["sales"]:
+            sale["subtotal"] = format_currency(sale.get("subtotal"))
+            sale["tax_amount"] = format_currency(sale.get("tax_amount"))
+            sale["total_amount"] = format_currency(sale.get("total_amount"))
+
+        data["summary"]["total_revenue"] = format_currency(
+            data["summary"].get("total_revenue")
+        )
+        data["summary"]["total_tax"] = format_currency(data["summary"].get("total_tax"))
+        data["summary"]["average_ticket"] = format_currency(
+            data["summary"].get("average_ticket")
+        )
+
+        html_content = render_to_string(
+            "pdf/sales_report.html",
+            {
+                "data": data["summary"],
+                "sales": data["sales"],
+                "company": company,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_ventas.pdf"'
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="sales/by-customer/pdf",
+    )
+    def sales_by_customer_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
+        )
+        result = SaleReportService.get_by_customer(qs)
+        totals = SaleReportService.get_totals_from_list(result)
+
+        total_sales = totals["total_sales"]
+        total_revenue = totals["total_revenue"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_revenue"] = format_currency(item["total_revenue"])
+
+        html_content = render_to_string(
+            "pdf/sales_by_customer_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_sales": total_sales,
+                "total_revenue": format_currency(total_revenue),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_ventas_por_cliente.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="sales/by-payment-method/pdf",
+    )
+    def sales_by_payment_method_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
+        )
+        result = SaleReportService.get_by_payment_method(qs)
+        totals = SaleReportService.get_totals_from_list(result)
+
+        total_sales = totals["total_sales"]
+        total_revenue = totals["total_revenue"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_revenue"] = format_currency(item["total_revenue"])
+
+        html_content = render_to_string(
+            "pdf/sales_by_payment_method_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_sales": total_sales,
+                "total_revenue": format_currency(total_revenue),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_ventas_por_metodo_pago.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="sales/by-period/pdf",
+    )
+    def sales_by_period_pdf(self, request):
+        period_type = request.query_params.get("period_type", "month")
+        qs = self.get_filtered_queryset(
+            Sale.objects.filter(state=OperationState.COMPLETED), SaleReportFilter
+        )
+        result = SaleReportService.get_by_period(qs, period_type)
+        totals = SaleReportService.get_totals_from_list(result)
+
+        total_sales = totals["total_sales"]
+        total_revenue = totals["total_revenue"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_revenue"] = format_currency(item["total_revenue"])
+
+        html_content = render_to_string(
+            "pdf/sales_by_period_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_sales": total_sales,
+                "total_revenue": format_currency(total_revenue),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_ventas_por_periodo.pdf"'
+        )
+        return response
 
 
 class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1395,19 +1503,13 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=PurchaseReportSerializer)
     @action(detail=False, methods=["get"], url_path="purchases")
     def purchases(self, request):
         qs = self.get_filtered_queryset(Purchase.objects.all(), PurchaseReportFilter)
-        data = qs.aggregate(
-            total_purchases=Count("id", filter=Q(state=OperationState.COMPLETED)),
-            total_spent=Sum("total_amount", filter=Q(state=OperationState.COMPLETED)),
-            average_purchase=Avg(
-                "total_amount", filter=Q(state=OperationState.COMPLETED)
-            ),
-            canceled_purchases=Count("id", filter=Q(state=OperationState.CANCELED)),
-        )
+        data = PurchaseReportService.get_summary(qs)
         serializer = PurchaseReportSerializer(data)
         return Response(serializer.data)
 
@@ -1418,20 +1520,7 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             Purchase.objects.filter(state=OperationState.COMPLETED),
             PurchaseReportFilter,
         )
-        data = (
-            qs.values("supplier__id", "supplier__name")
-            .annotate(total_purchases=Count("id"), total_spent=Sum("total_amount"))
-            .order_by("-total_spent")
-        )
-        result = [
-            {
-                "supplier_id": r["supplier__id"],
-                "supplier_name": r["supplier__name"],
-                "total_purchases": r["total_purchases"],
-                "total_spent": r["total_spent"],
-            }
-            for r in data
-        ]
+        result = PurchaseReportService.get_by_supplier(qs)
         serializer = PurchaseBySupplierSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1444,22 +1533,118 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             Purchase.objects.filter(state=OperationState.COMPLETED),
             PurchaseReportFilter,
         )
-        data = (
-            qs.annotate(period=trunc_func("created_at"))
-            .values("period")
-            .annotate(total_purchases=Count("id"), total_spent=Sum("total_amount"))
-            .order_by("period")
-        )
-        result = [
-            {
-                "period": r["period"].strftime("%Y-%m-%d") if r["period"] else None,
-                "total_purchases": r["total_purchases"],
-                "total_spent": r["total_spent"],
-            }
-            for r in data
-        ]
+        result = PurchaseReportService.get_by_period(qs, trunc_func)
         serializer = PurchaseByPeriodSerializer(result, many=True)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="purchases/pdf",
+    )
+    def purchases_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Purchase.objects.select_related("supplier", "user").all(),
+            PurchaseReportFilter,
+        )
+
+        data = PurchaseReportService.build_purchase_pdf_data(qs)
+
+        company = CompanyService.get_active_company()
+
+        for purchase in data["purchases"]:
+            purchase["total_amount"] = format_currency(purchase.get("total_amount"))
+
+        data["summary"]["total_spent"] = format_currency(
+            data["summary"].get("total_spent")
+        )
+        data["summary"]["average_purchase"] = format_currency(
+            data["summary"].get("average_purchase")
+        )
+
+        html_content = render_to_string(
+            "pdf/purchases_report.html",
+            {
+                "data": data["summary"],
+                "purchases": data["purchases"],
+                "company": company,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_compras.pdf"'
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="purchases/by-supplier/pdf",
+    )
+    def purchases_by_supplier_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Purchase.objects.filter(state=OperationState.COMPLETED),
+            PurchaseReportFilter,
+        )
+        result = PurchaseReportService.get_by_supplier(qs)
+
+        totals = PurchaseReportService.get_totals_from_list(result)
+        total_purchases = totals["total_purchases"]
+        total_spent = totals["total_spent"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_spent"] = format_currency(item["total_spent"])
+
+        html_content = render_to_string(
+            "pdf/purchases_by_supplier_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_purchases": total_purchases,
+                "total_spent": format_currency(total_spent),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_compras_por_proveedor.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="purchases/by-period/pdf",
+    )
+    def purchases_by_period_pdf(self, request):
+        period = request.query_params.get("period", "month")
+        trunc_func = get_trunc_func(period)
+        qs = self.get_filtered_queryset(
+            Purchase.objects.filter(state=OperationState.COMPLETED),
+            PurchaseReportFilter,
+        )
+        result = PurchaseReportService.get_by_period(qs, trunc_func)
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_spent"] = format_currency(item["total_spent"])
+
+        html_content = render_to_string(
+            "pdf/purchases_by_period_report.html", {"data": result, "company": company}
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_compras_por_periodo.pdf"'
+        )
+        return response
 
 
 class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1470,6 +1655,7 @@ class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=InventoryReportSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="inventory")
@@ -1478,17 +1664,7 @@ class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             Inventory.objects.select_related("product", "product__category").all(),
             InventoryReportFilter,
         )
-        result = [
-            {
-                "product_id": inv.product.id,
-                "product_name": inv.product.name,
-                "category": inv.product.category.name,
-                "quantity": inv.quantity,
-                "sale_price": inv.product.sale_price,
-                "stock_value": inv.quantity * inv.product.sale_price,
-            }
-            for inv in qs
-        ]
+        result = [InventoryReportService.map_inventory(inv) for inv in qs]
         serializer = InventoryReportSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1506,16 +1682,7 @@ class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             ),
             InventoryReportFilter,
         )
-        result = [
-            {
-                "product_id": inv.product.id,
-                "product_name": inv.product.name,
-                "category": inv.product.category.name,
-                "quantity": inv.quantity,
-                "threshold": threshold,
-            }
-            for inv in qs
-        ]
+        result = [InventoryReportService.map_low_stock(inv, threshold) for inv in qs]
         serializer = InventoryLowStockSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1526,21 +1693,116 @@ class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             InventoryMovement.objects.select_related("product", "user").all(),
             InventoryReportFilter,
         )
-        result = [
-            {
-                "product_id": m.product.id,
-                "product_name": m.product.name,
-                "movement_type": m.movement_type,
-                "quantity": m.quantity,
-                "user": (
-                    f"{m.user.first_name} {m.user.last_name}" if m.user else "Unknown"
-                ),
-                "created_at": m.created_at,
-            }
-            for m in qs
-        ]
+        result = [InventoryReportService.map_movement(m) for m in qs]
         serializer = InventoryMovementReportSerializer(result, many=True)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="inventory/pdf",
+    )
+    def inventory_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Inventory.objects.select_related("product", "product__category").all(),
+            InventoryReportFilter,
+        )
+        result = [InventoryReportService.map_inventory(inv) for inv in qs]
+
+        totals = InventoryReportService.get_totals_for_inventory(result)
+        total_quantity = totals["total_quantity"]
+        total_sale_price = totals["total_sale_price"]
+        total_stock_value = totals["total_stock_value"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["sale_price"] = format_currency(item["sale_price"])
+            item["stock_value"] = format_currency(item["stock_value"])
+
+        html_content = render_to_string(
+            "pdf/inventory_report.html",
+            {
+                "inventory": result,
+                "company": company,
+                "total_quantity": total_quantity,
+                "total_sale_price": format_currency(total_sale_price),
+                "total_stock_value": format_currency(total_stock_value),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_inventario.pdf"'
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="inventory/low-stock/pdf",
+    )
+    def low_stock_pdf(self, request):
+        threshold = int(
+            request.query_params.get(
+                "low_stock_threshold", settings.LOW_STOCK_THRESHOLD
+            )
+        )
+        qs = self.get_filtered_queryset(
+            Inventory.objects.select_related("product", "product__category").filter(
+                quantity__lte=threshold
+            ),
+            InventoryReportFilter,
+        )
+        result = [InventoryReportService.map_low_stock(inv, threshold) for inv in qs]
+
+        company = CompanyService.get_active_company()
+
+        html_content = render_to_string(
+            "pdf/inventory_low_stock_report.html",
+            {"data": result, "threshold": threshold, "company": company},
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_bajo_stock.pdf"'
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="inventory/movements/pdf",
+    )
+    def movements_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            InventoryMovement.objects.select_related("product", "user").all(),
+            InventoryReportFilter,
+        )
+        result = [InventoryReportService.map_movement(m) for m in qs]
+
+        company = CompanyService.get_active_company()
+
+        totals = InventoryReportService.get_totals_for_movements(result)
+        total_in = totals["total_in"]
+        total_out = totals["total_out"]
+
+        html_content = render_to_string(
+            "pdf/inventory_movements_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_in": total_in,
+                "total_out": total_out,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_movimientos_inventario.pdf"'
+        )
+        return response
 
 
 class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1551,6 +1813,7 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     def _base_sale_detail_qs(self):
         return self.get_filtered_queryset(
@@ -1560,28 +1823,34 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             ProductReportFilter,
         )
 
+    @extend_schema(responses=ProductReportSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="products")
+    def products(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+
+        sale_qs = self._base_sale_detail_qs()
+
+        purchase_qs = self.get_filtered_queryset(
+            PurchaseDetail.objects.select_related(
+                "product", "product__category", "purchase"
+            ).filter(purchase__state=OperationState.COMPLETED),
+            ProductReportFilter,
+        )
+
+        data = ProductReportService.build_report_products(sale_qs, purchase_qs, limit)
+
+        serializer = ProductReportSerializer(data)
+        return Response(serializer.data)
+
     @extend_schema(responses=ProductTopSellingSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="products/top-selling")
     def top_selling(self, request):
         limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
-        data = (
-            self._base_sale_detail_qs()
-            .values("product__id", "product__name", "product__category__name")
-            .annotate(
-                total_quantity_sold=Sum("quantity"), total_revenue=Sum("subtotal")
-            )
-            .order_by("-total_quantity_sold")[:limit]
+        result = ProductReportService.get_products_report(
+            qs=self._base_sale_detail_qs(),
+            order_by="-total_quantity",
+            limit=limit,
         )
-        result = [
-            {
-                "product_id": r["product__id"],
-                "product_name": r["product__name"],
-                "category": r["product__category__name"],
-                "total_quantity_sold": r["total_quantity_sold"],
-                "total_revenue": r["total_revenue"],
-            }
-            for r in data
-        ]
         serializer = ProductTopSellingSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1589,24 +1858,11 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="products/low-selling")
     def low_selling(self, request):
         limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
-        data = (
-            self._base_sale_detail_qs()
-            .values("product__id", "product__name", "product__category__name")
-            .annotate(
-                total_quantity_sold=Sum("quantity"), total_revenue=Sum("subtotal")
-            )
-            .order_by("total_quantity_sold")[:limit]
+        result = ProductReportService.get_products_report(
+            qs=self._base_sale_detail_qs(),
+            order_by="total_quantity",
+            limit=limit,
         )
-        result = [
-            {
-                "product_id": r["product__id"],
-                "product_name": r["product__name"],
-                "category": r["product__category__name"],
-                "total_quantity_sold": r["total_quantity_sold"],
-                "total_revenue": r["total_revenue"],
-            }
-            for r in data
-        ]
         serializer = ProductLowSellingSerializer(result, many=True)
         return Response(serializer.data)
 
@@ -1620,51 +1876,227 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             ).filter(purchase__state=OperationState.COMPLETED),
             ProductReportFilter,
         )
-        data = (
-            qs.values("product__id", "product__name", "product__category__name")
-            .annotate(
-                total_quantity_purchased=Sum("quantity"), total_spent=Sum("subtotal")
-            )
-            .order_by("-total_quantity_purchased")[:limit]
+        result = ProductReportService.get_products_report(
+            qs=qs,
+            order_by="-total_quantity",
+            limit=limit,
         )
-        result = [
-            {
-                "product_id": r["product__id"],
-                "product_name": r["product__name"],
-                "category": r["product__category__name"],
-                "total_quantity_purchased": r["total_quantity_purchased"],
-                "total_spent": r["total_spent"],
-            }
-            for r in data
-        ]
         serializer = ProductMostPurchasedSerializer(result, many=True)
         return Response(serializer.data)
 
     @extend_schema(responses=ProductByCategorySerializer(many=True))
     @action(detail=False, methods=["get"], url_path="products/by-category")
     def by_category(self, request):
-        data = (
-            self._base_sale_detail_qs()
-            .values("product__category__id", "product__category__name")
-            .annotate(
-                total_products=Count("product__id", distinct=True),
-                total_quantity_sold=Sum("quantity"),
-                total_revenue=Sum("subtotal"),
-            )
-            .order_by("-total_revenue")
+        result = ProductReportService.get_products_by_category(
+            self._base_sale_detail_qs(),
         )
-        result = [
-            {
-                "category_id": r["product__category__id"],
-                "category_name": r["product__category__name"],
-                "total_products": r["total_products"],
-                "total_quantity_sold": r["total_quantity_sold"],
-                "total_revenue": r["total_revenue"],
-            }
-            for r in data
-        ]
         serializer = ProductByCategorySerializer(result, many=True)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="products/pdf",
+    )
+    def products_pdf(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+
+        sale_qs = self._base_sale_detail_qs()
+
+        purchase_qs = self.get_filtered_queryset(
+            PurchaseDetail.objects.select_related(
+                "product", "product__category", "purchase"
+            ).filter(purchase__state=OperationState.COMPLETED),
+            ProductReportFilter,
+        )
+
+        data = ProductReportService.build_report_products(sale_qs, purchase_qs, limit)
+
+        company = CompanyService.get_active_company()
+
+        for section in ["top_selling", "most_purchased", "by_category"]:
+            if section == "by_category":
+                for cat in data.get(section, []):
+                    cat["total_revenue"] = format_currency(cat.get("total_revenue"))
+            else:
+                for item in data.get(section, []):
+                    item["total_amount"] = format_currency(item.get("total_amount"))
+                    item["total_revenue"] = format_currency(item.get("total_revenue"))
+                    item["total_spent"] = format_currency(item.get("total_spent"))
+
+        html_content = render_to_string(
+            "pdf/products_report.html", {"data": data, "company": company}
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="products/top-selling/pdf",
+    )
+    def top_selling_pdf(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        result = ProductReportService.get_products_report(
+            qs=self._base_sale_detail_qs(),
+            order_by="-total_quantity",
+            limit=limit,
+        )
+
+        totals = ProductReportService.get_totals_from_report(result)
+        total_quantity = totals["total_quantity"]
+        total_revenue = totals["total_revenue"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_amount"] = format_currency(item.get("total_amount"))
+
+        html_content = render_to_string(
+            "pdf/products_top_selling.html",
+            {
+                "data": result,
+                "company": company,
+                "total_quantity": total_quantity,
+                "total_revenue": format_currency(total_revenue),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_productos_mas_vendidos.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="products/low-selling/pdf",
+    )
+    def low_selling_pdf(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        result = ProductReportService.get_products_report(
+            qs=self._base_sale_detail_qs(),
+            order_by="total_quantity",
+            limit=limit,
+        )
+
+        totals = ProductReportService.get_totals_from_report(result)
+        total_quantity = totals["total_quantity"]
+        total_revenue = totals["total_revenue"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_amount"] = format_currency(item.get("total_amount"))
+
+        html_content = render_to_string(
+            "pdf/products_low_selling_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_quantity": total_quantity,
+                "total_revenue": format_currency(total_revenue),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_productos_menos_vendidos.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="products/most-purchased/pdf",
+    )
+    def most_purchased_pdf(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        qs = self.get_filtered_queryset(
+            PurchaseDetail.objects.select_related(
+                "product", "product__category", "purchase"
+            ).filter(purchase__state=OperationState.COMPLETED),
+            ProductReportFilter,
+        )
+        result = ProductReportService.get_products_report(
+            qs=qs,
+            order_by="-total_quantity",
+            limit=limit,
+        )
+
+        totals = ProductReportService.get_totals_from_report(
+            result, amount_field="total_spent"
+        )
+        total_quantity = totals["total_quantity"]
+        total_spent = totals["total_spent"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_amount"] = format_currency(item.get("total_amount"))
+            item["total_spent"] = format_currency(item.get("total_spent"))
+
+        html_content = render_to_string(
+            "pdf/products_most_purchased_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_quantity": total_quantity,
+                "total_spent": format_currency(total_spent),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_productos_mas_comprados.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="products/by-category/pdf",
+    )
+    def by_category_pdf(self, request):
+        result = ProductReportService.get_products_by_category(
+            self._base_sale_detail_qs(),
+        )
+
+        totals = ProductReportService.get_totals_by_category(result)
+        total_quantity = totals["total_quantity"]
+        total_revenue = totals["total_revenue"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_revenue"] = format_currency(item.get("total_revenue"))
+
+        html_content = render_to_string(
+            "pdf/products_by_category_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_quantity": total_quantity,
+                "total_revenue": format_currency(total_revenue),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_productos_por_categoria.pdf"'
+        )
+        return response
 
 
 class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1674,6 +2106,20 @@ class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
+
+    @extend_schema(responses=CustomerReportSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="customers")
+    def customers(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        qs = self.get_filtered_queryset(
+            Customer.objects.filter(sales__state=OperationState.COMPLETED),
+            CustomerReportFilter,
+        )
+        result = CustomerReportService.get_summary(qs, limit)
+
+        serializer = CustomerReportSerializer(result, many=True)
+        return Response(serializer.data)
 
     @extend_schema(responses=CustomerTopSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="customers/top")
@@ -1683,54 +2129,83 @@ class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             Customer.objects.filter(sales__state=OperationState.COMPLETED),
             CustomerReportFilter,
         )
-        data = (
-            qs.values("id", "first_name", "last_name")
-            .annotate(
-                total_purchases=Count("sales__id", distinct=True),
-                total_spent=Sum("sales__total_amount"),
-            )
-            .order_by("-total_spent")[:limit]
-        )
-        result = [
-            {
-                "customer_id": r["id"],
-                "customer_name": f"{r['first_name']} {r['last_name']}",
-                "total_purchases": r["total_purchases"],
-                "total_spent": r["total_spent"],
-            }
-            for r in data
-        ]
+        result = CustomerReportService.get_summary(qs, limit)
         serializer = CustomerTopSerializer(result, many=True)
         return Response(serializer.data)
 
-    @extend_schema(responses=CustomerPromotionReportSerializer(many=True))
-    @action(detail=False, methods=["get"], url_path="customers/promotions")
-    def customer_promotions(self, request):
-        from nexus_inventory_backend.db.models import CustomerPromotion
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="customers/pdf",
+    )
+    def customers_pdf(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
 
         qs = self.get_filtered_queryset(
-            CustomerPromotion.objects.select_related("customer").all(),
+            Customer.objects.filter(sales__state=OperationState.COMPLETED),
             CustomerReportFilter,
         )
-        data = (
-            qs.values("customer__id", "customer__first_name", "customer__last_name")
-            .annotate(
-                total_promotions=Count("id"),
-                applied_promotions=Count("id", filter=Q(applied=True)),
-            )
-            .order_by("-total_promotions")
-        )
-        result = [
+        result = CustomerReportService.get_summary(qs, limit)
+
+        totals = CustomerReportService.get_totals_from_summary(result)
+        total_purchases = totals["total_purchases"]
+        total_spent = totals["total_spent"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_spent"] = format_currency(item["total_spent"])
+
+        html_content = render_to_string(
+            "pdf/customers_report.html",
             {
-                "customer_id": r["customer__id"],
-                "customer_name": f"{r['customer__first_name']} {r['customer__last_name']}",
-                "total_promotions": r["total_promotions"],
-                "applied_promotions": r["applied_promotions"],
-            }
-            for r in data
-        ]
-        serializer = CustomerPromotionReportSerializer(result, many=True)
-        return Response(serializer.data)
+                "data": result,
+                "company": company,
+                "total_purchases": total_purchases,
+                "total_spent": format_currency(total_spent),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_clientes.pdf"'
+        return response
+
+    @action(detail=False, methods=["get"], url_path="customers/top/pdf")
+    def top_customers_pdf(self, request):
+        limit = int(request.query_params.get("limit", settings.DEFAULT_LIMIT))
+        qs = self.get_filtered_queryset(
+            Customer.objects.filter(sales__state=OperationState.COMPLETED),
+            CustomerReportFilter,
+        )
+        result = CustomerReportService.get_summary(qs, limit)
+
+        totals = CustomerReportService.get_totals_from_summary(result)
+        total_customers = totals["total_customers"]
+        total_purchases = totals["total_purchases"]
+        total_spent = totals["total_spent"]
+
+        company = CompanyService.get_active_company()
+
+        for item in result:
+            item["total_spent"] = format_currency(item["total_spent"])
+
+        html_content = render_to_string(
+            "pdf/customers_top_report.html",
+            {
+                "data": result,
+                "company": company,
+                "total_customers": total_customers,
+                "total_purchases": total_purchases,
+                "total_spent": format_currency(total_spent),
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_clientes_top.pdf"'
+        return response
 
 
 class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1741,17 +2216,13 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=InvoiceReportSerializer)
     @action(detail=False, methods=["get"], url_path="invoices")
     def invoices(self, request):
         qs = self.get_filtered_queryset(Invoice.objects.all(), InvoiceReportFilter)
-        data = qs.aggregate(
-            total_invoices=Count("id"),
-            issued_invoices=Count("id", filter=Q(state=InvoiceState.ISSUED)),
-            canceled_invoices=Count("id", filter=Q(state=InvoiceState.CANCELED)),
-            pdf_generated=Count("id", filter=Q(pdf_generated=True)),
-        )
+        data = InvoiceReportService.get_summary(qs)
         serializer = InvoiceReportSerializer(data)
         return Response(serializer.data)
 
@@ -1761,12 +2232,7 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         qs = self.get_filtered_queryset(
             Invoice.objects.filter(invoice_type=InvoiceType.SALE), InvoiceReportFilter
         )
-        data = qs.aggregate(
-            total_invoices=Count("id"),
-            issued_invoices=Count("id", filter=Q(state=InvoiceState.ISSUED)),
-            canceled_invoices=Count("id", filter=Q(state=InvoiceState.CANCELED)),
-            pdf_generated=Count("id", filter=Q(pdf_generated=True)),
-        )
+        data = InvoiceReportService.get_summary(qs)
         serializer = InvoiceReportSerializer(data)
         return Response(serializer.data)
 
@@ -1777,14 +2243,140 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             Invoice.objects.filter(invoice_type=InvoiceType.PURCHASE),
             InvoiceReportFilter,
         )
-        data = qs.aggregate(
-            total_invoices=Count("id"),
-            issued_invoices=Count("id", filter=Q(state=InvoiceState.ISSUED)),
-            canceled_invoices=Count("id", filter=Q(state=InvoiceState.CANCELED)),
-            pdf_generated=Count("id", filter=Q(pdf_generated=True)),
-        )
+        data = InvoiceReportService.get_summary(qs)
         serializer = InvoiceReportSerializer(data)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="invoices/pdf",
+    )
+    def invoices_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Invoice.objects.select_related(
+                "sale", "sale__customer", "purchase", "purchase__supplier"
+            ).all(),
+            InvoiceReportFilter,
+        )
+
+        data = InvoiceReportService.get_summary(qs)
+
+        invoices = list(
+            qs.values(
+                "id",
+                "number_invoice",
+                "created_at",
+                "sale__customer__first_name",
+                "sale__customer__last_name",
+                "purchase__supplier__name",
+                "sale__total_amount",
+                "purchase__total_amount",
+                "state",
+                "pdf_generated",
+            )
+        )
+
+        company = CompanyService.get_active_company()
+
+        for inv in invoices:
+            if inv.get("sale__total_amount"):
+                inv["sale__total_amount"] = format_currency(inv["sale__total_amount"])
+            if inv.get("purchase__total_amount"):
+                inv["purchase__total_amount"] = format_currency(
+                    inv["purchase__total_amount"]
+                )
+
+        html_content = render_to_string(
+            "pdf/invoices_report.html",
+            {
+                "data": data,
+                "invoices": invoices,
+                "company": company,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="reporte_facturas.pdf"'
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="invoices/sales/pdf",
+    )
+    def invoices_sales_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Invoice.objects.select_related("sale", "sale__customer").filter(
+                invoice_type=InvoiceType.SALE
+            ),
+            InvoiceReportFilter,
+        )
+        invoices = InvoiceReportService.build_sales_invoices(qs)
+
+        data = InvoiceReportService.get_summary(qs)
+
+        company = CompanyService.get_active_company()
+
+        for inv in invoices:
+            inv["sale__total_amount"] = format_currency(inv.get("sale__total_amount"))
+
+        html_content = render_to_string(
+            "pdf/invoices_sales_report.html",
+            {
+                "data": data,
+                "invoices": invoices,
+                "company": company,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_facturas_ventas.pdf"'
+        )
+        return response
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="invoices/purchases/pdf",
+    )
+    def invoices_purchases_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            Invoice.objects.select_related("purchase", "purchase__supplier").filter(
+                invoice_type=InvoiceType.PURCHASE
+            ),
+            InvoiceReportFilter,
+        )
+        invoices = InvoiceReportService.build_purchase_invoices(qs)
+        data = InvoiceReportService.get_summary(qs)
+
+        company = CompanyService.get_active_company()
+
+        for inv in invoices:
+            inv["purchase__total_amount"] = format_currency(
+                inv.get("purchase__total_amount")
+            )
+
+        html_content = render_to_string(
+            "pdf/invoices_purchases_report.html",
+            {
+                "data": data,
+                "invoices": invoices,
+                "company": company,
+            },
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_facturas_compras.pdf"'
+        )
+        return response
 
 
 class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1794,6 +2386,7 @@ class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=SaleReturnReportSerializer)
     @action(detail=False, methods=["get"], url_path="sale-returns")
@@ -1801,16 +2394,42 @@ class SaleReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         qs = self.get_filtered_queryset(
             SaleReturn.objects.all(), SaleReturnReportFilter
         )
-        data = qs.aggregate(
-            total_returns=Count("id"),
-            completed_returns=Count("id", filter=Q(state=OperationState.COMPLETED)),
-            canceled_returns=Count("id", filter=Q(state=OperationState.CANCELED)),
-            total_refund_amount=Sum(
-                "total_amount", filter=Q(state=OperationState.COMPLETED)
-            ),
-        )
+        data = SaleReturnReportService.get_summary(qs)
         serializer = SaleReturnReportSerializer(data)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="sale-returns/pdf",
+    )
+    def sale_returns_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            SaleReturn.objects.select_related("sale", "sale__customer").all(),
+            SaleReturnReportFilter,
+        )
+
+        data = SaleReturnReportService.get_summary(qs)
+        data["total_refund_amount"] = format_currency(data.get("total_refund_amount"))
+
+        sales_returns = SaleReturnReportService.format_returns(qs)
+
+        company = CompanyService.get_active_company()
+
+        for ret in sales_returns:
+            ret["total_amount"] = format_currency(ret.get("total_amount"))
+
+        html_content = render_to_string(
+            "pdf/sale_returns_report.html",
+            {"data": data, "sales_returns": sales_returns, "company": company},
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_devoluciones_ventas.pdf"'
+        )
+        return response
 
 
 class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
@@ -1820,6 +2439,7 @@ class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = EmptySerializer
 
     @extend_schema(responses=PurchaseReturnReportSerializer)
     @action(detail=False, methods=["get"], url_path="purchase-returns")
@@ -1827,13 +2447,41 @@ class PurchaseReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         qs = self.get_filtered_queryset(
             PurchaseReturn.objects.all(), PurchaseReturnReportFilter
         )
-        data = qs.aggregate(
-            total_returns=Count("id"),
-            completed_returns=Count("id", filter=Q(state=OperationState.COMPLETED)),
-            canceled_returns=Count("id", filter=Q(state=OperationState.CANCELED)),
-            total_refund_amount=Sum(
-                "total_amount", filter=Q(state=OperationState.COMPLETED)
-            ),
-        )
+        data = PurchaseReturnReportService.get_summary(qs)
         serializer = PurchaseReturnReportSerializer(data)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="purchase-returns/pdf",
+    )
+    def purchase_returns_pdf(self, request):
+        qs = self.get_filtered_queryset(
+            PurchaseReturn.objects.select_related(
+                "purchase", "purchase__supplier"
+            ).all(),
+            PurchaseReturnReportFilter,
+        )
+
+        data = PurchaseReturnReportService.get_summary(qs)
+        data["total_refund_amount"] = format_currency(data.get("total_refund_amount"))
+
+        purchases_returns = PurchaseReturnReportService.format_returns(qs)
+
+        company = CompanyService.get_active_company()
+
+        for ret in purchases_returns:
+            ret["total_amount"] = format_currency(ret.get("total_amount"))
+
+        html_content = render_to_string(
+            "pdf/purchase_returns_report.html",
+            {"data": data, "purchases_returns": purchases_returns, "company": company},
+        )
+
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = (
+            'inline; filename="reporte_devoluciones_compras.pdf"'
+        )
+        return response

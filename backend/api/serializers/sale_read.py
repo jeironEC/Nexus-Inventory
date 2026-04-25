@@ -6,10 +6,12 @@ from nexus_inventory_backend.db.models import Sale
 
 # Serializers
 from api.serializers.user_read import UserReadSerializer
+from api.serializers.company import CompanySerializer
 from api.serializers.customer import CustomerSerializer
 
 
 class SaleReadSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
     customer = CustomerSerializer(read_only=True)
     user = UserReadSerializer(read_only=True)
     updated_by = UserReadSerializer(read_only=True)
@@ -19,9 +21,12 @@ class SaleReadSerializer(serializers.ModelSerializer):
         model = Sale
         fields = [
             "id",
+            "company",
             "customer",
             "user",
+            "discount_amount",
             "subtotal",
+            "tax_percentage",
             "tax_amount",
             "total_amount",
             "payment_method",
@@ -31,14 +36,4 @@ class SaleReadSerializer(serializers.ModelSerializer):
             "deleted_at",
             "updated_by",
             "deleted_by",
-        ]
-        read_only_fields = [
-            "id",
-            "subtotal",
-            "tax_amount",
-            "total_amount",
-            "state",
-            "created_at",
-            "updated_at",
-            "deleted_at",
         ]

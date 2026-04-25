@@ -208,3 +208,8 @@ __marimo__/
 
 # Certicats
 ssl/
+
+# Partial
+generate_pdfs.py
+populate_db.py
+reports_api.py

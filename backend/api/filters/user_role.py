@@ -4,16 +4,13 @@ import django_filters
 # Models
 from nexus_inventory_backend.db.models import Role
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Filters
 from .base import AuditFilter
 
 
 class RoleFilter(django_filters.FilterSet):
     # Filters
-    state = django_filters.ChoiceFilter(field_name="state", choices=State.choices)
+    is_active = django_filters.BooleanFilter(field_name="is_active")
 
     # Searchs
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
@@ -30,7 +27,7 @@ class RoleFilter(django_filters.FilterSet):
         model = Role
         fields = [
             "name",
-            "state",
+            "is_active",
             "date_from",
             "date_to",
         ]

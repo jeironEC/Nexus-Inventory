@@ -337,8 +337,6 @@ class PasswordResetViewSet(viewsets.ViewSet):
     Valida el token y permite cambiar la contraseña.
     """
 
-    permission_classes = [IsAuthenticated, CanCreateUsers]
-
     def get_serializer_class(self):
         if self.action == "request":
             return PasswordResetRequestSerializer
@@ -361,6 +359,12 @@ class PasswordResetViewSet(viewsets.ViewSet):
             return Response(
                 {"detail": "If the email address exists, you will receive a code."},
                 status=status.HTTP_200_OK,
+            )
+
+        if user.role.name.lower() != "admin":
+            return Response(
+                {"detail": "Only administrators are allowed this action."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)

@@ -109,7 +109,8 @@ class Sidebar {
             {
                 label: 'Principal',
                 items: [
-                    { path: 'index.html', page: 'index.html', icon: 'dashboard', text: 'Dashboard' }
+                    { path: 'index.html',          page: 'index.html',     icon: 'dashboard',   text: 'Dashboard' },
+                    { path: 'html/inventory.html', page: 'inventory.html', icon: 'inventory_2', text: 'Inventario' }
                 ]
             },
             { label: 'Gestión',  items: [] },

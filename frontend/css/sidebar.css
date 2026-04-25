@@ -1,0 +1,112 @@
+/* ========================================
+ * SIDEBAR.CSS
+ * Estilos del componente barra lateral
+ * ======================================== */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    background: var(--navy);
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: var(--z-sticky);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+}
+
+/* ─── HEADER / LOGO ─── */
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+}
+
+.sidebar-logo-text em {
+    font-style: normal;
+    color: var(--sky);
+    font-weight: 400;
+}
+
+/* ─── NAVEGACIÓN ─── */
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 0;
+}
+
+/* ─── SECCIONES ─── */
+.sidebar-section {
+    margin-bottom: 8px;
+}
+
+.sidebar-section-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--white);
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.sidebar-section-items {
+    max-height: 2000px;
+    overflow: hidden;
+    transition: max-height var(--transition-slow);
+}
+
+.sidebar-section.collapsed .sidebar-section-items {
+    max-height: 0;
+}
+
+/* ─── ITEMS ─── */
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white);
+}
+
+.sidebar-item.active {
+    background: var(--royal);
+    color: var(--white);
+}
+
+.sidebar-icon { font-size: 20px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    #sidebar-container.active .sidebar {
+        transform: translateX(0);
+    }
+}

@@ -37,7 +37,6 @@ Reglas de negocio:
 * Un rol no puede existir sin nombre (`NOT NULL`).
 * Un usuario debe tener siempre un rol asignado (relación obligatoria desde `user`).
 * La fecha de creación del rol se registra automáticamente mediante `created_at`.
-* Las FK de auditoría (`created_by`, `updated_by`) se agregan mediante `ALTER TABLE` después de crear la tabla `user`, debido a la dependencia circular entre `role` y `user`.
 
 ---
 
@@ -70,10 +69,35 @@ Reglas de negocio:
 * El correo electrónico debe ser único (`UNIQUE`).
 * El correo y la contraseña son obligatorios para la autenticación.
 * La contraseña se almacena únicamente como hash (`password_hash`).
+* El nif debe ser único (`UNIQUE`).
 * El estado del usuario puede ser `active` o `inactive`.
 * La fecha de creación del usuario se registra automáticamente.
 * El campo `updated_at` permite registrar modificaciones del usuario.
 * Los campos `created_by` y `updated_by` implementan una **auto-referencia**, ya que un usuario puede crear o modificar a otro usuario. El primer usuario del sistema tendrá `NULL` en ambos campos.
+
+---
+
+### Tabla Password Reset OTP
+La tabla **Password Reset OTP** gestiona los códigos de verificación (OTP) para el restablecimiento de contraseña de los usuarios del sistema.
+Cada registro representa un código temporal generado para un usuario específico, que permite verificar su identidad antes de permitir el cambio de contraseña.
+
+Relaciones:
+```bash
+user (1) ─── (N) password_reset_otp
+```
+
+* Un usuario puede tener múltiples códigos OTP solicitados a lo largo del tiempo.
+
+Reglas de negocio:
+* Cada OTP debe estar asociado a un usuario existente (`user_id NOT NULL`).
+* El campo `email` almacena el correo electrónico al que se envió el código de verificación.
+* El campo `otp_hash` almacena el hash del código OTP generado (nunca el código en texto plano por seguridad).
+* El campo `is_used` indica si el código ya fue utilizado (`TRUE`) o aún está pendiente de uso (`FALSE`).
+* El campo `reset_token` es un UUID opcional que puede usarse para verificar el enlace directo de restablecimiento.
+* La fecha de creación del OTP se registra automáticamente mediante `created_at`.
+* Los códigos OTP deben tener una validez limitada en el tiempo (regla de negocio a nivel de aplicación).
+* Una vez usado o expirado, el OTP no debe ser válido para restablecimientos posteriores.
+* Un usuario no debe poder solicitar múltiples OTP simultáneamente sin límite (regla de negocio a nivel de aplicación).
 
 ---
 
@@ -142,6 +166,7 @@ product  (1) ─── (N) inventory_movement
 * Un producto puede aparecer en múltiples detalles de compra.
 * Un producto puede aparecer en múltiples detalles de devolución de venta.
 * Un producto puede aparecer en múltiples detalles de devolución de compra.
+* Un producto puede tener un descuento.
 * Un producto puede generar múltiples movimientos de inventario.
 
 Reglas de negocio:
@@ -185,66 +210,18 @@ Permite registrar a las personas o empresas que realizan compras, facilitando la
 Relaciones:
 ```bash
 customer (1) ─── (N) sale
-customer (1) ─── (N) customer_promotion
 ```
 * Un cliente puede tener muchas ventas asociadas.
-* Un cliente puede estar asociado a múltiples promociones.
 
 Reglas de negocio:
 * El nombre del cliente se almacena en dos campos separados: `first_name` y `last_name`, ambos obligatorios (`NOT NULL`).
+* El nif es único (`UNIQUE`) y obligatorio.
 * El correo electrónico es único (`UNIQUE`) y obligatorio.
 * El número de teléfono y dirección son opcionales.
 * El estado del cliente puede ser `active` o `inactive`.
 * La fecha de registro del cliente se guarda automáticamente mediante `created_at`.
 * Un cliente puede existir en el sistema incluso si nunca ha realizado una compra.
 * Un cliente inactivo no debería poder registrarse en nuevas ventas (regla de negocio a nivel de aplicación).
-
----
-
-### Tabla Promotion
-La tabla **Promotion** almacena las promociones o descuentos disponibles en el sistema.
-
-Permite definir campañas de descuento que pueden aplicarse a determinados clientes, facilitando estrategias comerciales como ofertas temporales, promociones especiales o fidelización de clientes.
-
-Relaciones:
-```bash
-promotion (1) ─── (N) customer_promotion
-```
-* Una promoción puede asignarse a múltiples clientes.
-* La relación entre clientes y promociones se gestiona mediante la tabla `customer_promotion`.
-
-Reglas de negocio:
-* El nombre de la promoción es obligatorio (`NOT NULL`).
-* El porcentaje de descuento se almacena en `discount_percentage`.
-* El descuento por defecto es `0` si no se especifica.
-* Una promoción puede tener fechas de inicio y fin para controlar su periodo de validez.
-* El estado de la promoción puede ser `active` o `inactive`.
-* Solo las promociones activas y dentro del rango de fechas deberían aplicarse a ventas (regla de negocio a nivel de aplicación).
-
----
-
-### Tabla Customer Promotion
-La tabla **Customer Promotion** gestiona la asignación de promociones a clientes específicos dentro del sistema.
-
-Permite controlar qué promociones están disponibles para cada cliente y si dichas promociones ya han sido utilizadas o aplicadas en una venta.
-
-Relaciones:
-```bash
-customer  (1) ─── (N) customer_promotion
-promotion (1) ─── (N) customer_promotion
-```
-* Un cliente puede tener múltiples promociones asignadas.
-* Una promoción puede asignarse a múltiples clientes.
-* Esta tabla funciona como una tabla intermedia (relación muchos a muchos) entre `customer` y `promotion`.
-
-Reglas de negocio:
-* Cada registro debe estar asociado a un cliente existente (`customer_id NOT NULL`).
-* Cada registro debe estar asociado a una promoción existente (`promotion_id NOT NULL`).
-* La combinación `(customer_id, promotion_id)` debe ser única, evitando asignar la misma promoción al mismo cliente más de una vez (`UNIQUE KEY uq_customer_promotion`).
-* El campo `applied` indica si la promoción ya fue utilizada en una compra.
-* La fecha de asignación se registra automáticamente mediante `assignment_date`.
-* El campo `updated_at` se actualiza automáticamente cuando cambia el estado de `applied`.
-* Una promoción solo debería aplicarse una vez si `applied = TRUE` (regla de negocio controlada a nivel de aplicación).
 
 ---
 
@@ -358,8 +335,10 @@ supplier (1) ─── (N) purchase
 
 Reglas de negocio:
 * Cada proveedor debe tener un nombre (`name NOT NULL`).
-* Los campos `email`, `number_phone` y `address` son opcionales.
-* El campo `state` indica si el proveedor está `active` o `inactive` en el sistema.
+* Los campos `number_phone` y `address` son opcionales.
+* El nif es único (`UNIQUE`) y obligatorio.
+* El correo electrónico es único (`UNIQUE`) y obligatorio.
+* El campo `is_active` indica si el proveedor está `active` o `inactive` en el sistema.
 * Solo proveedores activos deberían poder ser utilizados para registrar nuevas compras (regla de negocio a nivel de aplicación).
 * La fecha `created_at` registra automáticamente cuándo se creó el proveedor.
 * El historial de proveedores no debería eliminarse si existen compras asociadas, para mantener la trazabilidad del inventario.
@@ -582,33 +561,31 @@ CREATE TABLE IF NOT EXISTS role (
     id          BIGINT PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(30) UNIQUE NOT NULL,
     description TEXT,
-    state       ENUM('active', 'inactive') DEFAULT 'active',
+    is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NULL,
-    deleted_at  TIMESTAMP NULL,
-    created_by  BIGINT NULL,
-    updated_by  BIGINT NULL,
-    delete_by   BIGINT NULL
+    deleted_at  TIMESTAMP NULL
 );
 
 -- ─────────────────────────────────────────
 -- USER
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS user (
-    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    role_id       BIGINT NOT NULL,
-    avatar        VARCHAR(500) NULL,
-    first_name    VARCHAR(100) NOT NULL,
-    last_name     VARCHAR(100) NOT NULL,
-    email         VARCHAR(120) UNIQUE NOT NULL,
-    password      VARCHAR(255) NOT NULL,
-    state         ENUM('active', 'inactive') DEFAULT 'active',
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP NULL,
-    deleted_at    TIMESTAMP NULL,
-    created_by    BIGINT NULL,
-    updated_by    BIGINT NULL,
-    deleted_by    BIGINT NULL,
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    role_id    BIGINT NOT NULL,
+    avatar     VARCHAR(500) NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name  VARCHAR(100) NOT NULL,
+    email      VARCHAR(120) UNIQUE NOT NULL,
+    nif        VARCHAR(20) UNIQUE NOT NULL,
+    password   VARCHAR(255) NOT NULL,
+    is_active  BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL,
+    created_by BIGINT NULL,
+    updated_by BIGINT NULL,
+    deleted_by BIGINT NULL,
 
     FOREIGN KEY (role_id)    REFERENCES role(id),
     FOREIGN KEY (created_by) REFERENCES user(id),
@@ -617,25 +594,35 @@ CREATE TABLE IF NOT EXISTS user (
 );
 
 -- ─────────────────────────────────────────
--- FK ROLE
+-- PASSWORD RESET OTP
 -- ─────────────────────────────────────────
-ALTER TABLE role
-    ADD CONSTRAINT fk_role_created_by FOREIGN KEY (created_by) REFERENCES user(id),
-    ADD CONSTRAINT fk_role_updated_by FOREIGN KEY (updated_by) REFERENCES user(id),
-    ADD CONSTRAINT fk_role_deleted_by FOREIGN KEY (deleted_by) REFERENCES user(id);
+CREATE TABLE IF NOT EXISTS password_reset_otp (
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id     BIGINT NOT NULL,
+    email       VARCHAR(255) NOT NULL,
+    otp_hash    VARCHAR(128) NOT NULL,
+    is_used     BOOLEAN NOT NULL DEFAULT FALSE,
+    reset_token UUID NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NULL,
+    deleted_at  TIMESTAMP NULL,
+
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
 
 -- ─────────────────────────────────────────
 -- COMPANY
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS company (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
-    tax_id       VARCHAR(20) UNIQUE NOT NULL,
+    nif          VARCHAR(20) UNIQUE NOT NULL,
     name         VARCHAR(255) NOT NULL,
     address      TEXT,
-    number_phone VARCHAR(50),
+    phone_number VARCHAR(50),
     email        VARCHAR(120) UNIQUE NOT NULL,
     website      TEXT,
     logo         VARCHAR(255),
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NULL,
     deleted_at   TIMESTAMP NULL,
@@ -655,7 +642,7 @@ CREATE TABLE IF NOT EXISTS category (
     id          BIGINT PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(100) NOT NULL,
     description TEXT,
-    state       ENUM('active', 'inactive') DEFAULT 'active',
+    is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NULL,
     deleted_at  TIMESTAMP NULL,
@@ -672,20 +659,21 @@ CREATE TABLE IF NOT EXISTS category (
 -- PRODUCT
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS product (
-    id             BIGINT PRIMARY KEY AUTO_INCREMENT,
-    category_id    BIGINT NOT NULL,
-    name           VARCHAR(150) NOT NULL,
-    description    TEXT,
-    unique_code    VARCHAR(50) UNIQUE NOT NULL,
-    sale_price     DECIMAL(10, 2) NOT NULL,
-    purchase_price DECIMAL(10, 2) NOT NULL,
-    state          ENUM('active', 'inactive') DEFAULT 'active',
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NULL,
-    deleted_at     TIMESTAMP NULL,
-    created_by     BIGINT NULL,
-    updated_by     BIGINT NULL,
-    deleted_by     BIGINT NULL,
+    id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
+    category_id         BIGINT NOT NULL,
+    name                VARCHAR(150) NOT NULL,
+    description         TEXT,
+    unique_code         VARCHAR(50) UNIQUE NOT NULL,
+    sale_price          DECIMAL(10, 2) NOT NULL,
+    purchase_price      DECIMAL(10, 2) NOT NULL,
+    discount_percentage DECIMAL(5, 2) DEFAULT 0,
+    is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NULL,
+    deleted_at          TIMESTAMP NULL,
+    created_by          BIGINT NULL,
+    updated_by          BIGINT NULL,
+    deleted_by          BIGINT NULL,
 
     FOREIGN KEY (category_id) REFERENCES category(id),
     FOREIGN KEY (created_by)  REFERENCES user(id),
@@ -698,7 +686,7 @@ CREATE TABLE IF NOT EXISTS product (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS inventory (
     id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    product_id BIGINT UNIQUE NOT NULl,
+    product_id BIGINT UNIQUE NOT NULL,
     quantity   INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
@@ -707,7 +695,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     updated_by BIGINT NULL,
     deleted_by BIGINT NULL,
 
-    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(id),
     FOREIGN KEY (created_by) REFERENCES user(id),
     FOREIGN KEY (updated_by) REFERENCES user(id),
     FOREIGN KEY (deleted_by) REFERENCES user(id)
@@ -718,12 +706,13 @@ CREATE TABLE IF NOT EXISTS inventory (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS customer (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nif          VARCHAR(20) UNIQUE NOT NULL,
     first_name   VARCHAR(100) NOT NULL,
     last_name    VARCHAR(100) NOT NULL,
     email        VARCHAR(120) UNIQUE NOT NULL,
-    number_phone VARCHAR(50),
+    phone_number VARCHAR(50),
     address      TEXT,
-    state        ENUM('active', 'inactive') DEFAULT 'active',
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NULL,
     deleted_at   TIMESTAMP NULL,
@@ -737,70 +726,25 @@ CREATE TABLE IF NOT EXISTS customer (
 );
 
 -- ─────────────────────────────────────────
--- PROMOTION
--- ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS promotion (
-	id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
-	name                VARCHAR(100) NOT NULL,
-	description         TEXT,
-    discount_percentage DECIMAL(5, 2) DEFAULT 0,
-	start_date          DATE,
-	end_date            DATE,
-	state               ENUM('active', 'inactive') DEFAULT 'active',
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NULL,
-    deleted_at          TIMESTAMP NULL,
-    created_by          BIGINT NULL,
-    updated_by          BIGINT NULL,
-    deleted_by          BIGINT NULL,
-
-    FOREIGN KEY (created_by) REFERENCES user(id),
-    FOREIGN KEY (updated_by) REFERENCES user(id),
-    FOREIGN KEY (deleted_by) REFERENCES user(id)
-);
-
--- ─────────────────────────────────────────
--- CUSTOMER_PROMOTION
--- ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS customer_promotion(
-	id              BIGINT PRIMARY KEY AUTO_INCREMENT,
-	customer_id     BIGINT NOT NULL,
-	promotion_id    BIGINT NOT NULL,
-	applied         BOOLEAN DEFAULT FALSE,
-	created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP NULL,
-    deleted_at      TIMESTAMP NULL,
-    created_by      BIGINT NULL,
-    updated_by      BIGINT NULL,
-    deleted_by      BIGINT NULL,
-
-    UNIQUE KEY uq_customer_promotion (customer_id, promotion_id),
-
-	FOREIGN KEY (customer_id)  REFERENCES customer(id),
-	FOREIGN KEY (promotion_id) REFERENCES promotion(id),
-    FOREIGN KEY (created_by)   REFERENCES user(id),
-    FOREIGN KEY (updated_by)   REFERENCES user(id),
-    FOREIGN KEY (deleted_by)   REFERENCES user(id)
-);
-
--- ─────────────────────────────────────────
 -- SALE
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS sale (
-    id             BIGINT PRIMARY KEY AUTO_INCREMENT,
-    company_id     BIGINT NOT NULL,
-    customer_id    BIGINT NULL,
-    user_id        BIGINT NOT NULL,
-    subtotal       DECIMAL(12, 2) NOT NULL,
-    tax_amount     DECIMAL(12, 2) DEFAULT 0,
-    total_amount   DECIMAL(12, 2) NOT NULL,
-    payment_method ENUM('cash', 'card', 'transfer') DEFAULT 'cash',
-    state          ENUM('completed', 'canceled') DEFAULT 'completed',
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NULL,
-    deleted_at     TIMESTAMP NULL,
-    updated_by     BIGINT NULL,
-    deleted_by     BIGINT NULL,
+    id              BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id      BIGINT NOT NULL,
+    customer_id     BIGINT NULL,
+    user_id         BIGINT NOT NULL,
+    discount_amount DECIMAL(12, 2) DEFAULT 0,
+    subtotal        DECIMAL(12, 2) NOT NULL,
+    tax_percentage  DECIMAL(5, 2) DEFAULT 21.00,
+    tax_amount      DECIMAL(12, 2) DEFAULT 0,
+    total_amount    DECIMAL(12, 2) NOT NULL,
+    payment_method  ENUM('cash', 'card', 'transfer') DEFAULT 'cash',
+    state           ENUM('completed', 'canceled') DEFAULT 'completed',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NULL,
+    deleted_at      TIMESTAMP NULL,
+    updated_by      BIGINT NULL,
+    deleted_by      BIGINT NULL,
 
     FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (customer_id) REFERENCES customer(id),
@@ -847,11 +791,12 @@ CREATE TABLE IF NOT EXISTS sale_detail (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS supplier (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nif          VARCHAR(20) UNIQUE NOT NULL,
     name         VARCHAR(100) NOT NULL,
-    email        VARCHAR(120),
-    number_phone VARCHAR(50),
+    email        VARCHAR(120) UNIQUE NOT NULL,
+    phone_number VARCHAR(50),
     address      TEXT,
-    state        ENUM('active', 'inactive') DEFAULT 'active',
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NULL,
     deleted_at   TIMESTAMP NULL,
@@ -868,17 +813,17 @@ CREATE TABLE IF NOT EXISTS supplier (
 -- PURCHASE
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS purchase (
-    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    company_id    BIGINT NOT NULL,
-    supplier_id   BIGINT NOT NULL,
-    user_id       BIGINT NOT NULL,
-    total_amount  DECIMAL(12, 2) NOT NULL,
-    state         ENUM('completed', 'canceled') DEFAULT 'completed',
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP NULL,
-    deleted_at    TIMESTAMP NULL,
-    updated_by    BIGINT NULL,
-    deleted_by    BIGINT NULL,
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id   BIGINT NOT NULL,
+    supplier_id  BIGINT NOT NULL,
+    user_id      BIGINT NOT NULL,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    state        ENUM('completed', 'canceled') DEFAULT 'completed',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
 
     FOREIGN KEY (company_id)  REFERENCES company(id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(id),
@@ -911,8 +856,8 @@ CREATE TABLE IF NOT EXISTS purchase_detail (
 CREATE TABLE IF NOT EXISTS invoice (
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
     company_id     BIGINT NOT NULL,
-    sale_id        BIGINT UNIQUE NOT NULL,
-    purchase_id    BIGINT UNIQUE NOT NULL,
+    sale_id        BIGINT UNIQUE,
+    purchase_id    BIGINT UNIQUE,
     number_invoice VARCHAR(50) UNIQUE NOT NULL,
     state          ENUM('issued', 'canceled') DEFAULT 'issued',
     invoice_type   ENUM('sale', 'purchase'),
@@ -925,12 +870,17 @@ CREATE TABLE IF NOT EXISTS invoice (
     deleted_by     BIGINT NULL,
 
     FOREIGN KEY (company_id)  REFERENCES company(id),
-    FOREIGN KEY (sale_id)     REFERENCES sale(id) ON DELETE CASCADE,
-    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
+    FOREIGN KEY (sale_id)     REFERENCES sale(id),
+    FOREIGN KEY (purchase_id) REFERENCES purchase(id),
     FOREIGN KEY (created_by)  REFERENCES user(id),
     FOREIGN KEY (updated_by)  REFERENCES user(id),
-    FOREIGN KEY (deleted_by)  REFERENCES user(id)
+    FOREIGN KEY (deleted_by)  REFERENCES user(id),
+    CHECK (
+        (invoice_type = 'sale' AND sale_id IS NOT NULL AND purchase_id IS NULL) OR
+        (invoice_type = 'purchase' AND purchase_id IS NOT NULL AND sale_id IS NULL)
+    )
 );
+
 
 -- ─────────────────────────────────────────
 -- SALE RETURN
@@ -942,9 +892,16 @@ CREATE TABLE IF NOT EXISTS sale_return (
     reason       TEXT,
     total_amount DECIMAL(12, 2) NOT NULL,
     state        ENUM('completed', 'canceled') DEFAULT 'completed',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
 
-    FOREIGN KEY (sale_id) REFERENCES sale(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (sale_id)    REFERENCES sale(id),
+    FOREIGN KEY (user_id)    REFERENCES user(id),
+    FOREIGN KEY (updated_by) REFERENCES user(id),
+    FOREIGN KEY (deleted_by) REFERENCES user(id)
 );
 
 -- ─────────────────────────────────────────
@@ -952,8 +909,8 @@ CREATE TABLE IF NOT EXISTS sale_return (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS sale_return_detail (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
-    sale_return_id        BIGINT UNIQUE NOT NULL,
-    product_id            BIGINT UNIQUE NOT NULL,
+    sale_return_id        BIGINT NOT NULL,
+    product_id            BIGINT NOT NULL,
     inventory_movement_id BIGINT UNIQUE NOT NULL,
     quantity              INT NOT NULL,
     unit_price            DECIMAL(10, 2) NOT NULL,
@@ -975,9 +932,16 @@ CREATE TABLE IF NOT EXISTS purchase_return (
     reason       TEXT,
     total_amount DECIMAL(12, 2) NOT NULL,
     state        ENUM('completed', 'canceled') DEFAULT 'completed',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NULL,
+    deleted_at   TIMESTAMP NULL,
+    updated_by   BIGINT NULL,
+    deleted_by   BIGINT NULL,
 
-    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (purchase_id) REFERENCES purchase(id),
+    FOREIGN KEY (user_id)     REFERENCES user(id),
+    FOREIGN KEY (updated_by)  REFERENCES user(id),
+    FOREIGN KEY (deleted_by)  REFERENCES user(id)
 );
 
 -- ─────────────────────────────────────────
@@ -985,8 +949,8 @@ CREATE TABLE IF NOT EXISTS purchase_return (
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS purchase_return_detail (
     id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
-    purchase_return_id    BIGINT UNIQUE NOT NULL,
-    product_id            BIGINT UNIQUE NOT NULL,
+    purchase_return_id    BIGINT NOT NULL,
+    product_id            BIGINT NOT NULL,
     inventory_movement_id BIGINT UNIQUE NOT NULL,
     quantity              INT NOT NULL,
     unit_cost             DECIMAL(10, 2) NOT NULL,

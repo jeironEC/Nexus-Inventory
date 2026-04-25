@@ -7,9 +7,6 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import Company
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 
 @pytest.mark.django_db
 class TestGetCompany:
@@ -40,14 +37,14 @@ class TestGetCompany:
         data = response.data[0]
         assert set(data.keys()) == {
             "id",
-            "tax_id",
+            "nif",
             "name",
             "address",
             "number_phone",
             "email",
             "website",
             "logo",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -73,7 +70,7 @@ class TestPostCompany:
         self, api_client_auth, companies_url, payload_company
     ):
         api_client_auth.post(companies_url, payload_company)
-        assert Company.objects.filter(tax_id="A09876543").exists()
+        assert Company.objects.filter(nif="A09876543").exists()
 
     def test_create_company_response_contains_fields(
         self, api_client_auth, companies_url, payload_company
@@ -82,7 +79,7 @@ class TestPostCompany:
         data = response.data
         assert set(data.keys()) >= {
             "id",
-            "tax_id",
+            "nif",
             "name",
         }
 
@@ -92,10 +89,10 @@ class TestPostCompany:
         response = api_client.post(companies_url, payload_company)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_create_company_duplicate_tax_id_returns_400(
+    def test_create_company_duplicate_nif_returns_400(
         self, api_client_auth, companies_url, company, payload_company
     ):
-        payload = {**payload_company, "tax_id": company.tax_id}
+        payload = {**payload_company, "nif": company.nif}
         response = api_client_auth.post(companies_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -154,7 +151,7 @@ class TestStateCompany:
     def test_activate_company_returns_200(
         self, api_client_auth, company_activate_url, company
     ):
-        company.state = State.INACTIVE
+        company.is_active = False
         company.save()
         response = api_client_auth.patch(company_activate_url(company.pk))
         company.refresh_from_db()
@@ -163,7 +160,7 @@ class TestStateCompany:
     def test_deactivate_company_returns_200(
         self, api_client_auth, company_deactivate_url, company
     ):
-        company.state = State.ACTIVE
+        company.is_active = True
         company.save()
         response = api_client_auth.patch(company_deactivate_url(company.pk))
         company.refresh_from_db()
@@ -184,22 +181,10 @@ class TestStateCompany:
 
 @pytest.mark.django_db
 class TestFiltersCompany:
-    def test_returns_list_companies_actives(
-        self, api_client_auth, companies_actives_url
-    ):
-        response = api_client_auth.get(companies_actives_url)
-        assert response.status_code == status.HTTP_200_OK
-
-    def test_returns_list_companies_inactives(
-        self, api_client_auth, companies_inactives_url
-    ):
-        response = api_client_auth.get(companies_inactives_url)
-        assert response.status_code == status.HTTP_200_OK
-
     def test_search_companies(self, api_client_auth, companies_url, company):
         response = api_client_auth.get(f"{companies_url}?search={company.name}")
         assert len(response.data) >= 1
 
     def test_filter_state_companies(self, api_client_auth, companies_url, company):
-        response = api_client_auth.get(f"{companies_url}?state={company.state}")
+        response = api_client_auth.get(f"{companies_url}?is_active={company.is_active}")
         assert len(response.data) >= 1

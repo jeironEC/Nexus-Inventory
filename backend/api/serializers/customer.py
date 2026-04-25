@@ -16,9 +16,10 @@ class CustomerSerializer(AuditFieldsMixin):
             "first_name",
             "last_name",
             "email",
+            "nif",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -28,7 +29,7 @@ class CustomerSerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -36,6 +37,7 @@ class CustomerSerializer(AuditFieldsMixin):
 
     def validate(self, data):
         email = data.get("email")
+        nif = data.get("nif")
         is_create = not self.instance
 
         if is_create and not email:
@@ -48,6 +50,15 @@ class CustomerSerializer(AuditFieldsMixin):
             if queryset.exists():
                 raise serializers.ValidationError(
                     {"email": "A customer with this email already exists."}
+                )
+
+        if nif:
+            queryset = Customer.objects.filter(nif__iexact=nif)
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            if queryset.exists():
+                raise serializers.ValidationError(
+                    {"nif": "A customer with this nif already exists."}
                 )
 
         return data

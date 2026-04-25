@@ -15,13 +15,26 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "first_name",
+            "last_name",
             "email",
             "password",
+            "nif",
             "role",
         ]
 
     def validate_password(self, value):
         validate_password(value)
+        return value
+
+    def validate_nif(self, value):
+        queryset = User.objects.filter(nif__iexact=value)
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError("A User with this nif already exists.")
         return value
 
     def validate_role(self, value):

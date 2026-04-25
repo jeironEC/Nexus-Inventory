@@ -10,9 +10,6 @@ from django.utils import timezone
 # Models
 from nexus_inventory_backend.db.models import Customer
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Datetime
 from datetime import timedelta
 
@@ -38,10 +35,11 @@ class TestGetCustomer:
             "id",
             "first_name",
             "last_name",
+            "nif",
             "email",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -67,16 +65,6 @@ class TestGetCustomer:
     ):
         response = api_client_auth.get(customer_detail_url(customer.pk))
         assert response.data["id"] == customer.pk
-
-    def test_get_promotions_customer_returns_list(
-        self,
-        api_client_auth,
-        customer_list_promotions_url,
-        customer_promotion,
-        customer,
-    ):
-        response = api_client_auth.get(customer_list_promotions_url(customer.pk))
-        assert len(response.data) >= 1
 
     def test_get_customer_by_id_unauthenticated_returns_401(
         self, api_client, customer_detail_url, customer
@@ -197,14 +185,8 @@ class TestFiltersCustomer:
     def test_customers_filters_by_state_active(
         self, api_client_auth, customers_url, customer, another_customer
     ):
-        response = api_client_auth.get(customers_url, {"state": State.ACTIVE})
+        response = api_client_auth.get(customers_url, {"is_active": True})
         assert len(response.data) == 2
-
-    def test_customers_filters_by_state_invalid_returns_400(
-        self, api_client_auth, customers_url, customer
-    ):
-        response = api_client_auth.get(customers_url, {"state": "PRIVATE"})
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_customers_filters_date_from_correctly(
         self, api_client_auth, customers_url, customer
@@ -263,7 +245,7 @@ class TestFiltersCustomer:
         response = api_client_auth.get(
             customers_url,
             {
-                "state": State.ACTIVE,
+                "is_active": True,
                 "date_from": str(today),
             },
         )

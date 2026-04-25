@@ -15,7 +15,7 @@ class CategorySerializer(AuditFieldsMixin):
             "id",
             "name",
             "description",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -25,7 +25,7 @@ class CategorySerializer(AuditFieldsMixin):
         ]
         read_only_fields = [
             "id",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",

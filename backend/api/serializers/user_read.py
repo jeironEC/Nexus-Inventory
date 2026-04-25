@@ -5,11 +5,11 @@ from rest_framework import serializers
 from nexus_inventory_backend.db.models import User
 
 # Serializers
-from .user_role_read import UserRoleSerializer
+from .user_role import RoleSerializer
 
 
 class UserReadSerializer(serializers.ModelSerializer):
-    role = UserRoleSerializer(read_only=True)
+    role = RoleSerializer(read_only=True)
 
     class Meta:
         model = User
@@ -18,8 +18,10 @@ class UserReadSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
+            "nif",
             "role",
             "avatar",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -27,4 +29,3 @@ class UserReadSerializer(serializers.ModelSerializer):
             "updated_by",
             "deleted_by",
         ]
-        read_only_fields = fields

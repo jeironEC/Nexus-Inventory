@@ -39,13 +39,10 @@ class TestGetRole:
             "id",
             "name",
             "description",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
-            "created_by",
-            "updated_by",
-            "deleted_by",
         }
 
     def test_list_roles_unauthenticated_return_401(self, api_client, roles_url):
@@ -197,5 +194,5 @@ class TestFiltersRole:
         assert len(response.data) >= 1
 
     def test_filter_state_roles(self, api_client_auth, admin_role, roles_url):
-        response = api_client_auth.get(f"{roles_url}?state=ACTIVE")
+        response = api_client_auth.get(f"{roles_url}?is_active={True}")
         assert len(response.data) >= 1

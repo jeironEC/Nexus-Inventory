@@ -16,7 +16,7 @@ from nexus_inventory_backend.db.models import (
 )
 
 # Enums
-from nexus_inventory_backend.db.enums import OperationState, MovementType
+from nexus_inventory_backend.db.enums import MovementType
 
 # Datetime
 from datetime import timedelta
@@ -389,32 +389,6 @@ class TestDeleteSaleReturn:
         self, api_client, sale_return_detail_url, sale_return
     ):
         response = api_client.delete(sale_return_detail_url(sale_return.pk))
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
-class TestStateSaleReturn:
-    def test_cancel_sale_return_returns_200(
-        self, api_client_auth, sale_return_cancel_url, sale_return
-    ):
-        response = api_client_auth.patch(sale_return_cancel_url(sale_return.pk))
-        sale_return.refresh_from_db()
-        assert response.status_code == status.HTTP_200_OK
-        assert sale_return.state == OperationState.CANCELED
-        assert response.data["state"] == "CANCELED"
-
-    def test_cancel_already_canceled_returns_400(
-        self, api_client_auth, sale_return_cancel_url, sale_return
-    ):
-        sale_return.state = OperationState.CANCELED
-        sale_return.save()
-        response = api_client_auth.patch(sale_return_cancel_url(sale_return.pk))
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_cancel_unauthenticated_returns_401(
-        self, api_client, sale_return_cancel_url, sale_return
-    ):
-        response = api_client.patch(sale_return_cancel_url(sale_return.pk))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 

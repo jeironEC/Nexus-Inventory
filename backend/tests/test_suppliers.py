@@ -28,10 +28,11 @@ class TestGetSupplier:
         assert set(data.keys()) == {
             "id",
             "name",
+            "nif",
             "email",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -87,10 +88,11 @@ class TestPostSupplier:
         assert set(data.keys()) == {
             "id",
             "name",
+            "nif",
             "email",
             "number_phone",
             "address",
-            "state",
+            "is_active",
             "created_at",
             "updated_at",
             "deleted_at",
@@ -209,5 +211,5 @@ class TestFiltersSupplier:
     def test_suppliers_filters_by_state(
         self, api_client_auth, suppliers_url, supplier, another_supplier
     ):
-        response = api_client_auth.get(suppliers_url, {"state": "ACTIVE"})
+        response = api_client_auth.get(suppliers_url, {"is_active": True})
         assert len(response.data) == 2

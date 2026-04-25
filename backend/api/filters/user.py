@@ -5,9 +5,6 @@ from django.db.models import Q
 # Models
 from nexus_inventory_backend.db.models import User
 
-# Enums
-from nexus_inventory_backend.db.enums import State
-
 # Filters
 from .base import AuditFilter
 
@@ -15,7 +12,7 @@ from .base import AuditFilter
 class UserFilter(django_filters.FilterSet):
     # Filters
     role_id = django_filters.NumberFilter(field_name="role__id")
-    state = django_filters.ChoiceFilter(field_name="state", choices=State.choices)
+    is_active = django_filters.BooleanFilter(field_name="is_active")
 
     # Searchs
     full_name = django_filters.CharFilter(method="filter_full_name")
@@ -38,7 +35,7 @@ class UserFilter(django_filters.FilterSet):
         fields = [
             "role_id",
             "full_name",
-            "state",
+            "is_active",
             "date_from",
             "date_to",
         ]

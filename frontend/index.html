@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <link rel="icon" type="image/svg+xml" href="./assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <!-- Sidebar: lo rellena sidebar.js -->
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <!-- Header: lo rellena page_header.js -->
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── KPIs ── -->
+                <div class="stats-grid">
+                    <div class="card-kpi" data-kpi="kpi-sales">
+                        <span class="material-symbols-outlined card-kpi-icon">shopping_cart</span>
+                        <div class="card-kpi-value">€ 0.00</div>
+                        <div class="card-kpi-label">Ventas Hoy</div>
+                        <div class="card-kpi-trend" data-trend="sales">
+                            <span class="material-symbols-outlined"></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="card-kpi" data-kpi="kpi-purchases">
+                        <span class="material-symbols-outlined card-kpi-icon">local_shipping</span>
+                        <div class="card-kpi-value">€ 0.00</div>
+                        <div class="card-kpi-label">Compras Hoy</div>
+                        <div class="card-kpi-trend" data-trend="purchases">
+                            <span class="material-symbols-outlined"></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="card-kpi" data-kpi="kpi-stock">
+                        <span class="material-symbols-outlined card-kpi-icon">inventory</span>
+                        <div class="card-kpi-value">0</div>
+                        <div class="card-kpi-label">Stock Bajo</div>
+                        <div class="card-kpi-trend" data-trend="stock"></div>
+                    </div>
+                    <div class="card-kpi" data-kpi="kpi-customers">
+                        <span class="material-symbols-outlined card-kpi-icon">group_add</span>
+                        <div class="card-kpi-value">0</div>
+                        <div class="card-kpi-label">Clientes Nuevos</div>
+                        <div class="card-kpi-trend" data-trend="customers">
+                            <span class="material-symbols-outlined"></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Acciones rápidas + Últimas ventas ── -->
+                <div class="dashboard-sections">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Acciones Rápidas</h3>
+                        </div>
+                        <div class="quick-actions">
+                            <a href="html/sales.html" class="quick-action">
+                                <span class="quick-action-icon material-symbols-outlined">add_shopping_cart</span>
+                                <span class="quick-action-text">Nueva Venta</span>
+                            </a>
+                            <a href="html/purchases.html" class="quick-action">
+                                <span class="quick-action-icon material-symbols-outlined">add_card</span>
+                                <span class="quick-action-text">Nueva Compra</span>
+                            </a>
+                            <a href="html/products.html" class="quick-action">
+                                <span class="quick-action-icon material-symbols-outlined">inventory</span>
+                                <span class="quick-action-text">Inventario</span>
+                            </a>
+                            <a href="html/sale_returns.html" class="quick-action">
+                                <span class="quick-action-icon material-symbols-outlined">assignment_return</span>
+                                <span class="quick-action-text">Devolución</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Últimas Ventas</h3>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cliente</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-sales-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="sales-pagination" class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de ventas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Stock bajo ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Productos con Stock Bajo</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Stock</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="low-stock-tbody">
+                                <!-- Datos dinámicos del backend -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="stock-pagination" class="pagination">
+                        <button class="pagination-btn" aria-label="Página anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn" aria-label="Página siguiente">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <span class="pagination-info">Mostrando registros de stock</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="js/components/modal.js"></script>
+    <script src="js/components/sidebar.js"></script>
+    <script src="js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

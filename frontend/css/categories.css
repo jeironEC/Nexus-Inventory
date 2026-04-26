@@ -1,0 +1,97 @@
+/* ========================================
+ * CATEGORIES.CSS
+ * Estilos específicos de la página Categorías
+ * ======================================== */
+
+/* ─── Acciones de la página (botón nueva categoría) ─── */
+.page-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ─── Barra de filtros horizontal ─── */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filter-grid .form-group {
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
+}
+
+/* ─── Botones de acciones en la tabla ─── */
+.table-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.table-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius);
+    background: transparent;
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    color: rgba(206, 232, 242, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.table-action-btn:hover {
+    background: rgba(4, 85, 191, 0.15);
+    border-color: var(--sky);
+    color: var(--sky);
+}
+
+.table-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--danger);
+    color: #ff6b6b;
+}
+
+.table-action-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ─── Textarea dentro del modal ─── */
+textarea.form-input {
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-body);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1200px) {
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .filter-actions .btn,
+    .page-actions .btn {
+        width: 100%;
+    }
+}

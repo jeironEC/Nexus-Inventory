@@ -156,100 +156,58 @@
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/customers/` | Reporte de clientes |
-| GET | `/reports/customers/top/` | Mejores clientes |
-| **Total:** | | **2 Endpoints** |
+| **Total:** | | **1 Endpoints** |
 
 ### Inventory
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/inventory/` | Reporte de inventario |
-| GET | `/reports/inventory/low-stock/` | Inventario con bajo stock |
-| GET | `/reports/inventory/movements/` | Movimientos de inventario |
-| **Total:** | | **3 Endpoints** |
+| **Total:** | | **1 Endpoints** |
 
 ### Invoices
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/invoices/` | Reporte de facturas |
-| GET | `/reports/invoices/purchases/` | Facturas de compras |
-| GET | `/reports/invoices/sales/` | Facturas de ventas |
-| **Total:** | | **3 Endpoints** |
+| **Total:** | | **1 Endpoints** |
 
 ### Products
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/products/` | Reporte de productos |
-| GET | `/reports/products/` | Reporte de productos |
-| GET | `/reports/products/by-category/` | Productos por categoría |
-| GET | `/reports/products/low-selling/` | Productos menos vendidos |
-| GET | `/reports/products/most-purchased/` | Productos más comprados |
-| GET | `/reports/products/top-selling/` | Productos más vendidos |
-| **Total:** | | **5 Endpoints** |
-
-### Purchase Returns
-| Método | Endpoint | Descripción |
-| ------ | -------- | ----------- |
-| GET | `/reports/purchase-returns/` | Devoluciones de compras |
-| **Total:** | | **1 Endpoints** |
-
-### Purchase Returns
-| Método | Endpoint | Descripción |
-| ------ | -------- | ----------- |
-| GET | `/reports/purchase-returns/` | Devoluciones de compras |
 | **Total:** | | **1 Endpoints** |
 
 ### Purchases
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/purchases/` | Reporte de compras |
-| GET | `/reports/purchases/by-period/` | Compras por período |
-| GET | `/reports/purchases/by-supplier/` | Compras por proveedor |
-| **Total:** | | **3 Endpoints** |
-
-### Sale Returns
-| Método | Endpoint | Descripción |
-| ------ | -------- | ----------- |
-| GET | `/reports/sale-returns/` | Devoluciones de ventas |
 | **Total:** | | **1 Endpoints** |
 
 ### Sales
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
 | GET | `/reports/sales/` | Reporte de ventas |
-| GET | `/reports/sales/by-customer/` | Ventas por cliente |
-| GET | `/reports/sales/by-payment-method/` | Ventas por método de pago |
-| GET | `/reports/sales/by-period/` | Ventas por período |
-| **Total:** | | **4 Endpoints** |
+| **Total:** | | **1 Endpoints** |
+
+### Returns
+| Método | Endpoint | Descripción |
+| ------ | -------- | ----------- |
+| GET | `/reports/returns/` | Devoluciones de compras y ventas |
+| **Total:** | | **1 Endpoints** |
 
 ---
 
 ### PDFs
 | Método | Endpoint | Descripción |
 | ------ | -------- | ----------- |
-| GET | `/invoices/{id}/pdf/` | PDF factura compra o venta |
+| GET | `/invoices/{id}/pdf/` | PDF factura compra y venta |
 | GET | `/reports/sales/pdf/` | PDF reporte de ventas |
-| GET | `/reports/sales/by-customer/pdf/` | PDF ventas por cliente |
-| GET | `/reports/sales/by-payment-method/pdf/` | PDF ventas por método de pago |
-| GET | `/reports/sales/by-period/pdf/` | PDF ventas por período |
 | GET | `/reports/purchases/pdf/` | PDF reporte de compras |
-| GET | `/reports/purchases/by-supplier/pdf/` | PDF compras por proveedor |
-| GET | `/reports/purchases/by-period/pdf/` | PDF compras por período |
 | GET | `/reports/inventory/pdf/` | PDF reporte de inventario |
-| GET | `/reports/inventory/low-stock/pdf/` | PDF inventario bajo stock |
-| GET | `/reports/inventory/movements/pdf/` | PDF movimientos de inventario |
 | GET | `/reports/products/pdf/` | PDF reporte de productos |
-| GET | `/reports/products/top-selling/pdf/` | PDF productos más vendidos |
-| GET | `/reports/products/low-selling/pdf/` | PDF productos menos vendidos |
-| GET | `/reports/products/most-purchased/pdf/` | PDF productos más comprados |
-| GET | `/reports/products/by-category/pdf/` | PDF productos por categoría |
 | GET | `/reports/customers/pdf/` | PDF reporte de clientes |
-| GET | `/reports/customers/top/pdf/` | PDF mejores clientes |
 | GET | `/reports/invoices/pdf/` | PDF reporte de facturas |
-| GET | `/reports/invoices/sales/pdf/` | PDF facturas de ventas |
-| GET | `/reports/invoices/purchases/pdf/` | PDF facturas de compras |
-| GET | `/reports/sale-returns/pdf/` | PDF devoluciones de ventas |
-| GET | `/reports/purchase-returns/pdf/` | PDF devoluciones de compras |
-| **Total:** | | **23 Endpoints** |
+| GET | `/reports/returns/pdf/` | PDF devoluciones de compras y ventas |
+| **Total:** | | **8 Endpoints** |
 
 ---
 
@@ -340,7 +298,7 @@
 ---
 
 ## Total de endpoints
-**138**
+**111**
 
 ## Autenticación
 

@@ -22,16 +22,27 @@ class SaleReturnReportService:
 
     @staticmethod
     def format_returns(qs):
-        returns = list(
-            qs.values(
-                "id",
-                "sale__id",
-                "sale__customer__first_name",
-                "sale__customer__last_name",
-                "created_at",
-                "total_amount",
-                "state",
-            )
+        returns_data = qs.values(
+            "id",
+            "sale__id",
+            "sale__customer__first_name",
+            "sale__customer__last_name",
+            "reason",
+            "created_at",
+            "total_amount",
+            "state",
         )
 
-        return returns
+        return [
+            {
+                "id": r["id"],
+                "sale_id": r["sale__id"],
+                "customer_name": f"{r['sale__customer__first_name'] or ''} {r['sale__customer__last_name'] or ''}".strip()
+                or "Anonymous",
+                "reason": r["reason"],
+                "created_at": r["created_at"],
+                "total_amount": r["total_amount"],
+                "state": r["state"],
+            }
+            for r in returns_data
+        ]

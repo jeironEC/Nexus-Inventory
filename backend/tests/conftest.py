@@ -1083,102 +1083,102 @@ def purchase_return_detail_item_url():
 
 @pytest.fixture
 def url_reports_sales():
-    return reverse("sale-reports-sales")
+    return reverse("sale-reports-list")
 
 
 @pytest.fixture
 def url_reports_sales_by_customer():
-    return reverse("sale-reports-sales-by-customer")
+    return f"{reverse('sale-reports-list')}?group_by=customer"
 
 
 @pytest.fixture
 def url_reports_sales_by_payment_method():
-    return reverse("sale-reports-sales-by-payment-method")
+    return f"{reverse('sale-reports-list')}?group_by=payment_method"
 
 
 @pytest.fixture
 def url_reports_sales_by_period():
-    return reverse("sale-reports-sales-by-period")
+    return f"{reverse('sale-reports-list')}?group_by=period"
 
 
 @pytest.fixture
 def url_reports_purchases():
-    return reverse("purchase-reports-purchases")
+    return reverse("purchase-reports-list")
 
 
 @pytest.fixture
 def url_reports_purchases_by_supplier():
-    return reverse("purchase-reports-purchases-by-supplier")
+    return f"{reverse('purchase-reports-list')}?group_by=supplier"
 
 
 @pytest.fixture
 def url_reports_purchases_by_period():
-    return reverse("purchase-reports-purchases-by-period")
+    return f"{reverse('purchase-reports-list')}?group_by=period"
 
 
 @pytest.fixture
 def url_reports_inventory():
-    return reverse("inventory-reports-inventory")
+    return reverse("inventory-reports-list")
 
 
 @pytest.fixture
 def url_reports_inventory_low_stock():
-    return reverse("inventory-reports-low-stock")
+    return f"{reverse('inventory-reports-list')}?view=low_stock"
 
 
 @pytest.fixture
 def url_reports_inventory_movements():
-    return reverse("inventory-reports-movements")
+    return f"{reverse('inventory-reports-list')}?view=movements"
 
 
 @pytest.fixture
 def url_reports_products_top_selling():
-    return reverse("product-reports-top-selling")
+    return f"{reverse('product-reports-list')}?view=top_selling"
 
 
 @pytest.fixture
 def url_reports_products_low_selling():
-    return reverse("product-reports-low-selling")
+    return f"{reverse('product-reports-list')}?view=low_selling"
 
 
 @pytest.fixture
 def url_reports_products_most_purchased():
-    return reverse("product-reports-most-purchased")
+    return f"{reverse('product-reports-list')}?view=most_purchased"
 
 
 @pytest.fixture
 def url_reports_products_by_category():
-    return reverse("product-reports-by-category")
+    return f"{reverse('product-reports-list')}?view=by_category"
 
 
 @pytest.fixture
 def url_reports_customers_top():
-    return reverse("customer-reports-top-customers")
+    return f"{reverse('customer-reports-list')}?view=top_customers"
 
 
 @pytest.fixture
 def url_reports_invoices():
-    return reverse("invoice-reports-invoices")
+    return reverse("invoice-reports-list")
 
 
 @pytest.fixture
 def url_reports_invoices_sales():
-    return reverse("invoice-reports-invoices-sales")
+    return f"{reverse('invoice-reports-list')}?invoice_type=SALE"
 
 
 @pytest.fixture
 def url_reports_invoices_purchases():
-    return reverse("invoice-reports-invoices-purchases")
+    return f"{reverse('invoice-reports-list')}?invoice_type=PURCHASE"
 
 
 @pytest.fixture
 def url_reports_sale_returns():
-    return reverse("sale-return-reports-sale-returns")
+    return f"{reverse('return-reports-list')}?type=sale"
 
 
 @pytest.fixture
 def url_reports_purchase_returns():
-    return reverse("purchase-return-reports-purchase-returns")
+    return f"{reverse('return-reports-list')}?type=purchase"
 
 
 @pytest.fixture
@@ -1188,17 +1188,17 @@ def url_reports_sales_pdf():
 
 @pytest.fixture
 def url_reports_sales_by_customer_pdf():
-    return reverse("sale-reports-sales-by-customer-pdf")
+    return f"{reverse('sale-reports-sales-pdf')}?group_by=customer"
 
 
 @pytest.fixture
 def url_reports_sales_by_payment_method_pdf():
-    return reverse("sale-reports-sales-by-payment-method-pdf")
+    return f"{reverse('sale-reports-sales-pdf')}?group_by=payment_method"
 
 
 @pytest.fixture
 def url_reports_sales_by_period_pdf():
-    return reverse("sale-reports-sales-by-period-pdf")
+    return f"{reverse('sale-reports-sales-pdf')}?group_by=period"
 
 
 @pytest.fixture
@@ -1208,12 +1208,12 @@ def url_reports_purchases_pdf():
 
 @pytest.fixture
 def url_reports_purchases_by_supplier_pdf():
-    return reverse("purchase-reports-purchases-by-supplier-pdf")
+    return f"{reverse('purchase-reports-purchases-pdf')}?group_by=supplier"
 
 
 @pytest.fixture
 def url_reports_purchases_by_period_pdf():
-    return reverse("purchase-reports-purchases-by-period-pdf")
+    return f"{reverse('purchase-reports-purchases-pdf')}?group_by=period"
 
 
 @pytest.fixture
@@ -1223,12 +1223,12 @@ def url_reports_inventory_pdf():
 
 @pytest.fixture
 def url_reports_inventory_low_stock_pdf():
-    return reverse("inventory-reports-low-stock-pdf")
+    return f"{reverse('inventory-reports-inventory-pdf')}?view=low_stock"
 
 
 @pytest.fixture
 def url_reports_inventory_movements_pdf():
-    return reverse("inventory-reports-movements-pdf")
+    return f"{reverse('inventory-reports-inventory-pdf')}?view=movements"
 
 
 @pytest.fixture
@@ -1238,22 +1238,22 @@ def url_reports_products_pdf():
 
 @pytest.fixture
 def url_reports_products_top_selling_pdf():
-    return reverse("product-reports-top-selling-pdf")
+    return f"{reverse('product-reports-products-pdf')}?view=top_selling"
 
 
 @pytest.fixture
 def url_reports_products_low_selling_pdf():
-    return reverse("product-reports-low-selling-pdf")
+    return f"{reverse('product-reports-products-pdf')}?view=low_selling"
 
 
 @pytest.fixture
 def url_reports_products_most_purchased_pdf():
-    return reverse("product-reports-most-purchased-pdf")
+    return f"{reverse('product-reports-products-pdf')}?view=most_purchased"
 
 
 @pytest.fixture
 def url_reports_products_by_category_pdf():
-    return reverse("product-reports-by-category-pdf")
+    return f"{reverse('product-reports-products-pdf')}?view=by_category"
 
 
 @pytest.fixture
@@ -1263,7 +1263,7 @@ def url_reports_customers_pdf():
 
 @pytest.fixture
 def url_reports_customers_top_pdf():
-    return reverse("customer-reports-top-customers-pdf")
+    return f"{reverse('customer-reports-customers-pdf')}?view=top_customers"
 
 
 @pytest.fixture
@@ -1273,19 +1273,19 @@ def url_reports_invoices_pdf():
 
 @pytest.fixture
 def url_reports_invoices_sales_pdf():
-    return reverse("invoice-reports-invoices-sales-pdf")
+    return f"{reverse('invoice-reports-invoices-pdf')}?invoice_type=SALE"
 
 
 @pytest.fixture
 def url_reports_invoices_purchases_pdf():
-    return reverse("invoice-reports-invoices-purchases-pdf")
+    return f"{reverse('invoice-reports-invoices-pdf')}?invoice_type=PURCHASE"
 
 
 @pytest.fixture
 def url_reports_sale_returns_pdf():
-    return reverse("sale-return-reports-sale-returns-pdf")
+    return f"{reverse('return-reports-returns-pdf')}?type=sale"
 
 
 @pytest.fixture
 def url_reports_purchase_returns_pdf():
-    return reverse("purchase-return-reports-purchase-returns-pdf")
+    return f"{reverse('return-reports-returns-pdf')}?type=purchase"

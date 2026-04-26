@@ -22,15 +22,25 @@ class PurchaseReturnReportService:
 
     @staticmethod
     def format_returns(qs):
-        returns = list(
-            qs.values(
-                "id",
-                "purchase__id",
-                "purchase__supplier__name",
-                "created_at",
-                "total_amount",
-                "state",
-            )
+        returns_data = qs.values(
+            "id",
+            "purchase__id",
+            "purchase__supplier__name",
+            "reason",
+            "created_at",
+            "total_amount",
+            "state",
         )
 
-        return returns
+        return [
+            {
+                "id": r["id"],
+                "purchase_id": r["purchase__id"],
+                "supplier_name": r["purchase__supplier__name"] or "N/A",
+                "reason": r["reason"],
+                "created_at": r["created_at"],
+                "total_amount": r["total_amount"],
+                "state": r["state"],
+            }
+            for r in returns_data
+        ]

@@ -46,11 +46,16 @@ class InventoryReportService:
 
     @staticmethod
     def map_low_stock(inv, threshold):
+        sale_price = float(inv.product.sale_price) if inv.product.sale_price else 0
+        stock_value = sale_price * inv.quantity
+
         return {
             "product_id": inv.product.id,
             "product_name": inv.product.name,
             "category": inv.product.category.name,
             "quantity": inv.quantity,
+            "sale_price": sale_price,
+            "stock_value": stock_value,
             "threshold": threshold,
         }
 

@@ -96,6 +96,11 @@ class SaleReportService:
         return [
             {
                 "payment_method": r["payment_method"],
+                "payment_method_display": (
+                    "Efectivo"
+                    if r["payment_method"] == "CASH"
+                    else "Tarjeta" if r["payment_method"] == "CARD" else "Transferencia"
+                ),
                 "total_sales": r["total_sales"],
                 "total_revenue": r["total_revenue"],
             }

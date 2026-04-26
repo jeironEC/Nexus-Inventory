@@ -36,8 +36,7 @@ from .views import (
     ProductReportViewSet,
     CustomerReportViewSet,
     InvoiceReportViewSet,
-    SaleReturnReportViewSet,
-    PurchaseReturnReportViewSet,
+    ReturnReportViewSet,
 )
 
 router = SimpleRouter()
@@ -76,16 +75,15 @@ purchase_return_router = routers.NestedSimpleRouter(
 purchase_return_router.register(
     "details", PurchaseReturnDetailViewSet, basename="purchase-return-detail"
 )
-router.register("reports", SaleReportViewSet, basename="sale-reports")
-router.register("reports", PurchaseReportViewSet, basename="purchase-reports")
-router.register("reports", InventoryReportViewSet, basename="inventory-reports")
-router.register("reports", ProductReportViewSet, basename="product-reports")
-router.register("reports", CustomerReportViewSet, basename="customer-reports")
-router.register("reports", InvoiceReportViewSet, basename="invoice-reports")
-router.register("reports", SaleReturnReportViewSet, basename="sale-return-reports")
+router.register("reports/sales", SaleReportViewSet, basename="sale-reports")
+router.register("reports/purchases", PurchaseReportViewSet, basename="purchase-reports")
 router.register(
-    "reports", PurchaseReturnReportViewSet, basename="purchase-return-reports"
+    "reports/inventory", InventoryReportViewSet, basename="inventory-reports"
 )
+router.register("reports/products", ProductReportViewSet, basename="product-reports")
+router.register("reports/customers", CustomerReportViewSet, basename="customer-reports")
+router.register("reports/invoices", InvoiceReportViewSet, basename="invoice-reports")
+router.register("reports/returns", ReturnReportViewSet, basename="return-reports")
 
 urlpatterns = [
     path("health/", HealthCheckView.as_view(), name="health-check"),

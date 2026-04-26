@@ -113,7 +113,12 @@ class Sidebar {
                     { path: 'html/inventory.html', page: 'inventory.html', icon: 'inventory_2', text: 'Inventario' }
                 ]
             },
-            { label: 'Gestión',  items: [] },
+            {
+                label: 'Gestión',
+                items: [
+                    { path: 'html/users.html', page: 'users.html', icon: 'group', text: 'Usuarios' }
+                ]
+            },
             { label: 'Negocios', items: [] },
             { label: 'Reportes', items: [] },
             { label: 'Sistema',  items: [] }

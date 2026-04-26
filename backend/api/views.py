@@ -870,7 +870,7 @@ class InvoiceViewSet(
         template = (
             "pdf/invoice_sale.html"
             if invoice.invoice_type == "SALE"
-            else "pdf/invoice_puchase.html"
+            else "pdf/invoice_purchase.html"
         )
 
         html_content = render_to_string(

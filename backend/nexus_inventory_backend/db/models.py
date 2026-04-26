@@ -71,7 +71,7 @@ class User(DisplayModel, BaseModel, AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
-    avatar = models.URLField(max_length=500, null=True, blank=True)
+    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS: list[str] = []
@@ -113,7 +113,7 @@ class Company(DisplayModel, BaseModel):
     number_phone = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True)
     website = models.URLField(blank=True, null=True)
-    logo = models.FileField(upload_to="company/", blank=True, null=True)
+    logo = models.ImageField(upload_to="company/", blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     def get_display_fields(self):

@@ -7,6 +7,9 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import User
 
+# Django
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 
 @pytest.mark.django_db
 class TestGetUsers:
@@ -65,16 +68,27 @@ class TestPatchMe:
         assert response.data["email"] == "updated@test.com"
 
     def test_patch_me_avatar(self, api_client_auth, url_user_me):
-        url = "https://example.com/avatar.png"
+        image_content = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
 
-        response = api_client_auth.patch(url_user_me, {"avatar": url}, format="json")
+        image = SimpleUploadedFile(
+            "avatar.png", image_content, content_type="image/png"
+        )
+
+        response = api_client_auth.patch(
+            url_user_me, {"avatar": image}, format="multipart"
+        )
 
         assert response.status_code == 200
-        assert response.data["avatar"] == url
+        assert "avatar" in response.data
+        assert ".png" in response.data["avatar"]
 
-    def test_patch_me_avatar_invalid_url(self, api_client_auth, url_user_me):
+    def test_patch_me_avatar_invalid_file_upload(self, api_client_auth, url_user_me):
+        invalid_file = SimpleUploadedFile(
+            "avatar.txt", b"esto_no_es_una_imagen", content_type="text/plain"
+        )
+
         response = api_client_auth.patch(
-            url_user_me, {"avatar": "not-a-url"}, format="json"
+            url_user_me, {"avatar": invalid_file}, format="multipart"
         )
 
         assert response.status_code == 400

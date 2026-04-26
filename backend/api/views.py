@@ -1587,7 +1587,8 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                 ]
             else:  # period
                 period = request.query_params.get("period", "month")
-                result = PurchaseReportService.get_by_period(qs, period)
+                trunc_func = get_trunc_func(period)
+                result = PurchaseReportService.get_by_period(qs, trunc_func)
                 title = f"Compras por Período ({period})"
                 headers = ["Período", "Total Compras", "Gasto Total"]
                 data_rows = [
@@ -1615,7 +1616,7 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             )
             filename = "reporte_compras_agrupado.pdf"
         else:
-            data = PurchaseReportService.build_purchases_pdf(qs)
+            data = PurchaseReportService.build_purchase_pdf_data(qs)
             title = "Reporte Detallado de Compras"
             headers = ["Fecha", "Proveedor", "Subtotal", "Impuesto", "Total", "Estado"]
             data_rows = []
@@ -1629,8 +1630,7 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                                 else purchase["created_at"]
                             ),
                             purchase.get("supplier__name", "N/A"),
-                            format_currency(purchase["subtotal"]),
-                            format_currency(purchase["tax_amount"]),
+                            format_currency(purchase["total_amount"]),
                             format_currency(purchase["total_amount"]),
                             {
                                 "is_badge": True,
@@ -1657,10 +1657,9 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                     "value": format_currency(summary["total_spent"]),
                     "highlight": True,
                 },
-                {"label": "Impuestos", "value": format_currency(summary["total_tax"])},
                 {
-                    "label": "Ticket Promedio",
-                    "value": format_currency(summary["average_ticket"]),
+                    "label": "Compra Promedio",
+                    "value": format_currency(summary.get("average_purchase")),
                 },
             ]
             sections.append(

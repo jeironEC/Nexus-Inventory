@@ -30,19 +30,15 @@ class PurchaseReportService:
 
     @staticmethod
     def build_purchase_pdf_data(qs):
-        purchases = []
-
-        for purchase in qs:
-
-            purchases.append(
-                {
-                    "id": purchase.id,
-                    "created_at": purchase.created_at,
-                    "supplier__name": purchase.supplier.name,
-                    "total_amount": purchase.total_amount,
-                    "state": purchase.state,
-                }
+        purchases = list(
+            qs.values(
+                "id",
+                "created_at",
+                "supplier__name",
+                "total_amount",
+                "state",
             )
+        )
 
         summary = PurchaseReportService.get_summary(qs)
 

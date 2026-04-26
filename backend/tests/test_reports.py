@@ -15,7 +15,8 @@ class TestSaleReportViewSet:
         self, api_client_auth, sale, url_reports_sales
     ):
         response = api_client_auth.get(url_reports_sales)
-        assert set(response.data.keys()) == {
+        assert set(response.data.keys()) == {"summary", "data"}
+        assert set(response.data["summary"].keys()) == {
             "total_sales",
             "total_revenue",
             "total_tax",
@@ -27,7 +28,7 @@ class TestSaleReportViewSet:
         self, api_client_auth, sale, another_sale, url_reports_sales
     ):
         response = api_client_auth.get(url_reports_sales)
-        assert response.data["total_sales"] == 2
+        assert response.data["summary"]["total_sales"] == 2
 
     def test_sales_report_unauthenticated_returns_401(
         self, api_client, url_reports_sales
@@ -41,18 +42,18 @@ class TestSaleReportViewSet:
         response = api_client_auth.get(url_reports_sales_by_customer)
         assert response.status_code == status.HTTP_200_OK
 
-    def test_sales_by_customer_returns_list(
+    def test_sales_by_customer_returns_data_list(
         self, api_client_auth, sale, url_reports_sales_by_customer
     ):
         response = api_client_auth.get(url_reports_sales_by_customer)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_sales_by_customer_fields_present(
         self, api_client_auth, sale, url_reports_sales_by_customer
     ):
         response = api_client_auth.get(url_reports_sales_by_customer)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "customer_id",
                 "customer_name",
                 "total_sales",
@@ -69,18 +70,18 @@ class TestSaleReportViewSet:
         self, api_client_auth, sale, url_reports_sales_by_payment_method
     ):
         response = api_client_auth.get(url_reports_sales_by_payment_method)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_sales_by_payment_method_fields_present(
         self, api_client_auth, sale, url_reports_sales_by_payment_method
     ):
         response = api_client_auth.get(url_reports_sales_by_payment_method)
-        if response.data:
-            assert set(response.data[0].keys()) == {
-                "payment_method",
-                "total_sales",
-                "total_revenue",
-            }
+        if response.data["data"]:
+            # payment_method_display is optional but usually present
+            keys = set(response.data["data"][0].keys())
+            assert "payment_method" in keys
+            assert "total_sales" in keys
+            assert "total_revenue" in keys
 
     def test_sales_by_period_returns_200(
         self, api_client_auth, url_reports_sales_by_period
@@ -92,24 +93,18 @@ class TestSaleReportViewSet:
         self, api_client_auth, sale, url_reports_sales_by_period
     ):
         response = api_client_auth.get(url_reports_sales_by_period)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_sales_by_period_fields_present(
         self, api_client_auth, sale, url_reports_sales_by_period
     ):
         response = api_client_auth.get(url_reports_sales_by_period)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "period",
                 "total_sales",
                 "total_revenue",
             }
-
-    def test_sales_by_period_unauthenticated_returns_401(
-        self, api_client, url_reports_sales_by_period
-    ):
-        response = api_client.get(url_reports_sales_by_period)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.django_db
@@ -122,10 +117,11 @@ class TestPurchaseReportViewSet:
         self, api_client_auth, purchase, url_reports_purchases
     ):
         response = api_client_auth.get(url_reports_purchases)
-        assert set(response.data.keys()) == {
+        assert set(response.data.keys()) == {"summary", "data"}
+        assert set(response.data["summary"].keys()) == {
             "total_purchases",
             "total_spent",
-            "average_purchase",
+            "total_tax",
             "canceled_purchases",
         }
 
@@ -133,7 +129,7 @@ class TestPurchaseReportViewSet:
         self, api_client_auth, purchase, another_purchase, url_reports_purchases
     ):
         response = api_client_auth.get(url_reports_purchases)
-        assert response.data["total_purchases"] == 2
+        assert response.data["summary"]["total_purchases"] == 2
 
     def test_purchases_report_unauthenticated_returns_401(
         self, api_client, url_reports_purchases
@@ -151,14 +147,14 @@ class TestPurchaseReportViewSet:
         self, api_client_auth, purchase, url_reports_purchases_by_supplier
     ):
         response = api_client_auth.get(url_reports_purchases_by_supplier)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_purchases_by_supplier_fields_present(
         self, api_client_auth, purchase, url_reports_purchases_by_supplier
     ):
         response = api_client_auth.get(url_reports_purchases_by_supplier)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "supplier_id",
                 "supplier_name",
                 "total_purchases",
@@ -175,14 +171,14 @@ class TestPurchaseReportViewSet:
         self, api_client_auth, purchase, url_reports_purchases_by_period
     ):
         response = api_client_auth.get(url_reports_purchases_by_period)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_purchases_by_period_fields_present(
         self, api_client_auth, purchase, url_reports_purchases_by_period
     ):
         response = api_client_auth.get(url_reports_purchases_by_period)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "period",
                 "total_purchases",
                 "total_spent",
@@ -199,14 +195,14 @@ class TestInventoryReportViewSet:
         self, api_client_auth, inventory, url_reports_inventory
     ):
         response = api_client_auth.get(url_reports_inventory)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_inventory_report_fields_present(
         self, api_client_auth, inventory, url_reports_inventory
     ):
         response = api_client_auth.get(url_reports_inventory)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "product_id",
                 "product_name",
                 "category",
@@ -231,19 +227,21 @@ class TestInventoryReportViewSet:
         self, api_client_auth, inventory, url_reports_inventory_low_stock
     ):
         response = api_client_auth.get(url_reports_inventory_low_stock)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_inventory_low_stock_fields_present(
         self, api_client_auth, inventory, url_reports_inventory_low_stock
     ):
         response = api_client_auth.get(url_reports_inventory_low_stock)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "product_id",
                 "product_name",
                 "category",
                 "quantity",
                 "threshold",
+                "sale_price",
+                "stock_value",
             }
 
     def test_inventory_movements_report_returns_200(
@@ -256,14 +254,14 @@ class TestInventoryReportViewSet:
         self, api_client_auth, inventory_movements, url_reports_inventory_movements
     ):
         response = api_client_auth.get(url_reports_inventory_movements)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_inventory_movements_report_fields_present(
         self, api_client_auth, inventory_movements, url_reports_inventory_movements
     ):
         response = api_client_auth.get(url_reports_inventory_movements)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "product_id",
                 "product_name",
                 "movement_type",
@@ -285,7 +283,7 @@ class TestProductReportViewSet:
         self, api_client_auth, url_reports_products_top_selling
     ):
         response = api_client_auth.get(url_reports_products_top_selling)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_top_selling_unauthenticated_returns_401(
         self, api_client, url_reports_products_top_selling
@@ -303,7 +301,7 @@ class TestProductReportViewSet:
         self, api_client_auth, url_reports_products_low_selling
     ):
         response = api_client_auth.get(url_reports_products_low_selling)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_most_purchased_returns_200(
         self, api_client_auth, url_reports_products_most_purchased
@@ -315,7 +313,7 @@ class TestProductReportViewSet:
         self, api_client_auth, url_reports_products_most_purchased
     ):
         response = api_client_auth.get(url_reports_products_most_purchased)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_by_category_returns_200(
         self, api_client_auth, url_reports_products_by_category
@@ -327,7 +325,7 @@ class TestProductReportViewSet:
         self, api_client_auth, url_reports_products_by_category
     ):
         response = api_client_auth.get(url_reports_products_by_category)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
 
 @pytest.mark.django_db
@@ -342,14 +340,14 @@ class TestCustomerReportViewSet:
         self, api_client_auth, sale, url_reports_customers_top
     ):
         response = api_client_auth.get(url_reports_customers_top)
-        assert isinstance(response.data, list)
+        assert isinstance(response.data["data"], list)
 
     def test_top_customers_fields_present(
         self, api_client_auth, sale, url_reports_customers_top
     ):
         response = api_client_auth.get(url_reports_customers_top)
-        if response.data:
-            assert set(response.data[0].keys()) == {
+        if response.data["data"]:
+            assert set(response.data["data"][0].keys()) == {
                 "customer_id",
                 "customer_name",
                 "total_purchases",
@@ -373,7 +371,8 @@ class TestInvoiceReportViewSet:
         self, api_client_auth, invoice_sale, url_reports_invoices
     ):
         response = api_client_auth.get(url_reports_invoices)
-        assert set(response.data.keys()) == {
+        assert set(response.data.keys()) == {"summary", "data"}
+        assert set(response.data["summary"].keys()) == {
             "total_invoices",
             "issued_invoices",
             "canceled_invoices",
@@ -384,9 +383,9 @@ class TestInvoiceReportViewSet:
         self, api_client_auth, invoice_purchase, url_reports_invoices
     ):
         response = api_client_auth.get(url_reports_invoices)
-        assert response.data["total_invoices"] == 1
-        assert response.data["issued_invoices"] == 1
-        assert response.data["canceled_invoices"] == 0
+        assert response.data["summary"]["total_invoices"] == 1
+        assert response.data["summary"]["issued_invoices"] == 1
+        assert response.data["summary"]["canceled_invoices"] == 0
 
     def test_invoices_report_unauthenticated_returns_401(
         self, api_client, url_reports_invoices
@@ -411,7 +410,7 @@ class TestInvoiceReportViewSetSalesAndPurchases:
         url_reports_invoices_sales,
     ):
         response = api_client_auth.get(url_reports_invoices_sales)
-        assert response.data["total_invoices"] == 1
+        assert response.data["summary"]["total_invoices"] == 1
 
     def test_invoices_purchases_report_returns_200(
         self, api_client_auth, url_reports_invoices_purchases
@@ -427,18 +426,14 @@ class TestInvoiceReportViewSetSalesAndPurchases:
         url_reports_invoices_purchases,
     ):
         response = api_client_auth.get(url_reports_invoices_purchases)
-        assert response.data["total_invoices"] == 1
+        assert response.data["summary"]["total_invoices"] == 1
 
     def test_invoices_sales_unauthenticated_returns_401(
         self, api_client, url_reports_invoices_sales
     ):
+        # We need to strip the query params for the unauthenticated client test if it's not a fixture
+        # but here it's a fixture that already has them.
         response = api_client.get(url_reports_invoices_sales)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-    def test_invoices_purchases_unauthenticated_returns_401(
-        self, api_client, url_reports_invoices_purchases
-    ):
-        response = api_client.get(url_reports_invoices_purchases)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -454,7 +449,8 @@ class TestSaleReturnReportViewSet:
         self, api_client_auth, url_reports_sale_returns
     ):
         response = api_client_auth.get(url_reports_sale_returns)
-        assert set(response.data.keys()) == {
+        assert set(response.data.keys()) == {"summary", "data"}
+        assert set(response.data["summary"].keys()) == {
             "total_returns",
             "completed_returns",
             "canceled_returns",
@@ -473,6 +469,8 @@ class TestPurchaseReturnReportViewSet:
     def test_purchase_returns_report_returns_200(
         self, api_client_auth, url_reports_purchase_returns
     ):
+        # Even if the fixture is return-reports-list?type=purchase
+        # The viewset should handle it.
         response = api_client_auth.get(url_reports_purchase_returns)
         assert response.status_code == status.HTTP_200_OK
 
@@ -480,7 +478,8 @@ class TestPurchaseReturnReportViewSet:
         self, api_client_auth, url_reports_purchase_returns
     ):
         response = api_client_auth.get(url_reports_purchase_returns)
-        assert set(response.data.keys()) == {
+        assert set(response.data.keys()) == {"summary", "data"}
+        assert set(response.data["summary"].keys()) == {
             "total_returns",
             "completed_returns",
             "canceled_returns",

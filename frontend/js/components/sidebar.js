@@ -116,7 +116,8 @@ class Sidebar {
             {
                 label: 'Gestión',
                 items: [
-                    { path: 'html/users.html', page: 'users.html', icon: 'group', text: 'Usuarios' }
+                    { path: 'html/users.html', page: 'users.html', icon: 'group', text: 'Usuarios' },
+                    { path: 'html/roles.html', page: 'roles.html', icon: 'admin_panel_settings', text: 'Roles' }
                 ]
             },
             { label: 'Negocios', items: [] },

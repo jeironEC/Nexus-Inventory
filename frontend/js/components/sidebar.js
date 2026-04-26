@@ -118,7 +118,8 @@ class Sidebar {
                 items: [
                     { path: 'html/users.html', page: 'users.html', icon: 'group', text: 'Usuarios' },
                     { path: 'html/roles.html', page: 'roles.html', icon: 'admin_panel_settings', text: 'Roles' },
-                    { path: 'html/categories.html', page: 'categories.html', icon: 'category',  text: 'Categorías' }
+                    { path: 'html/categories.html', page: 'categories.html', icon: 'category',  text: 'Categorías' },
+                    { path: 'html/products.html', page: 'products.html', icon: 'inventory', text: 'Productos' }
                 ]
             },
             { label: 'Negocios', items: [] },

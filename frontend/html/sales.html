@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/sales.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── Acciones de la página ── -->
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="btn-new-sale">
+                        <span class="material-symbols-outlined">add_shopping_cart</span>
+                        Nueva Venta
+                    </button>
+                </div>
+
+                <!-- ── Filtros (según SaleFilter del backend) ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Filtros</h3>
+                    </div>
+                    <div class="filter-grid">
+
+                        <div class="form-group">
+                            <label class="form-label" for="sales-filter-customer">Cliente</label>
+                            <select class="form-input" id="sales-filter-customer">
+                                <option value="">Todos los clientes</option>
+                                <!-- Se rellena dinámico desde el backend -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="sales-filter-state">Estado</label>
+                            <select class="form-input" id="sales-filter-state">
+                                <option value="">Todos los estados</option>
+                                <option value="PENDING">Pendiente</option>
+                                <option value="COMPLETED">Completada</option>
+                                <option value="CANCELLED">Cancelada</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="sales-filter-payment">Método de Pago</label>
+                            <select class="form-input" id="sales-filter-payment">
+                                <option value="">Todos los métodos</option>
+                                <option value="CASH">Efectivo</option>
+                                <option value="CARD">Tarjeta</option>
+                                <option value="TRANSFER">Transferencia</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="sales-filter-date-from">Desde</label>
+                            <input type="date" class="form-input" id="sales-filter-date-from">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="sales-filter-date-to">Hasta</label>
+                            <input type="date" class="form-input" id="sales-filter-date-to">
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="btn btn-secondary" id="btn-apply-filters">
+                                <span class="material-symbols-outlined">filter_list</span>
+                                Aplicar Filtros
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ── Tabla ── -->
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nº Venta</th>
+                                    <th>Cliente</th>
+                                    <th>Subtotal</th>
+                                    <th>Impuestos</th>
+                                    <th>Descuento</th>
+                                    <th>Total</th>
+                                    <th>Método Pago</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-tbody">
+                                <!-- Datos dinámicos del backend -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="sales-pagination" class="pagination">
+                        <button class="pagination-btn" aria-label="Página anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn" aria-label="Página siguiente">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <span class="pagination-info">Mostrando registros de ventas</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ── Modal: Crear Venta ── -->
+    <div class="modal-backdrop" id="modal-new-sale" style="display:none;">
+        <div class="modal modal-xl">
+            <div class="modal-header">
+                <h3 class="modal-title">Nueva Venta</h3>
+                <button class="modal-close" aria-label="Cerrar">&times;</button>
+            </div>
+
+            <form id="form-new-sale">
+                <div class="modal-body">
+
+                    <!-- Datos generales -->
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label" for="new-sale-company">Empresa</label>
+                            <select class="form-input" id="new-sale-company" name="company_id">
+                                <option value="">Selecciona empresa</option>
+                                <!-- Se rellena dinámico desde el backend -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new-sale-customer">Cliente</label>
+                            <select class="form-input" id="new-sale-customer" name="customer_id">
+                                <option value="">Selecciona cliente</option>
+                                <!-- Se rellena dinámico desde el backend -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new-sale-payment">Método de Pago</label>
+                            <select class="form-input" id="new-sale-payment" name="payment_method">
+                                <option value="CASH">Efectivo</option>
+                                <option value="CARD">Tarjeta</option>
+                                <option value="TRANSFER">Transferencia</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Detalles: productos de la venta -->
+                    <div class="sale-details">
+                        <div class="sale-details-header">
+                            <h4 class="sale-details-title">Productos</h4>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-product">
+                                <span class="material-symbols-outlined">add</span>
+                                Añadir Producto
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sale-details-tbody">
+                                    <!-- Filas dinámicas: producto, cantidad, precio, subtotal, eliminar -->
+                                    <!-- Por defecto una fila vacía -->
+                                    <tr class="sale-detail-row">
+                                        <td>
+                                            <select class="form-input" name="product_id">
+                                                <option value="">Selecciona producto</option>
+                                                <!-- Se rellena dinámico -->
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-input" name="quantity" placeholder="1" min="1" value="1">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-input" name="unit_price" placeholder="0.00">
+                                        </td>
+                                        <td class="sale-detail-subtotal">€ 0.00</td>
+                                        <td>
+                                            <button type="button" class="table-action-btn danger btn-remove-row" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Totales -->
+                        <div class="sale-totals">
+                            <div class="sale-total-row">
+                                <span class="sale-total-label">Subtotal:</span>
+                                <span class="sale-total-value" id="sale-subtotal">€ 0.00</span>
+                            </div>
+                            <div class="sale-total-row">
+                                <span class="sale-total-label">Impuestos:</span>
+                                <span class="sale-total-value" id="sale-tax">€ 0.00</span>
+                            </div>
+                            <div class="sale-total-row sale-total-final">
+                                <span class="sale-total-label">Total:</span>
+                                <span class="sale-total-value" id="sale-total">€ 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Crear Venta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/sales.js"></script>
+</body>
+</html>

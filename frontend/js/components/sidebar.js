@@ -126,7 +126,8 @@ class Sidebar {
                 label: 'Negocios',
                 items: [
                     { path: 'html/customers.html', page: 'customers.html', icon: 'people', text: 'Clientes' },
-                    { path: 'html/suppliers.html', page: 'suppliers.html', icon: 'local_shipping', text: 'Proveedores' }
+                    { path: 'html/suppliers.html', page: 'suppliers.html', icon: 'local_shipping', text: 'Proveedores' },
+                    { path: 'html/sales.html', page: 'sales.html', icon: 'point_of_sale', text: 'Ventas' }
                 ]
             },
             { label: 'Reportes', items: [] },

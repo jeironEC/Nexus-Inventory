@@ -1,0 +1,191 @@
+/* ========================================
+ * PURCHASES.CSS
+ * Estilos específicos de la página Compras
+ * ======================================== */
+
+/* ─── Acciones de la página ─── */
+.page-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ─── Barra de filtros (4 filtros) ─── */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filter-grid .form-group {
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
+}
+
+/* ─── Botones de acciones en la tabla ─── */
+.table-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.table-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius);
+    background: transparent;
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    color: rgba(206, 232, 242, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.table-action-btn:hover {
+    background: rgba(4, 85, 191, 0.15);
+    border-color: var(--sky);
+    color: var(--sky);
+}
+
+.table-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--danger);
+    color: #ff6b6b;
+}
+
+.table-action-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ─── Modal: filas de columnas ─── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-row .form-group {
+    margin-bottom: 0;
+}
+
+/* ─── Detalles de compra (productos dentro del modal) ─── */
+.purchase-details {
+    margin-top: 12px;
+    border-top: 1px solid rgba(4, 85, 191, 0.2);
+    padding-top: 20px;
+}
+
+.purchase-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.purchase-details-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.purchase-detail-row .form-input {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.purchase-detail-subtotal {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--sky);
+    white-space: nowrap;
+}
+
+/* ─── Totales ─── */
+.purchase-totals {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.purchase-total-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 280px;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.purchase-total-label {
+    font-size: 14px;
+    color: rgba(206, 232, 242, 0.6);
+}
+
+.purchase-total-value {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+}
+
+.purchase-total-final {
+    border-top: 1px solid rgba(4, 85, 191, 0.3);
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.purchase-total-final .purchase-total-label {
+    font-size: 16px;
+    color: var(--white);
+    font-weight: 600;
+}
+
+.purchase-total-final .purchase-total-value {
+    font-size: 22px;
+    color: var(--sky);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1200px) {
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .filter-actions .btn,
+    .page-actions .btn {
+        width: 100%;
+    }
+    .purchase-total-row {
+        min-width: 100%;
+    }
+}

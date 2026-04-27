@@ -122,7 +122,12 @@ class Sidebar {
                     { path: 'html/products.html', page: 'products.html', icon: 'inventory', text: 'Productos' }
                 ]
             },
-            { label: 'Negocios', items: [] },
+            {
+                label: 'Negocios',
+                items: [
+                    { path: 'html/customers.html', page: 'customers.html', icon: 'people', text: 'Clientes' }
+                ]
+            },
             { label: 'Reportes', items: [] },
             { label: 'Sistema',  items: [] }
         ];

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/suppliers.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── Acciones de la página ── -->
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="btn-new-supplier">
+                        <span class="material-symbols-outlined">add_business</span>
+                        Nuevo Proveedor
+                    </button>
+                </div>
+
+                <!-- ── Filtros (según SupplierFilter del backend) ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Filtros</h3>
+                    </div>
+                    <div class="filter-grid">
+
+                        <div class="form-group">
+                            <label class="form-label" for="suppliers-filter-name">Nombre</label>
+                            <input type="text" class="form-input" id="suppliers-filter-name" placeholder="Nombre del proveedor...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="suppliers-filter-email">Email</label>
+                            <input type="email" class="form-input" id="suppliers-filter-email" placeholder="email@ejemplo.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="suppliers-filter-state">Estado</label>
+                            <select class="form-input" id="suppliers-filter-state">
+                                <option value="">Todos los estados</option>
+                                <option value="active">Activo</option>
+                                <option value="inactive">Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="suppliers-filter-date-from">Desde</label>
+                            <input type="date" class="form-input" id="suppliers-filter-date-from">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="suppliers-filter-date-to">Hasta</label>
+                            <input type="date" class="form-input" id="suppliers-filter-date-to">
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="btn btn-secondary" id="btn-apply-filters">
+                                <span class="material-symbols-outlined">filter_list</span>
+                                Aplicar Filtros
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ── Tabla ── -->
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>NIF</th>
+                                    <th>Teléfono</th>
+                                    <th>Dirección</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="suppliers-tbody">
+                                <!-- Datos dinámicos del backend -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="suppliers-pagination" class="pagination">
+                        <button class="pagination-btn" aria-label="Página anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn" aria-label="Página siguiente">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <span class="pagination-info">Mostrando registros de proveedores</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ── Modal: Crear Proveedor ── -->
+    <!-- (campos según POST /v1/suppliers del backend) -->
+    <div class="modal-backdrop" id="modal-new-supplier" style="display:none;">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo Proveedor</h3>
+                <button class="modal-close" aria-label="Cerrar">&times;</button>
+            </div>
+
+            <form id="form-new-supplier">
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-supplier-name">Nombre</label>
+                        <input type="text" class="form-input" id="new-supplier-name" name="name" placeholder="Ej: Distribuciones Hunain S.L.">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="new-supplier-email">Correo electrónico</label>
+                            <input type="email" class="form-input" id="new-supplier-email" name="email" placeholder="proveedor@ejemplo.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new-supplier-nif">NIF / CIF</label>
+                            <input type="text" class="form-input" id="new-supplier-nif" name="nif" placeholder="B12345678">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-supplier-phone">Teléfono</label>
+                        <input type="tel" class="form-input" id="new-supplier-phone" name="number_phone" placeholder="+34 600 000 000">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-supplier-address">Dirección</label>
+                        <textarea class="form-input" id="new-supplier-address" name="address" rows="3" placeholder="Calle, número, ciudad, código postal..."></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Crear Proveedor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/suppliers.js"></script>
+</body>
+</html>

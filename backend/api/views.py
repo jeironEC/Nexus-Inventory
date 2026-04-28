@@ -877,7 +877,9 @@ class InvoiceViewSet(
             },
         )
 
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
 
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = (
@@ -1503,7 +1505,9 @@ class SaleReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
         return response
@@ -1676,7 +1680,9 @@ class PurchaseReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
         return response
@@ -1879,7 +1885,9 @@ class InventoryReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
         return response
@@ -2164,7 +2172,9 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="reporte_productos.pdf"'
         return response
@@ -2256,7 +2266,9 @@ class CustomerReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="reporte_clientes.pdf"'
         return response
@@ -2452,7 +2464,9 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="reporte_facturas.pdf"'
         return response
@@ -2605,7 +2619,9 @@ class ReturnReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         }
 
         html_content = render_to_string("pdf/base_report.html", context)
-        pdf_file = HTML(string=html_content).write_pdf()
+        pdf_file = HTML(
+            string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
+        ).write_pdf()
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="reporte_devoluciones.pdf"'
         return response

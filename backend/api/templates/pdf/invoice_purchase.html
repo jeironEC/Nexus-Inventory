@@ -75,6 +75,13 @@
             font-weight: 800;
         }
 
+        .company-logo-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
         .company-info {
             text-align: left;
         }
@@ -322,7 +329,9 @@
             <div class="company-section">
                 <div class="company-brand">
                     {% if company.logo %}
-                        <div class="company-logo">{{ company.logo }}</div>
+                        <div class="company-logo">
+                            <img src="{{ company.logo }}" alt="Logo de {{ company.name }}" class="company-logo-img">
+                        </div>
                     {% else %}
                         <div class="company-logo-default">{{ company.name|slice:":1" }}</div>
                     {% endif %}

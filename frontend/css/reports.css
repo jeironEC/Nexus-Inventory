@@ -1,0 +1,67 @@
+/* ========================================
+ * REPORTS.CSS
+ * Estilos compartidos de las páginas de Reportes
+ * ======================================== */
+
+/* ─── Filtros de reporte ─── */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filter-grid .form-group {
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
+}
+
+/* ─── Vistas mostrar/ocultar según el filtro de agrupación ─── */
+.report-view {
+    display: block;
+}
+
+.report-view.hidden {
+    display: none;
+}
+
+/* ─── Estado vacío opcional dentro de las tablas ─── */
+.report-empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: rgba(206, 232, 242, 0.4);
+    font-size: 14px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1200px) {
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    .filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-actions .btn {
+        width: 100%;
+    }
+}

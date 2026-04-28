@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Inventario - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/reports.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── Filtros de Inventario ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Filtros de Inventario</h3>
+                    </div>
+
+                    <div class="filter-grid">
+
+                        <div class="form-group">
+                            <label class="form-label" for="report-view">Vista</label>
+                            <select class="form-input" id="report-view">
+                                <option value="general">Inventario General</option>
+                                <option value="low_stock">Stock Bajo</option>
+                                <option value="movements">Historial de Movimientos</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="report-date-from">Desde</label>
+                            <input type="date" class="form-input" id="report-date-from" name="date_from">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="report-date-to">Hasta</label>
+                            <input type="date" class="form-input" id="report-date-to" name="date_to">
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" id="btn-generate-report">
+                                <span class="material-symbols-outlined">assessment</span>
+                                Generar Reporte
+                            </button>
+                            <button class="btn btn-secondary" id="btn-export-pdf">
+                                <span class="material-symbols-outlined">picture_as_pdf</span>
+                                Exportar PDF
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ── Datos del Reporte ── -->
+                <div class="card">
+
+                    <!-- Vista: Inventario General -->
+                    <div class="report-view" id="view-general">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Stock</th>
+                                        <th>Precio Venta</th>
+                                        <th>Valor Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-general-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros del inventario</span>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Stock Bajo -->
+                    <div class="report-view hidden" id="view-low-stock">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Stock Actual</th>
+                                        <th>Precio Venta</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-low-stock-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de stock bajo</span>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Historial de Movimientos -->
+                    <div class="report-view hidden" id="view-movements">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Producto</th>
+                                        <th>Tipo Movimiento</th>
+                                        <th>Cantidad</th>
+                                        <th>Usuario</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-movements-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de movimientos</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/inventory-report.js"></script>
+</body>
+</html>

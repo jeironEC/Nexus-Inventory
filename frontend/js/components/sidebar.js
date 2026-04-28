@@ -136,7 +136,8 @@ class Sidebar {
             {
                 label: 'Reportes',
                 items: [
-                    { path: 'html/sales-report.html', page: 'reports/sales.html', icon: 'receipt_long', text: 'Reporte de Ventas' }
+                    { path: 'html/sales-report.html', page: 'reports/sales.html', icon: 'receipt_long', text: 'Reporte de Ventas' },
+                    { path: 'html/purchases-report.html', page: 'reports/purchases.html', icon: 'shopping_bag', text: 'Reporte de Compras' }
                 ]
             },
             {

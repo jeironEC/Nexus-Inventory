@@ -1,0 +1,72 @@
+/* ========================================
+ * COMPANY-SETUP.CSS
+ * Estilos específicos de la página de configuración
+ * inicial de empresa (estilo login)
+ * ======================================== */
+
+/* Wrapper más ancho que el login normal */
+.company-setup-wrapper {
+    max-width: 560px;
+}
+
+/* ─── Filas de columnas ─── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-row .form-group {
+    margin-bottom: 20px;
+}
+
+/* ─── Logo uploader ─── */
+.company-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.company-logo-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius);
+    background: rgba(2, 40, 89, 0.5);
+    border: 1px dashed rgba(4, 85, 191, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(206, 232, 242, 0.4);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.company-logo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.company-logo-preview .material-symbols-outlined {
+    font-size: 32px;
+}
+
+.company-logo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ─── Textarea ─── */
+textarea.form-input {
+    resize: vertical;
+    min-height: 60px;
+    font-family: var(--font-body);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

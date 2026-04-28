@@ -594,6 +594,62 @@ a:hover { color: var(--ice); }
 }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
 
+/* ─── Recursos (Términos y Manual) ─── */
+.profile-resources {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-resource-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(4, 85, 191, 0.08);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius);
+    color: var(--ice);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.profile-resource-link:hover {
+    background: rgba(4, 85, 191, 0.15);
+    border-color: var(--sky);
+    color: var(--ice);
+    transform: translateX(2px);
+}
+
+.profile-resource-link > .material-symbols-outlined {
+    font-size: 28px;
+    color: var(--sky);
+    flex-shrink: 0;
+}
+
+.profile-resource-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-resource-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+}
+
+.profile-resource-desc {
+    font-size: 13px;
+    color: rgba(206, 232, 242, 0.5);
+}
+
+.profile-resource-arrow {
+    font-size: 20px;
+    color: rgba(206, 232, 242, 0.4);
+}
+
 @media (max-width: 1200px) {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }

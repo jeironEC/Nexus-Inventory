@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil Empresa - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/company.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── Tarjeta de cabecera de la empresa ── -->
+                <div class="card company-card-header">
+                    <div class="company-logo-header-wrapper">
+                        <div class="company-logo-header" id="company-logo-header">
+                            <span class="material-symbols-outlined">business</span>
+                            <!-- El compañero pondrá aquí <img> si hay logo -->
+                        </div>
+                        <button type="button" class="company-logo-edit" id="btn-edit-logo" title="Cambiar logo">
+                            <span class="material-symbols-outlined">photo_camera</span>
+                        </button>
+                        <input type="file" id="input-logo" accept="image/*" hidden>
+                    </div>
+
+                    <div class="company-info">
+                        <h2 class="company-name" id="company-display-name">Nombre de la Empresa</h2>
+                        <p class="company-nif" id="company-display-nif">NIF: B12345678</p>
+                        <span class="badge badge-success" id="company-state">Activa</span>
+                    </div>
+                </div>
+
+                <!-- ── Datos de la Empresa ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Datos de la Empresa</h3>
+                    </div>
+
+                    <form id="form-company-info">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="company-name">Nombre de la Empresa</label>
+                                <input type="text" class="form-input" id="company-name" name="name" placeholder="Mi Empresa S.L.">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="company-nif">NIF / CIF</label>
+                                <input type="text" class="form-input" id="company-nif" name="nif" placeholder="B12345678">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="company-email">Correo electrónico</label>
+                                <input type="email" class="form-input" id="company-email" name="email" placeholder="contacto@empresa.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="company-phone">Teléfono</label>
+                                <input type="tel" class="form-input" id="company-phone" name="number_phone" placeholder="+34 600 000 000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="company-website">Sitio Web</label>
+                            <input type="url" class="form-input" id="company-website" name="website" placeholder="https://www.empresa.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="company-address">Dirección</label>
+                            <textarea class="form-input" id="company-address" name="address" rows="3" placeholder="Calle, número, ciudad, código postal..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-symbols-outlined">save</span>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── Recursos (Términos y Manual) ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recursos</h3>
+                    </div>
+
+                    <div class="profile-resources">
+                        <a href="terms.html" class="profile-resource-link">
+                            <span class="material-symbols-outlined">description</span>
+                            <div class="profile-resource-text">
+                                <span class="profile-resource-title">Términos y Condiciones</span>
+                                <span class="profile-resource-desc">Lee los términos de uso de Nexus Inventory</span>
+                            </div>
+                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                        </a>
+
+                        <a href="manual.html" class="profile-resource-link">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <div class="profile-resource-text">
+                                <span class="profile-resource-title">Manual de Uso</span>
+                                <span class="profile-resource-desc">Aprende a usar todas las funciones del sistema</span>
+                            </div>
+                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/company.js"></script>
+</body>
+</html>

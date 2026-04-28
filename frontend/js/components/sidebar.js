@@ -129,7 +129,9 @@ class Sidebar {
                     { path: 'html/suppliers.html', page: 'suppliers.html', icon: 'local_shipping', text: 'Proveedores' },
                     { path: 'html/sales.html', page: 'sales.html', icon: 'point_of_sale', text: 'Ventas' },
                     { path: 'html/purchases.html', page: 'purchases.html', icon: 'shopping_cart', text: 'Compras' },
-                    { path: 'html/invoices.html', page: 'invoices.html', icon: 'receipt_long', text: 'Facturas' }
+                    { path: 'html/invoices.html', page: 'invoices.html', icon: 'receipt_long', text: 'Facturas' },
+                    { path: 'html/sale_returns.html', page: 'sale_returns.html', icon: 'assignment_return', text: 'Devoluciones Ventas' },
+                    { path: 'html/purchase_returns.html', page: 'purchase_returns.html', icon: 'keyboard_return', text: 'Devoluciones Compras' }
                 ]
             },
             { label: 'Reportes', items: [] },

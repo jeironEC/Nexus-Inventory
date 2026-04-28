@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Uso - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/static_pages.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <div class="card static-page">
+
+                    <div class="static-page-header">
+                        <span class="material-symbols-outlined static-page-icon">menu_book</span>
+                        <div>
+                            <h1 class="static-page-title">Manual de Uso</h1>
+                            <p class="static-page-subtitle">Guía completa para sacar el máximo provecho de Nexus Inventory</p>
+                        </div>
+                    </div>
+
+                    <div class="static-page-content">
+
+                        <h2>1. Inicio de Sesión</h2>
+                        <p>Accede al sistema con tu correo electrónico y contraseña proporcionados por el administrador. Si olvidaste tu contraseña, utiliza el enlace "¿Olvidaste tu contraseña?" en la pantalla de login.</p>
+
+                        <h2>2. Dashboard</h2>
+                        <p>El panel principal muestra un resumen del estado actual del negocio:</p>
+                        <ul>
+                            <li><strong>Ventas Hoy:</strong> Total de ventas realizadas en el día.</li>
+                            <li><strong>Compras Hoy:</strong> Total de compras registradas en el día.</li>
+                            <li><strong>Stock Bajo:</strong> Productos que necesitan reposición.</li>
+                            <li><strong>Clientes Nuevos:</strong> Clientes registrados recientemente.</li>
+                        </ul>
+
+                        <h2>3. Gestión de Inventario</h2>
+                        <p>En la sección <strong>Inventario</strong> puedes consultar el stock actual de todos los productos. Utiliza los filtros para buscar por nombre, ID, cantidad o fechas.</p>
+
+                        <h2>4. Productos y Categorías</h2>
+                        <p>Crea, edita y desactiva los productos del catálogo desde la sección <strong>Productos</strong>. Asigna cada producto a una categoría desde <strong>Categorías</strong>.</p>
+                        <p>Para crear un producto necesitarás: nombre, código único, categoría, precio de venta, precio de compra y opcionalmente un descuento.</p>
+
+                        <h2>5. Clientes y Proveedores</h2>
+                        <p>Gestiona la base de datos de clientes y proveedores desde sus respectivas secciones. Cada registro guarda nombre, NIF, email, teléfono y dirección.</p>
+
+                        <h2>6. Realizar una Venta</h2>
+                        <p>Desde <strong>Ventas → Nueva Venta</strong>:</p>
+                        <ol>
+                            <li>Selecciona la empresa y el cliente.</li>
+                            <li>Elige el método de pago (efectivo, tarjeta, transferencia).</li>
+                            <li>Añade los productos a la venta indicando cantidad y precio unitario.</li>
+                            <li>Revisa el total y confirma la venta.</li>
+                        </ol>
+                        <p>El sistema generará automáticamente la factura asociada.</p>
+
+                        <h2>7. Realizar una Compra</h2>
+                        <p>Desde <strong>Compras → Nueva Compra</strong>:</p>
+                        <ol>
+                            <li>Selecciona la empresa y el proveedor.</li>
+                            <li>Añade los productos comprados con cantidad y coste unitario.</li>
+                            <li>Confirma la compra y el inventario se actualizará automáticamente.</li>
+                        </ol>
+
+                        <h2>8. Devoluciones</h2>
+                        <p>Las devoluciones se gestionan desde las secciones correspondientes:</p>
+                        <ul>
+                            <li><strong>Devoluciones de Venta:</strong> cuando un cliente devuelve productos.</li>
+                            <li><strong>Devoluciones de Compra:</strong> cuando devuelves productos a un proveedor.</li>
+                        </ul>
+                        <p>En ambos casos debes indicar la operación original, el motivo y los productos a devolver.</p>
+
+                        <h2>9. Facturas</h2>
+                        <p>Todas las facturas generadas (de ventas y compras) se listan en la sección <strong>Facturas</strong>. Desde aquí puedes ver detalles, descargar el PDF o cancelarlas.</p>
+
+                        <h2>10. Reportes</h2>
+                        <p>La sección <strong>Reportes</strong> ofrece informes detallados sobre ventas, compras, inventario, productos, clientes y facturación. Puedes exportar cada reporte en PDF.</p>
+
+                        <h2>11. Mi Perfil</h2>
+                        <p>Desde tu perfil puedes:</p>
+                        <ul>
+                            <li>Cambiar tu foto de avatar.</li>
+                            <li>Actualizar tu información personal.</li>
+                            <li>Cambiar tu contraseña.</li>
+                        </ul>
+
+                        <h2>12. Soporte</h2>
+                        <p>Si tienes dudas o problemas técnicos, contacta con el administrador del sistema.</p>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/manual.js"></script>
+</body>
+</html>

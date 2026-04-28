@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/profile.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── Tarjeta de cabecera del perfil ── -->
+                <div class="card profile-card-header">
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar" id="profile-avatar">
+                            <span id="profile-avatar-initials">NX</span>
+                            <!-- El backend pondrá aquí <img> si hay avatar -->
+                        </div>
+                        <button type="button" class="profile-avatar-edit" id="btn-edit-avatar" title="Cambiar foto">
+                            <span class="material-symbols-outlined">photo_camera</span>
+                        </button>
+                        <input type="file" id="input-avatar" accept="image/*" hidden>
+                    </div>
+
+                    <div class="profile-info">
+                        <h2 class="profile-name" id="profile-name">Nombre Apellidos</h2>
+                        <p class="profile-email" id="profile-email">correo@ejemplo.com</p>
+                        <span class="badge badge-primary" id="profile-role">Rol</span>
+                    </div>
+                </div>
+
+                <!-- ── Información Personal ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Información Personal</h3>
+                    </div>
+
+                    <form id="form-profile-info">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profile-first-name">Nombre</label>
+                                <input type="text" class="form-input" id="profile-first-name" name="first_name" placeholder="Tu nombre">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="profile-last-name">Apellidos</label>
+                                <input type="text" class="form-input" id="profile-last-name" name="last_name" placeholder="Tus apellidos">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profile-email-input">Correo electrónico</label>
+                                <input type="email" class="form-input" id="profile-email-input" name="email" placeholder="correo@ejemplo.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="profile-nif">NIF</label>
+                                <input type="text" class="form-input" id="profile-nif" name="nif" placeholder="12345678X">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-symbols-outlined">save</span>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── Cambiar Contraseña ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Cambiar Contraseña</h3>
+                    </div>
+
+                    <form id="form-change-password">
+                        <div class="form-group">
+                            <label class="form-label" for="profile-current-password">Contraseña Actual</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-input" id="profile-current-password" name="current_password" placeholder="••••••••">
+                                <button type="button" class="password-toggle" data-target="profile-current-password" aria-label="Mostrar contraseña">
+                                    <span class="material-symbols-outlined">visibility_off</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="profile-new-password">Nueva Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-input" id="profile-new-password" name="new_password" placeholder="••••••••">
+                                    <button type="button" class="password-toggle" data-target="profile-new-password" aria-label="Mostrar contraseña">
+                                        <span class="material-symbols-outlined">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="profile-confirm-password">Confirmar Nueva Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-input" id="profile-confirm-password" name="confirm_password" placeholder="••••••••">
+                                    <button type="button" class="password-toggle" data-target="profile-confirm-password" aria-label="Mostrar contraseña">
+                                        <span class="material-symbols-outlined">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-symbols-outlined">lock_reset</span>
+                                Cambiar Contraseña
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── Recursos Términos y Manual ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recursos</h3>
+                    </div>
+
+                    <div class="profile-resources">
+                        <a href="terms.html" class="profile-resource-link">
+                            <span class="material-symbols-outlined">description</span>
+                            <div class="profile-resource-text">
+                                <span class="profile-resource-title">Términos y Condiciones</span>
+                                <span class="profile-resource-desc">Lee los términos de uso de Nexus Inventory</span>
+                            </div>
+                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                        </a>
+
+                        <a href="manual.html" class="profile-resource-link">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <div class="profile-resource-text">
+                                <span class="profile-resource-title">Manual de Uso</span>
+                                <span class="profile-resource-desc">Aprende a usar todas las funciones del sistema</span>
+                            </div>
+                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ── Zona peligrosa: eliminar cuenta ── -->
+                <div class="card profile-danger-zone">
+                    <div class="card-header">
+                        <h3 class="card-title">Gestión de la Cuenta</h3>
+                    </div>
+
+                    <div class="profile-danger-content">
+                        <div>
+                            <h4 class="profile-danger-title">Eliminar mi cuenta</h4>
+                            <p class="profile-danger-desc">Esta acción es permanente y no se puede deshacer. Todos tus datos serán eliminados.</p>
+                        </div>
+                        <button type="button" class="btn btn-danger" id="btn-delete-account">
+                            <span class="material-symbols-outlined">delete_forever</span>
+                            Eliminar Cuenta
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/profile.js"></script>
+</body>
+</html>

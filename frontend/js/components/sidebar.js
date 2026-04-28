@@ -135,7 +135,14 @@ class Sidebar {
                 ]
             },
             { label: 'Reportes', items: [] },
-            { label: 'Sistema',  items: [] }
+            {
+                label: 'Sistema',
+                items: [
+                    { path: 'html/profile.html', page: 'profile.html', icon: 'person',    text: 'Perfil' },
+                    { path: 'html/terms.html',   page: 'terms.html',   icon: 'description', text: 'Términos y Condiciones' },
+                    { path: 'html/manual.html',  page: 'manual.html',  icon: 'menu_book',   text: 'Manual de Uso' }
+                ]
+            }
         ];
 
         structure.forEach(sectionData => {

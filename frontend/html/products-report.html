@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Productos - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/reports.css">
+
+    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+
+        <div id="sidebar-container"></div>
+
+        <main class="main-content" id="main-content">
+
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+
+                <!-- ── Filtros de Productos ── -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Filtros de Productos</h3>
+                    </div>
+
+                    <div class="filter-grid">
+
+                        <div class="form-group">
+                            <label class="form-label" for="report-view">Vista</label>
+                            <select class="form-input" id="report-view">
+                                <option value="top_selling">Top Ventas</option>
+                                <option value="low_selling">Menos Vendidos</option>
+                                <option value="most_purchased">Más Comprados</option>
+                                <option value="by_category">Por Categoría</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="report-limit">Límite</label>
+                            <input type="number" class="form-input" id="report-limit" name="limit" placeholder="10" min="1" value="10">
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" id="btn-generate-report">
+                                <span class="material-symbols-outlined">assessment</span>
+                                Generar Reporte
+                            </button>
+                            <button class="btn btn-secondary" id="btn-export-pdf">
+                                <span class="material-symbols-outlined">picture_as_pdf</span>
+                                Exportar PDF
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ── Datos del Reporte ── -->
+                <div class="card">
+
+                    <!-- Vista: Top Ventas -->
+                    <div class="report-view" id="view-top-selling">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Cant. Vendida</th>
+                                        <th>Ingresos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-top-selling-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de productos</span>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Menos Vendidos -->
+                    <div class="report-view hidden" id="view-low-selling">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Cant. Vendida</th>
+                                        <th>Ingresos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-low-selling-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de productos</span>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Más Comprados -->
+                    <div class="report-view hidden" id="view-most-purchased">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Cant. Comprada</th>
+                                        <th>Gasto Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-most-purchased-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de productos</span>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Por Categoría -->
+                    <div class="report-view hidden" id="view-by-category">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Categoría</th>
+                                        <th>Nº Productos</th>
+                                        <th>Total Vendido</th>
+                                        <th>Total Ingresos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-by-category-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros por categoría</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Componentes globales -->
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/sidebar.js"></script>
+    <script src="../js/components/page_header.js"></script>
+    <!-- Lógica de la página -->
+    <script src="../js/pages/products-report.js"></script>
+</body>
+</html>

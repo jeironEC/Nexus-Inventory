@@ -7,9 +7,6 @@ from rest_framework import status
 # Models
 from nexus_inventory_backend.db.models import User
 
-# Django
-from django.core.files.uploadedfile import SimpleUploadedFile
-
 
 @pytest.mark.django_db
 class TestGetUsers:
@@ -48,12 +45,6 @@ class TestGetMe:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["email"] == normal_user.email
 
-    def test_get_me_avatar_default_null(self, api_client_auth, url_user_me):
-        response = api_client_auth.get(url_user_me)
-
-        assert response.status_code == 200
-        assert response.data["avatar"] is None
-
     def test_get_me_unauthenticated(self, api_client, url_user_me):
         response = api_client.get(url_user_me)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -66,33 +57,6 @@ class TestPatchMe:
         response = api_client.patch(url_user_me, {"email": "updated@test.com"})
         assert response.status_code == status.HTTP_200_OK
         assert response.data["email"] == "updated@test.com"
-
-    def test_patch_me_avatar(self, api_client_auth, url_user_me):
-        image_content = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
-
-        image = SimpleUploadedFile(
-            "avatar.png", image_content, content_type="image/png"
-        )
-
-        response = api_client_auth.patch(
-            url_user_me, {"avatar": image}, format="multipart"
-        )
-
-        assert response.status_code == 200
-        assert "avatar" in response.data
-        assert ".png" in response.data["avatar"]
-
-    def test_patch_me_avatar_invalid_file_upload(self, api_client_auth, url_user_me):
-        invalid_file = SimpleUploadedFile(
-            "avatar.txt", b"esto_no_es_una_imagen", content_type="text/plain"
-        )
-
-        response = api_client_auth.patch(
-            url_user_me, {"avatar": invalid_file}, format="multipart"
-        )
-
-        assert response.status_code == 400
-        assert "avatar" in response.data
 
     def test_patch_me_unauthenticated(self, api_client, url_user_me):
         response = api_client.patch(url_user_me, {"first_name": "Updated"})
@@ -108,15 +72,6 @@ class TestDeleteMe:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert normal_user.deleted_at is not None
         assert normal_user.is_active is False
-
-    def test_delete_me_avatar(self, api_client_auth, normal_user, url_user_me):
-        normal_user.avatar = "https://example.com/avatar.png"
-        normal_user.save()
-
-        response = api_client_auth.patch(url_user_me, {"avatar": None}, format="json")
-
-        assert response.status_code == 200
-        assert response.data["avatar"] is None
 
     def test_delete_me_unauthenticated(self, api_client, url_user_me):
         response = api_client.delete(url_user_me)

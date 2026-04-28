@@ -20,7 +20,6 @@ class UserReadSerializer(serializers.ModelSerializer):
             "email",
             "nif",
             "role",
-            "avatar",
             "is_active",
             "created_at",
             "updated_at",

@@ -10,7 +10,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "email",
-            "avatar",
             "first_name",
             "last_name",
             "nif",

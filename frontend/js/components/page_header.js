@@ -13,7 +13,6 @@ class PageHeader {
     getBasePath() {
         const path = window.location.pathname;
         if (path.endsWith('index.html') || path === '/' || path.endsWith('/')) return '';
-        if (path.includes('/html/reports/')) return '../../';
         if (path.includes('/html/')) return '../';
         return '';
     }

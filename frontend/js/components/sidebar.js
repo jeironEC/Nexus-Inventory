@@ -12,7 +12,6 @@ class Sidebar {
     getBasePath() {
         const path = window.location.pathname;
         if (path.endsWith('index.html') || path === '/' || path.endsWith('/')) return '';
-        if (path.includes('/html/reports/')) return '../../';
         if (path.includes('/html/')) return '../';
         return '';
     }
@@ -134,7 +133,12 @@ class Sidebar {
                     { path: 'html/purchase_returns.html', page: 'purchase_returns.html', icon: 'keyboard_return', text: 'Devoluciones Compras' }
                 ]
             },
-            { label: 'Reportes', items: [] },
+            {
+                label: 'Reportes',
+                items: [
+                    { path: 'html/sales-report.html', page: 'reports/sales.html', icon: 'receipt_long', text: 'Reporte de Ventas' }
+                ]
+            },
             {
                 label: 'Sistema',
                 items: [

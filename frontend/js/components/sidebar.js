@@ -141,7 +141,8 @@ class Sidebar {
                     { path: 'html/inventory-report.html', page: 'reports/inventory.html', icon: 'inventory_2', text: 'Reporte de Inventario' },
                     { path: 'html/products-report.html', page: 'reports/products.html', icon: 'list_alt', text: 'Reporte de Productos' },
                     { path: 'html/customers-report.html', page: 'reports/customers.html', icon: 'group', text: 'Reporte de Clientes' },
-                    { path: 'html/returns-report.html', page: 'reports/returns.html', icon: 'assignment_return', text: 'Reporte de Devoluciones' }
+                    { path: 'html/returns-report.html', page: 'reports/returns.html', icon: 'assignment_return', text: 'Reporte de Devoluciones' },
+                    { path: 'html/invoices-report.html',  page: 'reports/invoices.html',  icon: 'receipt',  text: 'Reporte de Facturación' }
                 ]
             },
             {

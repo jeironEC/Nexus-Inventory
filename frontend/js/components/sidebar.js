@@ -128,7 +128,8 @@ class Sidebar {
                     { path: 'html/customers.html', page: 'customers.html', icon: 'people', text: 'Clientes' },
                     { path: 'html/suppliers.html', page: 'suppliers.html', icon: 'local_shipping', text: 'Proveedores' },
                     { path: 'html/sales.html', page: 'sales.html', icon: 'point_of_sale', text: 'Ventas' },
-                    { path: 'html/purchases.html', page: 'purchases.html', icon: 'shopping_cart', text: 'Compras' }
+                    { path: 'html/purchases.html', page: 'purchases.html', icon: 'shopping_cart', text: 'Compras' },
+                    { path: 'html/invoices.html', page: 'invoices.html', icon: 'receipt_long', text: 'Facturas' }
                 ]
             },
             { label: 'Reportes', items: [] },

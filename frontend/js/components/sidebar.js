@@ -87,6 +87,10 @@ class Sidebar {
         const header = document.createElement('div');
         header.className = 'sidebar-header';
 
+        const logoLink = document.createElement('a');
+        logoLink.href = base + 'index.html';
+        logoLink.className = 'sidebar-logo-link';
+
         const logoText = document.createElement('span');
         logoText.className = 'sidebar-logo-text';
         logoText.appendChild(document.createTextNode('Nexus'));
@@ -95,7 +99,8 @@ class Sidebar {
         logoEm.textContent = 'Inventory';
         logoText.appendChild(logoEm);
 
-        header.appendChild(logoText);
+        logoLink.appendChild(logoText);
+        header.appendChild(logoLink);
         aside.appendChild(header);
 
         // Navegación

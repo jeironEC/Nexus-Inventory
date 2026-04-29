@@ -38,6 +38,16 @@
     font-weight: 400;
 }
 
+.sidebar-logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: opacity var(--transition-fast);
+}
+.sidebar-logo-link:hover {
+    opacity: 0.8;
+}
+
 /* ─── NAVEGACIÓN ─── */
 .sidebar-nav {
     flex: 1;

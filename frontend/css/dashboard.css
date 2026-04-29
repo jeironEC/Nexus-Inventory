@@ -3,12 +3,6 @@
  * Estilos específicos de la página Dashboard
  * ======================================== */
 
-/* ─── LAYOUT DOS COLUMNAS (Acciones + Ventas) ─── */
-.dashboard-sections {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-}
 
 /* ─── ACCIONES RÁPIDAS ─── */
 .quick-actions {
@@ -54,12 +48,6 @@
 }
 
 /* ─── RESPONSIVE ─── */
-@media (max-width: 1024px) {
-    .dashboard-sections {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 768px) {
     .quick-actions {
         grid-template-columns: repeat(2, 1fr);

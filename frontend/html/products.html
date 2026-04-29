@@ -100,38 +100,84 @@
 
                 <!-- ── Tabla ── -->
                 <div class="card">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Código</th>
-                                    <th>Nombre</th>
-                                    <th>Categoría</th>
-                                    <th>P. Venta</th>
-                                    <th>P. Compra</th>
-                                    <th>Descuento</th>
-                                    <th>Estado</th>
-                                    <th>Fecha Creación</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="products-tbody">
-                                <!-- Datos dinámicos del backend -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="products-pagination" class="pagination">
-                        <button class="pagination-btn" aria-label="Página anterior" disabled>
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </button>
-                        <button class="pagination-btn active">1</button>
-                        <button class="pagination-btn" aria-label="Página siguiente">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </button>
-                        <span class="pagination-info">Mostrando registros de productos</span>
-                    </div>
-                </div>
 
+                    <!-- Botones de vista -->
+                    <div class="table-view-tabs">
+                        <button class="table-view-btn active" id="btn-view-normal">Campos Normales</button>
+                        <button class="table-view-btn" id="btn-view-audit">Campos de Auditoría</button>
+                    </div>
+
+                    <!-- Vista: Campos Normales -->
+                    <div id="view-normal">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Categoría</th>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Código Único</th>
+                                        <th>Precio Compra</th>
+                                        <th>Precio Venta</th>
+                                        <th>Descuento (%)</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-tbody">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de productos</span>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Campos de Auditoría -->
+                    <div id="view-audit" style="display:none;">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Código Único</th>
+                                        <th>Creado En</th>
+                                        <th>Actualizado En</th>
+                                        <th>Eliminado En</th>
+                                        <th>Creado Por</th>
+                                        <th>Actualizado Por</th>
+                                        <th>Eliminado Por</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-tbody-audit">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros de productos</span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </main>
     </div>

@@ -3,14 +3,14 @@
  * Inicializa los componentes de la página Categorías:
  *  - Sidebar con la página activa marcada
  *  - Header con título "Categorías" y botón "Nueva Categoría"
- *  - Modal de "Nueva Categoría" (abrir/cerrar desde el header)
+ *  - Toggle entre vista normal y vista de auditoría
+ *  - Modal de "Nueva Categoría"
  *
  * SIN fetch ni conexiones a API.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ─── Inicializar componentes ───────────────────────────────────
     if (window.sidebar) {
         window.sidebar.init('categories.html');
     }
@@ -24,6 +24,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.modal.show('modal-new-category');
                 }
             }
+        });
+    }
+
+    // ─── Toggle vistas ─────────────────────────────────────────────
+    const btnNormal  = document.getElementById('btn-view-normal');
+    const btnAudit   = document.getElementById('btn-view-audit');
+    const viewNormal = document.getElementById('view-normal');
+    const viewAudit  = document.getElementById('view-audit');
+
+    if (btnNormal && btnAudit) {
+        btnNormal.addEventListener('click', function () {
+            viewNormal.style.display = 'block';
+            viewAudit.style.display  = 'none';
+            btnNormal.classList.add('active');
+            btnAudit.classList.remove('active');
+        });
+
+        btnAudit.addEventListener('click', function () {
+            viewAudit.style.display  = 'block';
+            viewNormal.style.display = 'none';
+            btnAudit.classList.add('active');
+            btnNormal.classList.remove('active');
         });
     }
 

@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                <!-- ── Filtros (según InventoryFilter del backend) ── -->
+                <!-- ── Filtros ── -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Filtros</h3>
@@ -65,8 +65,14 @@
                     <div class="filter-grid">
 
                         <div class="form-group">
-                            <label class="form-label" for="inventory-filter-product-id">ID Producto</label>
-                            <input type="number" class="form-input" id="inventory-filter-product-id" placeholder="ID del producto">
+                            <label class="form-label" for="inventory-filter-product-id">Producto</label>
+                            <input type="text" class="form-input" id="inventory-filter-product-id"
+                                placeholder="Todos los productos"
+                                autocomplete="off"
+                                list="products-inventory-list">
+                            <datalist id="products-inventory-list">
+                                <!-- Se rellena dinámico desde el backend -->
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -106,33 +112,79 @@
 
                 <!-- ── Tabla ── -->
                 <div class="card">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Categoría</th>
-                                    <th>Stock Actual</th>
-                                    <th>P. Unitario</th>
-                                    <th>V. Total</th>
-                                    <th>Última Act.</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventory-tbody">
-                                <!-- Datos dinámicos del backend -->
-                            </tbody>
-                        </table>
+
+                    <!-- Botones de vista -->
+                    <div class="table-view-tabs">
+                        <button class="table-view-btn active" id="btn-view-normal">Campos Normales</button>
+                        <button class="table-view-btn" id="btn-view-audit">Campos de Auditoría</button>
                     </div>
-                    <div id="inventory-pagination" class="pagination">
-                        <button class="pagination-btn" aria-label="Página anterior" disabled>
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </button>
-                        <button class="pagination-btn active">1</button>
-                        <button class="pagination-btn" aria-label="Página siguiente">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </button>
-                        <span class="pagination-info">Mostrando registros del inventario</span>
+
+                    <!-- Vista: Campos Normales -->
+                    <div id="view-normal">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Stock Actual</th>
+                                        <th>P. Unitario</th>
+                                        <th>V. Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-tbody-normal">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros del inventario</span>
+                        </div>
                     </div>
+
+                    <!-- Vista: Campos de Auditoría -->
+                    <div id="view-audit" style="display:none;">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Producto</th>
+                                        <th>Creado En</th>
+                                        <th>Actualizado En</th>
+                                        <th>Eliminado En</th>
+                                        <th>Creado Por</th>
+                                        <th>Actualizado Por</th>
+                                        <th>Eliminado Por</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-tbody-audit">
+                                    <!-- Datos dinámicos del backend -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros del inventario</span>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>

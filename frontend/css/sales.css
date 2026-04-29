@@ -80,6 +80,10 @@
     grid-template-columns: 1fr 1fr 1fr;
 }
 
+.form-row-4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
 .form-row .form-group {
     margin-bottom: 0;
 }

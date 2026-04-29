@@ -50,10 +50,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="products-filter-category">Categoría</label>
-                            <select class="form-input" id="products-filter-category">
-                                <option value="">Todas las categorías</option>
+                            <input type="text" class="form-input" id="products-filter-category" name="category_id"
+                                placeholder="Todas las categorías"
+                                autocomplete="off"
+                                list="categories-filter-list">
+                            <datalist id="categories-filter-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -67,12 +70,12 @@
 
                         <div class="form-group">
                             <label class="form-label" for="products-filter-price-min">Precio Mín.</label>
-                            <input type="number" step="0.01" class="form-input" id="products-filter-price-min" placeholder="0.00">
+                            <input type="number" step="1" class="form-input" id="products-filter-price-min" placeholder="0.00">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="products-filter-price-max">Precio Máx.</label>
-                            <input type="number" step="0.01" class="form-input" id="products-filter-price-max" placeholder="0.00">
+                            <input type="number" step="1" class="form-input" id="products-filter-price-max" placeholder="0.00">
                         </div>
 
                         <div class="form-group">
@@ -158,10 +161,13 @@
 
                     <div class="form-group">
                         <label class="form-label" for="new-product-category">Categoría</label>
-                        <select class="form-input" id="new-product-category" name="category_id">
-                            <option value="">Selecciona una categoría</option>
+                        <input type="text" class="form-input" id="new-product-category" name="category_id"
+                            placeholder="Escribe para buscar una categoría..."
+                            autocomplete="off"
+                            list="categories-modal-list">
+                        <datalist id="categories-modal-list">
                             <!-- Se rellena dinámico desde el backend -->
-                        </select>
+                        </datalist>
                     </div>
 
                     <div class="form-group">
@@ -172,17 +178,17 @@
                     <div class="form-row form-row-3">
                         <div class="form-group">
                             <label class="form-label" for="new-product-sale-price">Precio Venta (€)</label>
-                            <input type="number" step="0.01" class="form-input" id="new-product-sale-price" name="sale_price" placeholder="0.00">
+                            <input type="number" step="1" class="form-input" id="new-product-sale-price" name="sale_price" placeholder="0.00">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="new-product-purchase-price">Precio Compra (€)</label>
-                            <input type="number" step="0.01" class="form-input" id="new-product-purchase-price" name="purchase_price" placeholder="0.00">
+                            <input type="number" step="1" class="form-input" id="new-product-purchase-price" name="purchase_price" placeholder="0.00">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="new-product-discount">Descuento (%)</label>
-                            <input type="number" step="0.01" class="form-input" id="new-product-discount" name="discount_percentage" placeholder="0.00">
+                            <input type="number" step="1" class="form-input" id="new-product-discount" name="discount_percentage" placeholder="0.00">
                         </div>
                     </div>
 

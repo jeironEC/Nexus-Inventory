@@ -40,10 +40,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="purchases-filter-supplier">Proveedor</label>
-                            <select class="form-input" id="purchases-filter-supplier">
-                                <option value="">Todos los proveedores</option>
+                            <input type="text" class="form-input" id="purchases-filter-supplier" name="supplier_id"
+                                placeholder="Todos los proveedores"
+                                autocomplete="off"
+                                list="suppliers-filter-list">
+                            <datalist id="suppliers-filter-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -126,18 +129,24 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="new-purchase-company">Empresa</label>
-                            <select class="form-input" id="new-purchase-company" name="company_id">
-                                <option value="">Selecciona empresa</option>
+                            <input type="text" class="form-input" id="new-purchase-company" name="company_id"
+                                placeholder="Escribe para buscar..."
+                                autocomplete="off"
+                                list="companies-purchase-list">
+                            <datalist id="companies-purchase-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="new-purchase-supplier">Proveedor</label>
-                            <select class="form-input" id="new-purchase-supplier" name="supplier_id">
-                                <option value="">Selecciona proveedor</option>
+                            <input type="text" class="form-input" id="new-purchase-supplier" name="supplier_id"
+                                placeholder="Escribe para buscar..."
+                                autocomplete="off"
+                                list="suppliers-purchase-list">
+                            <datalist id="suppliers-purchase-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
                     </div>
 
@@ -166,10 +175,13 @@
                                     <!-- Por defecto una fila vacía -->
                                     <tr class="purchase-detail-row">
                                         <td>
-                                            <select class="form-input" name="product_id">
-                                                <option value="">Selecciona producto</option>
-                                                <!-- Se rellena dinámico -->
-                                            </select>
+                                            <input type="text" class="form-input" name="product_id"
+                                                placeholder="Buscar producto..."
+                                                autocomplete="off"
+                                                list="products-sale-return-list">
+                                            <datalist id="products-sale-return-list">
+                                                <!-- Se rellena dinámico desde el backend -->
+                                            </datalist>
                                         </td>
                                         <td>
                                             <input type="number" class="form-input" name="quantity" placeholder="1" min="1" value="1">

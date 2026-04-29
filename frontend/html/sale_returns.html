@@ -39,10 +39,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="sale-returns-filter-sale-id">Venta</label>
-                            <select class="form-input" id="sale-returns-filter-sale-id">
-                                <option value="">Todas las ventas</option>
+                            <input type="text" class="form-input" id="sale-returns-filter-sale-id" name="sale_id"
+                                placeholder="Todas las ventas"
+                                autocomplete="off"
+                                list="sales-filter-list">
+                            <datalist id="sales-filter-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -123,13 +126,15 @@
             <form id="form-new-sale-return">
                 <div class="modal-body">
 
-                    <!-- Datos generales -->
                     <div class="form-group">
                         <label class="form-label" for="new-sale-return-sale">Venta a Devolver</label>
-                        <select class="form-input" id="new-sale-return-sale" name="sale_id">
-                            <option value="">Selecciona la venta</option>
+                        <input type="text" class="form-input" id="new-sale-return-sale" name="sale_id"
+                            placeholder="Escribe para buscar una venta..."
+                            autocomplete="off"
+                            list="sales-modal-list">
+                        <datalist id="sales-modal-list">
                             <!-- Se rellena dinámico desde el backend -->
-                        </select>
+                        </datalist>
                     </div>
 
                     <div class="form-group">
@@ -161,10 +166,13 @@
                                 <tbody id="sale-return-details-tbody">
                                     <tr class="return-detail-row">
                                         <td>
-                                            <select class="form-input" name="product_id">
-                                                <option value="">Selecciona producto</option>
-                                                <!-- Se rellena dinámico -->
-                                            </select>
+                                            <input type="text" class="form-input" name="product_id"
+                                                placeholder="Buscar producto..."
+                                                autocomplete="off"
+                                                list="products-sale-return-list">
+                                            <datalist id="products-sale-return-list">
+                                                <!-- Se rellena dinámico desde el backend -->
+                                            </datalist>
                                         </td>
                                         <td>
                                             <input type="number" class="form-input" name="quantity" placeholder="1" min="1" value="1">

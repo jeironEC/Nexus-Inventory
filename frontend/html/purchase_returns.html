@@ -40,10 +40,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="purchase-returns-filter-purchase-id">Compra</label>
-                            <select class="form-input" id="purchase-returns-filter-purchase-id">
-                                <option value="">Todas las compras</option>
+                            <input type="text" class="form-input" id="purchase-returns-filter-purchase-id" name="purchase_id"
+                                placeholder="Todas las compras"
+                                autocomplete="off"
+                                list="purchases-filter-list">
+                            <datalist id="purchases-filter-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -127,10 +130,13 @@
                     <!-- Datos generales -->
                     <div class="form-group">
                         <label class="form-label" for="new-purchase-return-purchase">Compra a Devolver</label>
-                        <select class="form-input" id="new-purchase-return-purchase" name="purchase_id">
-                            <option value="">Selecciona la compra</option>
+                        <input type="text" class="form-input" id="new-purchase-return-purchase" name="purchase_id"
+                            placeholder="Escribe para buscar una compra..."
+                            autocomplete="off"
+                            list="purchases-modal-list">
+                        <datalist id="purchases-modal-list">
                             <!-- Se rellena dinámico desde el backend -->
-                        </select>
+                        </datalist>
                     </div>
 
                     <div class="form-group">
@@ -162,10 +168,13 @@
                                 <tbody id="purchase-return-details-tbody">
                                     <tr class="return-detail-row">
                                         <td>
-                                            <select class="form-input" name="product_id">
-                                                <option value="">Selecciona producto</option>
-                                                <!-- Se rellena dinámico -->
-                                            </select>
+                                            <input type="text" class="form-input" name="product_id"
+                                                placeholder="Buscar producto..."
+                                                autocomplete="off"
+                                                list="products-purchase-return-list">
+                                            <datalist id="products-purchase-return-list">
+                                                <!-- Se rellena dinámico desde el backend -->
+                                            </datalist>
                                         </td>
                                         <td>
                                             <input type="number" class="form-input" name="quantity" placeholder="1" min="1" value="1">

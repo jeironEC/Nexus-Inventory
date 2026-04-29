@@ -2,8 +2,8 @@
  * ROLES.JS
  * Inicializa los componentes de la página Roles:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Roles"
- *  - Modal de "Nuevo Rol" (abrir/cerrar)
+ *  - Header con título "Roles" y botón "Nuevo Rol"
+ *  - Modal de "Nuevo Rol" (abrir/cerrar desde el header)
  *
  * SIN fetch ni conexiones a API.
  */
@@ -16,17 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Roles');
-    }
-
-    // ─── Modal de crear rol ────────────────────────────────────────
-    const btnNewRole = document.getElementById('btn-new-role');
-    const modalNewRole = document.getElementById('modal-new-role');
-
-    if (btnNewRole && modalNewRole) {
-        btnNewRole.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-role');
+        window.pageHeader.init('Roles', {
+            icon: 'admin_panel_settings',
+            text: 'Nuevo Rol',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-role');
+                }
             }
         });
     }

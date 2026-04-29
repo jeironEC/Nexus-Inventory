@@ -2,8 +2,8 @@
  * SALES.JS
  * Inicializa los componentes de la página Ventas:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Ventas"
- *  - Modal de "Nueva Venta" (abrir/cerrar)
+ *  - Header con título "Ventas" y botón "Nueva Venta"
+ *  - Modal de "Nueva Venta" (abrir/cerrar desde el header)
  *  - Añadir/eliminar filas de productos en el modal
  *
  * SIN fetch ni conexiones a API.
@@ -16,17 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Ventas');
-    }
-
-    // ─── Modal de crear venta ──────────────────────────────────────
-    const btnNewSale = document.getElementById('btn-new-sale');
-    const modalNewSale = document.getElementById('modal-new-sale');
-
-    if (btnNewSale && modalNewSale) {
-        btnNewSale.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-sale');
+        window.pageHeader.init('Ventas', {
+            icon: 'add_shopping_cart',
+            text: 'Nueva Venta',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-sale');
+                }
             }
         });
     }
@@ -53,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ─── Crear una nueva fila de producto ──────────
+    // ─── Crear una nueva fila de producto ──────────────────────────
     function createProductRow() {
         const tr = document.createElement('tr');
         tr.className = 'sale-detail-row';

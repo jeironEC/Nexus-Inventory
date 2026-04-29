@@ -1,8 +1,8 @@
 /**
  * PAGE_HEADER.JS
  * Componente del encabezado superior de todas las páginas.
- * Muestra: botón menú (móvil) + título + avatar + botón logout.
- * El logout por ahora redirige a login.html a través de un modal de confirmación.
+ * Muestra: botón menú (móvil) + título + boton opcional + avatar + botón logout.
+ *
  */
 
 class PageHeader {
@@ -29,7 +29,7 @@ class PageHeader {
         return 'NX';
     }
 
-    createHeader(title) {
+    createHeader(title, action) {
         const header = document.createElement('header');
         header.className = 'page-header';
 
@@ -56,9 +56,33 @@ class PageHeader {
         titleEl.textContent = title;
         header.appendChild(titleEl);
 
-        // Acciones
+        // Acciones (lado derecho)
         const actions = document.createElement('div');
         actions.className = 'page-header-actions';
+
+        // Botón de acción opcional
+        if (action && action.text) {
+            const actionBtn = document.createElement('button');
+            actionBtn.className = 'btn btn-primary header-action-btn';
+            actionBtn.id = 'header-action-btn';
+
+            if (action.icon) {
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined';
+                icon.textContent = action.icon;
+                actionBtn.appendChild(icon);
+            }
+
+            const text = document.createElement('span');
+            text.textContent = action.text;
+            actionBtn.appendChild(text);
+
+            if (typeof action.onClick === 'function') {
+                actionBtn.addEventListener('click', action.onClick);
+            }
+
+            actions.appendChild(actionBtn);
+        }
 
         // Avatar
         const userBtn = document.createElement('button');
@@ -106,14 +130,14 @@ class PageHeader {
         return header;
     }
 
-    init(title) {
+    init(title, action) {
         const container = document.getElementById('page-header-container');
         if (!container) return;
 
         while (container.firstChild) {
             container.removeChild(container.firstChild);
         }
-        container.appendChild(this.createHeader(title));
+        container.appendChild(this.createHeader(title, action));
     }
 }
 

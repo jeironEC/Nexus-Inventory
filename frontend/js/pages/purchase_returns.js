@@ -2,8 +2,8 @@
  * PURCHASE_RETURNS.JS
  * Inicializa los componentes de la página Devoluciones de Compra:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Devoluciones de Compra"
- *  - Modal de "Nueva Devolución" (abrir/cerrar)
+ *  - Header con título "Devoluciones de Compra" y botón "Nueva Devolución"
+ *  - Modal de "Nueva Devolución" (abrir/cerrar desde el header)
  *  - Añadir/eliminar filas de productos en el modal
  *
  * SIN fetch ni conexiones a API.
@@ -16,17 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Devoluciones de Compra');
-    }
-
-    // ─── Modal de crear devolución ─────────────────────────────────
-    const btnNewReturn = document.getElementById('btn-new-purchase-return');
-    const modalNewReturn = document.getElementById('modal-new-purchase-return');
-
-    if (btnNewReturn && modalNewReturn) {
-        btnNewReturn.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-purchase-return');
+        window.pageHeader.init('Devoluciones de Compra', {
+            icon: 'keyboard_return',
+            text: 'Nueva Devolución',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-purchase-return');
+                }
             }
         });
     }
@@ -52,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ─── Crear una nueva fila de producto ──────────
+    // ─── Crear una nueva fila de producto ──────────────────────────
     function createProductRow() {
         const tr = document.createElement('tr');
         tr.className = 'return-detail-row';

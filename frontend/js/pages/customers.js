@@ -2,8 +2,8 @@
  * CUSTOMERS.JS
  * Inicializa los componentes de la página Clientes:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Clientes"
- *  - Modal de "Nuevo Cliente" (abrir/cerrar)
+ *  - Header con título "Clientes" y botón "Nuevo Cliente"
+ *  - Modal de "Nuevo Cliente" (abrir/cerrar desde el header)
  *
  * SIN fetch ni conexiones a API.
  */
@@ -15,17 +15,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Clientes');
-    }
-
-    // ─── Modal de crear cliente ────────────────────────────────────
-    const btnNewCustomer = document.getElementById('btn-new-customer');
-    const modalNewCustomer = document.getElementById('modal-new-customer');
-
-    if (btnNewCustomer && modalNewCustomer) {
-        btnNewCustomer.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-customer');
+        window.pageHeader.init('Clientes', {
+            icon: 'person_add',
+            text: 'Nuevo Cliente',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-customer');
+                }
             }
         });
     }

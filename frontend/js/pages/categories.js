@@ -2,11 +2,10 @@
  * CATEGORIES.JS
  * Inicializa los componentes de la página Categorías:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Categorías"
- *  - Modal de "Nueva Categoría" (abrir/cerrar)
+ *  - Header con título "Categorías" y botón "Nueva Categoría"
+ *  - Modal de "Nueva Categoría" (abrir/cerrar desde el header)
  *
  * SIN fetch ni conexiones a API.
- * El compañero conectará el GET (tabla, filtros) y el POST (crear categoría).
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -17,17 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Categorías');
-    }
-
-    // ─── Modal de crear categoría ──────────────────────────────────
-    const btnNewCategory = document.getElementById('btn-new-category');
-    const modalNewCategory = document.getElementById('modal-new-category');
-
-    if (btnNewCategory && modalNewCategory) {
-        btnNewCategory.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-category');
+        window.pageHeader.init('Categorías', {
+            icon: 'add',
+            text: 'Nueva Categoría',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-category');
+                }
             }
         });
     }

@@ -37,13 +37,16 @@
                     </div>
                     <div class="filter-grid">
 
-                        <div class="form-group">
-                            <label class="form-label" for="sales-filter-customer">Cliente</label>
-                            <select class="form-input" id="sales-filter-customer">
-                                <option value="">Todos los clientes</option>
-                                <!-- Se rellena dinámico desde el backend -->
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sales-filter-customer">Cliente</label>
+                        <input type="text" class="form-input" id="sales-filter-customer" name="customer_id"
+                            placeholder="Todos los clientes"
+                            autocomplete="off"
+                            list="customers-filter-list">
+                        <datalist id="customers-filter-list">
+                            <!-- Se rellena dinámico desde el backend -->
+                        </datalist>
+                    </div>
 
                         <div class="form-group">
                             <label class="form-label" for="sales-filter-state">Estado</label>
@@ -135,22 +138,28 @@
             <form id="form-new-sale">
                 <div class="modal-body">
 
-                    <!-- Datos generales -->
-                    <div class="form-row form-row-3">
+                   <!-- Datos generales -->
+                    <div class="form-row form-row-4">
                         <div class="form-group">
                             <label class="form-label" for="new-sale-company">Empresa</label>
-                            <select class="form-input" id="new-sale-company" name="company_id">
-                                <option value="">Selecciona empresa</option>
+                            <input type="text" class="form-input" id="new-sale-company" name="company_id"
+                                placeholder="Escribe para buscar..."
+                                autocomplete="off"
+                                list="companies-modal-list">
+                            <datalist id="companies-modal-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="new-sale-customer">Cliente</label>
-                            <select class="form-input" id="new-sale-customer" name="customer_id">
-                                <option value="">Selecciona cliente</option>
+                            <input type="text" class="form-input" id="new-sale-customer" name="customer_id"
+                                placeholder="Escribe para buscar..."
+                                autocomplete="off"
+                                list="customers-modal-list">
+                            <datalist id="customers-modal-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -160,6 +169,11 @@
                                 <option value="CARD">Tarjeta</option>
                                 <option value="TRANSFER">Transferencia</option>
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new-sale-iva">IVA (%)</label>
+                            <input type="number" step="1" class="form-input" id="new-sale-iva" name="tax_percentage" value="21" placeholder="21">
                         </div>
                     </div>
 
@@ -189,10 +203,13 @@
                                     <!-- Por defecto una fila vacía -->
                                     <tr class="sale-detail-row">
                                         <td>
-                                            <select class="form-input" name="product_id">
-                                                <option value="">Selecciona producto</option>
-                                                <!-- Se rellena dinámico -->
-                                            </select>
+                                            <input type="text" class="form-input" name="product_id"
+                                                placeholder="Buscar producto..."
+                                                autocomplete="off"
+                                                list="products-sale-list">
+                                            <datalist id="products-sale-list">
+                                                <!-- Se rellena dinámico desde el backend -->
+                                            </datalist>
                                         </td>
                                         <td>
                                             <input type="number" class="form-input" name="quantity" placeholder="1" min="1" value="1">

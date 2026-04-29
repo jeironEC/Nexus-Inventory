@@ -47,10 +47,13 @@
 
                         <div class="form-group">
                             <label class="form-label" for="users-filter-role">Rol</label>
-                            <select class="form-input" id="users-filter-role">
-                                <option value="">Todos los roles</option>
+                            <input type="text" class="form-input" id="users-filter-role" name="role"
+                                placeholder="Todos los roles"
+                                autocomplete="off"
+                                list="roles-filter-list">
+                            <datalist id="roles-filter-list">
                                 <!-- Se rellena dinámico desde el backend -->
-                            </select>
+                            </datalist>
                         </div>
 
                         <div class="form-group">
@@ -158,10 +161,13 @@
 
                     <div class="form-group">
                         <label class="form-label" for="new-user-role">Rol</label>
-                        <select class="form-input" id="new-user-role" name="role">
-                            <option value="">Selecciona un rol</option>
+                        <input type="text" class="form-input" id="new-user-role" name="role"
+                            placeholder="Escribe para buscar un rol..."
+                            autocomplete="off"
+                            list="roles-modal-list">
+                        <datalist id="roles-modal-list">
                             <!-- Se rellena dinámico desde el backend -->
-                        </select>
+                        </datalist>
                     </div>
 
                 </div>

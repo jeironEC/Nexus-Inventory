@@ -56,14 +56,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Producto
         const tdProduct = document.createElement('td');
-        const selectProduct = document.createElement('select');
-        selectProduct.className = 'form-input';
-        selectProduct.name = 'product_id';
-        const optionDefault = document.createElement('option');
-        optionDefault.value = '';
-        optionDefault.textContent = 'Selecciona producto';
-        selectProduct.appendChild(optionDefault);
-        tdProduct.appendChild(selectProduct);
+        const inputProduct = document.createElement('input');
+        inputProduct.type = 'text';
+        inputProduct.className = 'form-input';
+        inputProduct.name = 'product_id';
+        inputProduct.placeholder = 'Buscar producto...';
+        inputProduct.autocomplete = 'off';
+        inputProduct.setAttribute('list', 'products-sale-return-list');
+        tdProduct.appendChild(inputProduct);
 
         // Cantidad
         const tdQty = document.createElement('td');

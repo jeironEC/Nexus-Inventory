@@ -362,6 +362,28 @@ a:hover { color: var(--ice); }
 .btn-logout:hover { background: rgba(239, 68, 68, 0.15); color: #ff6b6b; }
 .btn-logout .material-symbols-outlined { font-size: 20px; }
 
+/* Botón de acción al lado del avatar */
+.header-action-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    height: 40px;
+}
+
+.header-action-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* En móvil ocultar el texto, dejar solo el icono */
+@media (max-width: 768px) {
+    .header-action-btn {
+        padding: 8px;
+        min-width: 40px;
+    }
+    .header-action-btn span:not(.material-symbols-outlined) {
+        display: none;
+    }
+}
+
 /* ─── PAGE BODY ─── */
 .page-body {
     flex: 1;

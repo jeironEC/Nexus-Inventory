@@ -2,8 +2,8 @@
  * PRODUCTS.JS
  * Inicializa los componentes de la página Productos:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Productos"
- *  - Modal de "Nuevo Producto" (abrir/cerrar)
+ *  - Header con título "Productos" y botón "Nuevo Producto"
+ *  - Modal de "Nuevo Producto" (abrir/cerrar desde el header)
  *
  * SIN fetch ni conexiones a API.
  */
@@ -15,17 +15,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Productos');
-    }
-
-    // ─── Modal de crear producto ───────────────────────────────────
-    const btnNewProduct = document.getElementById('btn-new-product');
-    const modalNewProduct = document.getElementById('modal-new-product');
-
-    if (btnNewProduct && modalNewProduct) {
-        btnNewProduct.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-product');
+        window.pageHeader.init('Productos', {
+            icon: 'add',
+            text: 'Nuevo Producto',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-product');
+                }
             }
         });
     }

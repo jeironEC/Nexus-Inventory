@@ -2,8 +2,8 @@
  * PURCHASES.JS
  * Inicializa los componentes de la página Compras:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Compras"
- *  - Modal de "Nueva Compra" (abrir/cerrar)
+ *  - Header con título "Compras" y botón "Nueva Compra"
+ *  - Modal de "Nueva Compra" (abrir/cerrar desde el header)
  *  - Añadir/eliminar filas de productos en el modal
  *
  * SIN fetch ni conexiones a API.
@@ -16,17 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Compras');
-    }
-
-    // ─── Modal de crear compra ─────────────────────────────────────
-    const btnNewPurchase = document.getElementById('btn-new-purchase');
-    const modalNewPurchase = document.getElementById('modal-new-purchase');
-
-    if (btnNewPurchase && modalNewPurchase) {
-        btnNewPurchase.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-purchase');
+        window.pageHeader.init('Compras', {
+            icon: 'add_card',
+            text: 'Nueva Compra',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-purchase');
+                }
             }
         });
     }
@@ -53,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ─── Crear una nueva fila de producto  ──────────
+    // ─── Crear una nueva fila de producto ──────────────────────────
     function createProductRow() {
         const tr = document.createElement('tr');
         tr.className = 'purchase-detail-row';

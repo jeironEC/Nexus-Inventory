@@ -2,8 +2,8 @@
  * SUPPLIERS.JS
  * Inicializa los componentes de la página Proveedores:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Proveedores"
- *  - Modal de "Nuevo Proveedor" (abrir/cerrar)
+ *  - Header con título "Proveedores" y botón "Nuevo Proveedor"
+ *  - Modal de "Nuevo Proveedor" (abrir/cerrar desde el header)
  *
  * SIN fetch ni conexiones a API.
  */
@@ -15,17 +15,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (window.pageHeader) {
-        window.pageHeader.init('Proveedores');
-    }
-
-    // ─── Modal de crear proveedor ──────────────────────────────────
-    const btnNewSupplier = document.getElementById('btn-new-supplier');
-    const modalNewSupplier = document.getElementById('modal-new-supplier');
-
-    if (btnNewSupplier && modalNewSupplier) {
-        btnNewSupplier.addEventListener('click', function () {
-            if (window.modal) {
-                window.modal.show('modal-new-supplier');
+        window.pageHeader.init('Proveedores', {
+            icon: 'add_business',
+            text: 'Nuevo Proveedor',
+            onClick: function () {
+                if (window.modal) {
+                    window.modal.show('modal-new-supplier');
+                }
             }
         });
     }

@@ -25,6 +25,37 @@
     height: 44px;
 }
 
+/* ─── Botones de vista de tabla ─── */
+.table-view-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.table-view-btn {
+    padding: 8px 20px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(4, 85, 191, 0.3);
+    background: transparent;
+    color: rgba(206, 232, 242, 0.6);
+    font-family: var(--font-body);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.table-view-btn:hover {
+    border-color: var(--sky);
+    color: var(--sky);
+}
+
+.table-view-btn.active {
+    background: var(--royal);
+    border-color: var(--royal);
+    color: var(--white);
+    font-weight: 500;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 1400px) {
     .filter-grid {

@@ -2,8 +2,9 @@
  * USERS.JS
  * Inicializa los componentes de la página Usuarios:
  *  - Sidebar con la página activa marcada
- *  - Header con el título "Usuarios"
- *  - Modal de "Nuevo Usuario" (abrir/cerrar)
+ *  - Header con título "Usuarios" y botón "Nuevo Usuario"
+ *  - Toggle entre vista normal y vista de auditoría
+ *  - Modal de "Nuevo Usuario"
  *
  * SIN fetch ni conexiones a API.
  */
@@ -26,10 +27,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ─── Toggle vistas ─────────────────────────────────────────────
+    const btnNormal  = document.getElementById('btn-view-normal');
+    const btnAudit   = document.getElementById('btn-view-audit');
+    const viewNormal = document.getElementById('view-normal');
+    const viewAudit  = document.getElementById('view-audit');
+
+    if (btnNormal && btnAudit) {
+        btnNormal.addEventListener('click', function () {
+            viewNormal.style.display = 'block';
+            viewAudit.style.display  = 'none';
+            btnNormal.classList.add('active');
+            btnAudit.classList.remove('active');
+        });
+
+        btnAudit.addEventListener('click', function () {
+            viewAudit.style.display  = 'block';
+            viewNormal.style.display = 'none';
+            btnAudit.classList.add('active');
+            btnNormal.classList.remove('active');
+        });
+    }
+
+    // ─── Submit del formulario ─────────────────────────────────────
     const formNewUser = document.getElementById('form-new-user');
     if (formNewUser) {
         formNewUser.addEventListener('submit', function (e) {
             e.preventDefault();
+            // El backend conectará aquí el POST
             console.log('Formulario nuevo usuario enviado');
         });
     }

@@ -29,11 +29,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Código verificado',
                 '¡Listo! Ahora puedes crear tu nueva contraseña.',
                 function () {
-                    window.location.href = 'new-password.html';
+                    window.location.href = 'new_password.html';
                 }
             );
         } else {
-            window.location.href = 'new-password.html';
+            window.location.href = 'new_password.html';
         }
     });
 

@@ -20,34 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
         window.pageHeader.init('Perfil Empresa');
     }
 
-    // ─── Cambiar logo ──────────────────────────────────────────────
-    const btnEditLogo = document.getElementById('btn-edit-logo');
-    const inputLogo   = document.getElementById('input-logo');
-    const logoBox     = document.getElementById('company-logo-header');
-
-    if (btnEditLogo && inputLogo) {
-        btnEditLogo.addEventListener('click', function () {
-            inputLogo.click();
-        });
-
-        inputLogo.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                while (logoBox.firstChild) {
-                    logoBox.removeChild(logoBox.firstChild);
-                }
-                const img = document.createElement('img');
-                img.src = event.target.result;
-                img.alt = 'Logo de la empresa';
-                logoBox.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
     // ─── Submit: información de la empresa ─────────────────────────
     const form = document.getElementById('form-company-info');
     if (form) {

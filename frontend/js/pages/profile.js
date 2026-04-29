@@ -4,8 +4,6 @@
  *  - Sidebar con la página activa marcada
  *  - Header con el título "Mi Perfil"
  *  - Toggle de contraseñas
- *  - Cambiar avatar (preview local — el upload real lo conecta el compañero)
- *  - Confirmación al eliminar cuenta
  *
  * SIN fetch ni conexiones a API.
  */
@@ -18,36 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (window.pageHeader) {
         window.pageHeader.init('Mi Perfil');
-    }
-
-    // ─── Cambiar avatar ────────────────────────────────────────────
-    const btnEditAvatar = document.getElementById('btn-edit-avatar');
-    const inputAvatar   = document.getElementById('input-avatar');
-    const avatarBox     = document.getElementById('profile-avatar');
-
-    if (btnEditAvatar && inputAvatar) {
-        btnEditAvatar.addEventListener('click', function () {
-            inputAvatar.click();
-        });
-
-        inputAvatar.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Preview local — en backend se hará el upload
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                // Vaciar el contenido sin innerHTML
-                while (avatarBox.firstChild) {
-                    avatarBox.removeChild(avatarBox.firstChild);
-                }
-                const img = document.createElement('img');
-                img.src = event.target.result;
-                img.alt = 'Avatar';
-                avatarBox.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        });
     }
 
     // ─── Toggle de contraseñas ──
@@ -87,22 +55,4 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Formulario cambiar contraseña enviado');
         });
     }
-
-    // ─── Eliminar cuenta ──────────────
-    const btnDeleteAccount = document.getElementById('btn-delete-account');
-    if (btnDeleteAccount) {
-        btnDeleteAccount.addEventListener('click', function () {
-            if (window.modal && typeof window.modal.showConfirm === 'function') {
-                window.modal.showConfirm(
-                    'Eliminar cuenta',
-                    '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es permanente y no se puede deshacer.',
-                    function () {
-                        // El compañero conectará aquí el DELETE a /v1/users/me/
-                        console.log('Cuenta eliminada (placeholder)');
-                    }
-                );
-            }
-        });
-    }
-
 });

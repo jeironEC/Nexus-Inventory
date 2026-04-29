@@ -23,12 +23,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Si el correo está registrado, recibirás un código de verificación.',
                 function () {
                     // Al aceptar  ir a verificar código
-                    window.location.href = 'verify-code.html';
+                    window.location.href = 'verify_code.html';
                 }
             );
         } else {
             // Fallback si el modal no está cargado
-            window.location.href = 'verify-code.html';
+            window.location.href = 'verify_code.html';
         }
     });
 

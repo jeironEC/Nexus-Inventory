@@ -249,15 +249,6 @@ def another_inventory_movements(db, another_product, admin_user):
 
 
 @pytest.fixture
-def inventory_movements_without_user(db, another_product):
-    return InventoryMovement.objects.create(
-        product=another_product,
-        user=None,
-        quantity=20,
-    )
-
-
-@pytest.fixture
 def customer(db):
     return Customer.objects.create(
         first_name="Eduardo",

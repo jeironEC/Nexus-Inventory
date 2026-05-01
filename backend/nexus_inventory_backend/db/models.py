@@ -142,7 +142,7 @@ class Category(DisplayModel, BaseModel):
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Product(DisplayModel, BaseModel):
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, related_name="products", null=True
+        Category, on_delete=models.RESTRICT, related_name="products"
     )
     name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
@@ -198,7 +198,7 @@ class Sale(DisplayModel, AuditModel):
         blank=True,
     )
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name="created_sales", null=True
+        User, on_delete=models.RESTRICT, related_name="created_sales"
     )
     discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
@@ -224,7 +224,7 @@ class InventoryMovement(DisplayModel, models.Model):
         Product, on_delete=models.PROTECT, related_name="inventory_movements"
     )
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name="inventory_movements", null=True
+        User, on_delete=models.RESTRICT, related_name="inventory_movements"
     )
     movement_type = models.CharField(
         max_length=10, choices=MovementType.choices, default=MovementType.IN
@@ -281,9 +281,7 @@ class Purchase(DisplayModel, AuditModel):
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, related_name="purchases"
     )
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name="purchases", null=True
-    )
+    user = models.ForeignKey(User, on_delete=models.RESTRICT, related_name="purchases")
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     state = models.CharField(
         max_length=20, choices=OperationState.choices, default=OperationState.COMPLETED
@@ -384,7 +382,7 @@ class Invoice(DisplayModel, BaseModel):
 class SaleReturn(DisplayModel, AuditModel):
     sale = models.ForeignKey(Sale, on_delete=models.PROTECT, related_name="returns")
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="sale_returns"
+        User, on_delete=models.RESTRICT, related_name="sale_returns"
     )
     reason = models.TextField()
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -430,7 +428,7 @@ class PurchaseReturn(DisplayModel, AuditModel):
         Purchase, on_delete=models.PROTECT, related_name="returns"
     )
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="purchase_returns"
+        User, on_delete=models.RESTRICT, related_name="purchase_returns"
     )
     reason = models.TextField()
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)

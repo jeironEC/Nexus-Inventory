@@ -38,6 +38,7 @@ Listado de todos los endpoints `GET` en la API (`/v1/`).
 |---|---|
 | `GET /v1/products/` | Listar productos |
 | `GET /v1/products/{id}/` | Obtener producto por ID |
+| `GET /v1/products/by-supplier/{supplier_id}/` | Listar productos de un proveedor |
 
 ## Inventario
 | Endpoint | Descripción |

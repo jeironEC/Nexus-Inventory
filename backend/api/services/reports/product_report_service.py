@@ -104,3 +104,28 @@ class ProductReportService:
             }
             for r in data
         ]
+
+    @staticmethod
+    def get_products_by_supplier(qs):
+        data = (
+            qs.values(
+                "purchase__supplier__id",
+                "purchase__supplier__name",
+            )
+            .annotate(
+                total_products=Count("product__id", distinct=True),
+                total_quantity_purchased=Sum("quantity"),
+                total_spent=Sum("subtotal"),
+            )
+            .order_by("-total_spent")
+        )
+        return [
+            {
+                "supplier_id": r["purchase__supplier__id"],
+                "supplier_name": r["purchase__supplier__name"],
+                "total_products": r["total_products"],
+                "total_quantity_purchased": r["total_quantity_purchased"],
+                "total_spent": r["total_spent"],
+            }
+            for r in data
+        ]

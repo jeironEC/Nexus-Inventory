@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.template.loader import render_to_string
 from django.http.response import HttpResponse
+from django.db import transaction
 
 # Weasyprint
 from weasyprint import HTML
@@ -69,6 +70,7 @@ from .serializers.reports import (
     InventoryMovementReportSerializer,
     ProductByCategorySerializer,
     ProductPerformanceSerializer,
+    ProductBySupplierSerializer,
     CustomerReportSerializer,
     InvoiceSummarySerializer,
     ReturnReportSummarySerializer,
@@ -250,6 +252,8 @@ class UserRoleViewSet(
 @extend_schema_view(
     list=extend_schema(tags=["Users"], summary="List users"),
     create=extend_schema(tags=["Users"], summary="Create user"),
+    retrieve=extend_schema(tags=["Users"], summary="Get user"),
+    partial_update=extend_schema(tags=["Users"], summary="Partial update user"),
     activate=extend_schema(tags=["Users"], summary="Activate user"),
     deactivate=extend_schema(tags=["Users"], summary="Deactivate user"),
 )
@@ -257,9 +261,12 @@ class UserViewSet(
     StrictFilterMixin,
     RoleFilterMixin,
     StateMixin,
+    NoPutMixin,
     AuditUserMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
     """
@@ -279,6 +286,8 @@ class UserViewSet(
     def get_serializer_class(self):
         if self.action == "create":
             return UserCreateSerializer
+        elif self.action == "partial_update":
+            return UserUpdateSerializer
         return UserReadSerializer
 
 
@@ -367,10 +376,13 @@ class PasswordResetViewSet(viewsets.ViewSet):
 
         otp = generate_otp()
         otp_hash = sha256(otp.encode()).hexdigest()
+        expires_at = timezone.now() + timedelta(minutes=15)
 
-        PasswordResetOTP.objects.create(user=user, email=email, otp_hash=otp_hash)
+        PasswordResetOTP.objects.create(
+            user=user, email=email, otp_hash=otp_hash, expires_at=expires_at
+        )
 
-        send_reset_password_email(email, otp, user)
+        send_reset_password_email(email, otp)
 
         return Response(
             {"detail": "If the email address exists, you will receive a code."},
@@ -393,7 +405,7 @@ class PasswordResetViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if timezone.now() - record.created_at > timedelta(minutes=5):
+        if record.expires_at and timezone.now() > record.expires_at:
             return Response(
                 {"detail": "Expired code."}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -554,6 +566,28 @@ class ProductViewSet(
     admin_filterset_class = ProductAdminFilter
     user_filterset_class = ProductFilter
 
+    @action(detail=False, methods=["get"], url_path="by-supplier/<int:supplier_id>")
+    def by_supplier(self, request, supplier_id):
+        """Listar productos comprados a un proveedor específico."""
+        products = (
+            Product.objects.filter(purchase_details__purchase__supplier_id=supplier_id)
+            .select_related("category")
+            .distinct()
+            .order_by("name")
+        )
+
+        page = self.paginate_queryset(products)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            products, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
 
 @extend_schema_view(
     list=extend_schema(tags=["Inventory"], summary="List inventory"),
@@ -711,6 +745,7 @@ class SaleViewSet(
             return EmptySerializer
         return SaleReadSerializer
 
+    @transaction.atomic
     @action(
         detail=True,
         methods=["patch"],
@@ -729,6 +764,14 @@ class SaleViewSet(
         sale.state = OperationState.CANCELED
         sale.updated_by = request.user
         sale.save(update_fields=["state", "updated_by", "updated_at"])
+
+        for detail in sale.details.select_related("product"):
+            try:
+                inventory = Inventory.objects.get(product=detail.product)
+                inventory.quantity += detail.quantity
+                inventory.save()
+            except Inventory.DoesNotExist:
+                pass
 
         serializer = SaleReadSerializer(sale, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -881,6 +924,9 @@ class InvoiceViewSet(
             string=html_content, base_url=str(settings.MEDIA_ROOT) + "/"
         ).write_pdf()
 
+        invoice.pdf_generated = True
+        invoice.save(update_fields=["pdf_generated", "updated_at"])
+
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = (
             f'inline; filename="factura_{invoice.number_invoice}.pdf"'
@@ -966,6 +1012,7 @@ class PurchaseViewSet(
             return EmptySerializer
         return PurchaseReadSerializer
 
+    @transaction.atomic
     @action(
         detail=True,
         methods=["patch"],
@@ -984,6 +1031,14 @@ class PurchaseViewSet(
         purchase.state = OperationState.CANCELED
         purchase.updated_by = request.user
         purchase.save(update_fields=["state", "updated_by", "updated_at"])
+
+        for detail in purchase.details.select_related("product"):
+            try:
+                inventory = Inventory.objects.get(product=detail.product)
+                inventory.quantity -= detail.quantity
+                inventory.save()
+            except Inventory.DoesNotExist:
+                pass
 
         serializer = PurchaseReadSerializer(purchase, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1923,7 +1978,13 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             OpenApiParameter(
                 name="view",
                 type=str,
-                enum=["top_selling", "low_selling", "most_purchased", "by_category"],
+                enum=[
+                    "top_selling",
+                    "low_selling",
+                    "most_purchased",
+                    "by_category",
+                    "by_supplier",
+                ],
             ),
             OpenApiParameter(
                 name="limit", type=int, description="Límite de resultados"
@@ -1977,6 +2038,16 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                     "data": ProductByCategorySerializer(data, many=True).data,
                 }
             )
+        elif view == "by_supplier":
+            data = ProductReportService.get_products_by_supplier(
+                self._base_purchase_detail_qs()
+            )
+            return Response(
+                {
+                    "summary": {"view": view},
+                    "data": ProductBySupplierSerializer(data, many=True).data,
+                }
+            )
 
         # Default: Reporte general
         summary = ProductReportService.build_report_products(
@@ -1993,7 +2064,13 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
             OpenApiParameter(
                 name="view",
                 type=str,
-                enum=["top_selling", "low_selling", "most_purchased", "by_category"],
+                enum=[
+                    "top_selling",
+                    "low_selling",
+                    "most_purchased",
+                    "by_category",
+                    "by_supplier",
+                ],
             ),
             OpenApiParameter(name="limit", type=int),
         ]
@@ -2102,6 +2179,26 @@ class ProductReportViewSet(ReportFilterMixin, viewsets.ViewSet):
                         item["total_products"],
                         item["total_quantity_sold"],
                         format_currency(item["total_revenue"]),
+                    ]
+                }
+                for item in result
+            ]
+            sections.append(
+                {"headers": headers, "data": data_rows, "align_last_right": True}
+            )
+        elif view == "by_supplier":
+            result = ProductReportService.get_products_by_supplier(
+                self._base_purchase_detail_qs()
+            )
+            title = "Productos por Proveedor"
+            headers = ["Proveedor", "Cant. Productos", "Cant. Comprada", "Gasto Total"]
+            data_rows = [
+                {
+                    "values_list": [
+                        item["supplier_name"],
+                        item["total_products"],
+                        item["total_quantity_purchased"],
+                        format_currency(item["total_spent"]),
                     ]
                 }
                 for item in result

@@ -28,6 +28,15 @@ class SaleFilter(django_filters.FilterSet):
         field_name="created_at__date", lookup_expr="lte"
     )
 
+    def filter_customer(self, queryset, name, value):
+        if value.lower() == "anonymous":
+            return queryset.filter(customer__isnull=True)
+
+        if value.isdigit():
+            return queryset.filter(customer__id=int(value))
+
+        return queryset
+
     class Meta:
         model = Sale
         fields = [

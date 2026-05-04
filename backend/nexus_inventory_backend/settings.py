@@ -9,6 +9,7 @@ import django.db.models.signals
 from pathlib import Path
 from configurations import Configuration
 from corsheaders.defaults import default_headers
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -153,6 +154,13 @@ class Base(Configuration):
         "DEFAULT_FILTER_BACKENDS": [
             "django_filters.rest_framework.DjangoFilterBackend"
         ],
+    }
+
+    SIMPLE_JWT = {
+        "ACCESS_TOKEN_LIFETIME": timedelta(hours=8),
+        "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+        "ROTATE_REFRESH_TOKENS": True,
+        "BLACKLIST_AFTER_ROTATION": False,
     }
 
     SPECTACULAR_SETTINGS = {

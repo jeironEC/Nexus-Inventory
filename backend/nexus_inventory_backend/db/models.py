@@ -97,6 +97,7 @@ class PasswordResetOTP(DisplayModel, TimestampModel):
     otp_hash = models.CharField(max_length=128)
     is_used = models.BooleanField(default=False)
     reset_token = models.UUIDField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     def get_display_fields(self):
         return ["email", "created_at"]

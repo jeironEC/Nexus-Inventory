@@ -53,10 +53,9 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             "customer_id",
             "payment_method",
             "tax_percentage",
-            "tax_percentage",
             "details",
         ]
-        read_only_fields = ["id", "tax_percentage"]
+        read_only_fields = ["id"]
 
     def validate_details(self, value):
         if not value:
@@ -66,6 +65,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         details_data = validated_data.pop("details")
+        tax_percentage = validated_data.pop("tax_percentage", Decimal("21.00"))
         user = self.context["request"].user
 
         # Calcular totales
@@ -132,7 +132,6 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         total_discount = discount_amount
         tax_base = subtotal - total_discount
 
-        tax_percentage = validated_data.get("tax_percentage", Decimal("21.00"))
         tax_amount = (tax_base * tax_percentage / 100).quantize(Decimal("0.01"))
         total_amount = tax_base + tax_amount
 

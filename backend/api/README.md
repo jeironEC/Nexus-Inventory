@@ -114,7 +114,8 @@
 | DELETE | `/products/{id}/` | Eliminar producto |
 | PATCH | `/products/{id}/activate/` | Activar producto |
 | PATCH | `/products/{id}/deactivate/` | Desactivar producto |
-| **Total:** | | **7 Endpoints** |
+| GET | `/products/by-supplier/{supplier_id}/` | Listar todos los productos de un proveedor |
+| **Total:** | | **8 Endpoints** |
 
 ---
 

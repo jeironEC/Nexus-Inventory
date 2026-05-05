@@ -1,27 +1,11 @@
-import { authService } from "./AuthService.js";
-import {
-    URL_INVENTORIES,
-    URL_LOW_INVENTORIES,
-    URL_PRODUCT_INVENTORIES,
-} from "../util/const.js";
+// Servicio para gestionar inventarios
 
-class InventoryService {
-    get api() {
-        return authService.getApiClient();
-    }
+import { BaseService } from "./BaseService.js";
+import { URL_INVENTORIES } from "../utils/const.js";
 
-    async getAllInventories(filtros = {}) {
-        const params = new URLSearchParams(filtros).toString();
-        const endpoint = params ? `${URL_INVENTORIES}?${params}` : `${URL_INVENTORIES}`;
-        return await this.api.get(endpoint);
-    }
-
-    async getLowInventory() {
-        return await this.api.get(`${URL_LOW_INVENTORIES}`);
-    }
-
-    async getProductInventory(id) {
-        return await this.api.get(`${URL_PRODUCT_INVENTORIES}${id}/`);
+class InventoryService extends BaseService {
+    constructor() {
+        super(URL_INVENTORIES);
     }
 }
 

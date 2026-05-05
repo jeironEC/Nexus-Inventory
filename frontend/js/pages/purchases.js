@@ -1,125 +1,260 @@
-/**
- * PURCHASES.JS
- * Inicializa los componentes de la página Compras:
- *  - Sidebar con la página activa marcada
- *  - Header con título "Compras" y botón "Nueva Compra"
- *  - Modal de "Nueva Compra" (abrir/cerrar desde el header)
- *  - Añadir/eliminar filas de productos en el modal
- *
- * SIN fetch ni conexiones a API.
- */
+// Lógica para la gestión de compras
 
-document.addEventListener('DOMContentLoaded', function () {
+import { toast } from '../components/Toast.js';
+import { serviceProvider } from '../services/ServiceProvider.js';
+import { create } from '../utils/dom.js';
+import { initFilterListeners, loadFilterSelects } from '../utils/filter_utils.js';
+import { loadData, showModal, setupTableColumnToggles } from '../utils/base_page.js';
+import { formatCurrency, formatDate, formatFullName } from '../utils/helpers.js';
+import { setupDynamicDetails, getRowsData, populateSelect } from '../utils/form_utils.js';
+import { Table } from '../components/Table.js';
 
+let purchaseTable;
+
+const TABLE_COLUMNS = [
+    { label: 'ID', type: 'primary', value: (item) => `#${item.id}` },
+    { label: 'Proveedor', type: 'primary', value: (item) => item.supplier?.name || 'Proveedor Desconocido' },
+    { label: 'Usuario', type: 'primary', value: (item) => item.user?.first_name ? formatFullName(item.user) : (item.user?.email || '-') },
+    { label: 'Total', type: 'normal', value: (item) => formatCurrency(item.total_amount) },
+    { label: 'Estado', type: 'normal', value: (item) => `<span class="badge ${item.state === 'COMPLETED' ? 'badge-success' : 'badge-danger'}">${item.state === 'COMPLETED' ? 'Completada' : 'Cancelada'}</span>` },
+    { label: 'Creado en', type: 'normal', value: (item) => item.created_at ? formatDate(item.created_at, 'dd/mm/yyyy HH:mm') : '-' },
+    { label: 'Actualizado en', type: 'normal', value: (item) => item.updated_at ? formatDate(item.updated_at, 'dd/mm/yyyy HH:mm') : '-' },
+    { label: 'Eliminado en', type: 'normal', value: (item) => item.deleted_at ? formatDate(item.deleted_at, 'dd/mm/yyyy HH:mm') : '-' },
+    { label: 'Creado por', type: 'audit', value: (item) => item.created_by?.first_name ? formatFullName(item.created_by) : (item.created_by?.email || '-') },
+    { label: 'Actualizado por', type: 'audit', value: (item) => item.updated_by?.first_name ? formatFullName(item.updated_by) : (item.updated_by?.email || '-') },
+    { label: 'Eliminado por', type: 'audit', value: (item) => item.deleted_by?.first_name ? formatFullName(item.deleted_by) : (item.deleted_by?.email || '-') }
+];
+
+// Inicializa la página de compras
+async function initPurchasesPage() {
     if (window.sidebar) {
         window.sidebar.init('purchases.html');
     }
 
+    setupPurchasesPageHeader();
+
+    purchaseTable = new Table({
+        selector: '.table',
+        columns: TABLE_COLUMNS,
+        actions: {
+            customHtml: (item) => `
+                <div class="table-actions">
+                    ${item.state === 'COMPLETED' ? `
+                    <button class="btn-action btn-action-danger btn-cancel-purchase" title="Cancelar Compra">
+                        <span class="material-symbols-outlined">cancel</span>
+                    </button>` : '<span style="color: rgba(206,232,242,0.3); font-size: 12px;">—</span>'}
+                </div>
+            `,
+            setupEvents: (tr, item) => {
+                const btnCancel = tr.querySelector('.btn-cancel-purchase');
+                if (btnCancel) btnCancel.addEventListener('click', () => handleCancelPurchase(item));
+            }
+        }
+    });
+
+    setupTableColumnToggles();
+
+    // Cargar opciones de proveedores en el select de filtros
+    await loadFilterSelects(['purchase-filter-supplier-id']);
+
+    await loadPurchasesData();
+
+    initFilterListeners('.card', async () => {
+        await loadPurchasesData();
+    });
+}
+
+// Carga los datos de las compras
+async function loadPurchasesData() {
+    await loadData({
+        service: serviceProvider.purchases,
+        renderFn: (data) => purchaseTable.setData(data)
+    });
+}
+
+// Cancela una compra
+async function handleCancelPurchase(purchase) {
+    window.modal.showConfirm(
+        'Cancelar Compra',
+        `¿Estás seguro de que deseas cancelar la compra #${purchase.id}? Esta acción revertirá el inventario agregado.`,
+        async () => {
+            try {
+                const response = await serviceProvider.purchases.cancel(purchase.id);
+                if (response.success) {
+                    await loadPurchasesData();
+                    toast.show('Compra cancelada exitosamente', 'success');
+                } else {
+                    window.modal.showAlert('Error', response.message || 'No se pudo cancelar la compra', 'error');
+                }
+            } catch (error) {
+                window.modal.showAlert('Error', error.message || 'Error al cancelar la compra', 'error');
+            }
+        }
+    );
+}
+
+// Configura el encabezado de la página
+function setupPurchasesPageHeader() {
+    const btnNew = create('button', 'btn btn-primary', { id: 'btn-new-purchase' });
+    btnNew.appendChild(create('span', 'material-symbols-outlined', {}, 'add'));
+    btnNew.appendChild(document.createTextNode('Nueva Compra'));
+
+    btnNew.addEventListener('click', () => handleShowPurchaseModal());
+
     if (window.pageHeader) {
-        window.pageHeader.init('Compras', {
-            icon: 'add_card',
-            text: 'Nueva Compra',
-            onClick: function () {
-                if (window.modal) {
-                    window.modal.show('modal-new-purchase');
+        window.pageHeader.init('Compras', { extraActions: btnNew });
+    }
+}
+
+// Muestra el modal para crear una nueva compra
+async function handleShowPurchaseModal() {
+    await showModal({
+        modalId: 'modal-purchase',
+        template: 'purchase',
+        formId: 'form-purchase',
+        singularName: 'Compra',
+        onSubmit: handlePurchaseSubmit,
+        onShow: async (form) => {
+            const purchaseForm = form;
+            if (!purchaseForm) return;
+
+            try {
+                const [compRes, suppliersRes, productsRes] = await Promise.all([
+                    serviceProvider.companies.getAll({ limit: 100 }),
+                    serviceProvider.suppliers.getAll({ limit: 100 }),
+                    serviceProvider.products.getAll({ limit: 100 })
+                ]);
+
+                if (compRes.success && compRes.data) {
+                    populateSelect(purchaseForm.querySelector('select[name="company_id"]'), compRes.data.results || compRes.data);
                 }
-            }
-        });
-    }
 
-    // ─── Añadir / eliminar filas de productos ──────────────────────
-    const btnAddProduct = document.getElementById('btn-add-product');
-    const detailsTbody  = document.getElementById('purchase-details-tbody');
-
-    if (btnAddProduct && detailsTbody) {
-        btnAddProduct.addEventListener('click', function () {
-            const newRow = createProductRow();
-            detailsTbody.appendChild(newRow);
-        });
-
-        // Delegación: eliminar fila al clickar la papelera
-        detailsTbody.addEventListener('click', function (e) {
-            const removeBtn = e.target.closest('.btn-remove-row');
-            if (removeBtn) {
-                const row = removeBtn.closest('tr');
-                if (row && detailsTbody.querySelectorAll('.purchase-detail-row').length > 1) {
-                    row.remove();
+                if (suppliersRes.success && suppliersRes.data) {
+                    populateSelect(purchaseForm.querySelector('select[name="supplier_id"]'), suppliersRes.data.results || suppliersRes.data);
                 }
+
+                if (productsRes.success && productsRes.data) {
+                    const products = productsRes.data.results || productsRes.data;
+                    purchaseForm._products = products;
+                }
+            } catch (e) {
             }
-        });
+
+            // Configura detalles dinámicos de la compra
+            const detailTemplate = `
+                <tr class="purchase-detail-row">
+                    <td><select name="product_id" class="form-input form-select no-choices"></select></td>
+                    <td><input type="number" name="quantity" class="form-input" placeholder="Cantidad" min="1" value="0"></td>
+                    <td><input type="number" name="unit_cost" class="form-input" placeholder="Costo" step="0.01"></td>
+                    <td class="purchase-detail-subtotal">€ 0.00</td>
+                    <td>
+                        <button type="button" class="btn-remove-detail" title="Eliminar">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            setupDynamicDetails({
+                containerId: 'purchase-details-tbody',
+                btnAddId: 'btn-add-purchase-detail',
+                template: detailTemplate,
+                products: purchaseForm._products || [],
+                onProductSelect: (product, row) => {
+                    const costInput = row.querySelector('input[name="unit_cost"]');
+                    if (costInput && product.purchase_price) {
+                        costInput.value = product.purchase_price;
+                    }
+                    updateRowSubtotal(row);
+                },
+                isTableRow: true
+            });
+
+            // Actualiza el subtotal de una fila
+            function updateRowSubtotal(row) {
+                const costInput = row.querySelector('input[name="unit_cost"]');
+                const qtyInput = row.querySelector('input[name="quantity"]');
+                const subtotalCell = row.querySelector('.purchase-detail-subtotal');
+
+                const cost = parseFloat(costInput?.value) || 0;
+                const qty = parseInt(qtyInput?.value) || 0;
+                const subtotal = qty * cost;
+                subtotalCell.textContent = `€ ${subtotal.toFixed(2)}`;
+                recalculateTotals();
+            }
+
+            // Recalcula los totales generales
+            function recalculateTotals() {
+                const rows = document.querySelectorAll('#purchase-details-tbody .purchase-detail-row');
+                let grandSubtotal = 0;
+
+                rows.forEach(row => {
+                    const costInput = row.querySelector('input[name="unit_cost"]');
+                    const qtyInput = row.querySelector('input[name="quantity"]');
+
+                    const cost = parseFloat(costInput?.value) || 0;
+                    const qty = parseInt(qtyInput?.value) || 0;
+
+                    grandSubtotal += qty * cost;
+                });
+
+                const subtotalEl = document.getElementById('purchase-subtotal');
+                const totalEl = document.getElementById('purchase-total');
+
+                if (subtotalEl) subtotalEl.textContent = `€ ${grandSubtotal.toFixed(2)}`;
+                if (totalEl) totalEl.textContent = `€ ${grandSubtotal.toFixed(2)}`;
+            }
+
+            document.getElementById('purchase-details-tbody')?.addEventListener('input', (e) => {
+                const row = e.target.closest('.purchase-detail-row');
+                if (row) updateRowSubtotal(row);
+            });
+        }
+    });
+}
+
+// Maneja el envío del formulario de compra
+async function handlePurchaseSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+
+    const details = getRowsData('purchase-details-tbody', ['product_id', 'quantity', 'unit_cost'])
+        .map(d => ({
+            product_id: parseInt(d.product_id),
+            quantity: parseInt(d.quantity),
+            unit_cost: String(parseFloat(d.unit_cost))
+        }))
+        .filter(d => d.product_id && d.quantity > 0 && d.unit_cost > 0);
+
+    if (details.length === 0) {
+        toast.show('Debe agregar al menos un producto con cantidad y precio válidos', 'warning');
+        return;
     }
 
-    // ─── Crear una nueva fila de producto ──────────────────────────
-    function createProductRow() {
-        const tr = document.createElement('tr');
-        tr.className = 'purchase-detail-row';
-
-        // Producto
-        const tdProduct = document.createElement('td');
-        const inputProduct = document.createElement('input');
-        inputProduct.type = 'text';
-        inputProduct.className = 'form-input';
-        inputProduct.name = 'product_id';
-        inputProduct.placeholder = 'Buscar producto...';
-        inputProduct.autocomplete = 'off';
-        inputProduct.setAttribute('list', 'products-sale-return-list');
-        tdProduct.appendChild(inputProduct);
-
-        // Cantidad
-        const tdQty = document.createElement('td');
-        const inputQty = document.createElement('input');
-        inputQty.type = 'number';
-        inputQty.className = 'form-input';
-        inputQty.name = 'quantity';
-        inputQty.placeholder = '1';
-        inputQty.min = '1';
-        inputQty.value = '1';
-        tdQty.appendChild(inputQty);
-
-        // Coste unitario
-        const tdCost = document.createElement('td');
-        const inputCost = document.createElement('input');
-        inputCost.type = 'number';
-        inputCost.step = '0.01';
-        inputCost.className = 'form-input';
-        inputCost.name = 'unit_cost';
-        inputCost.placeholder = '0.00';
-        tdCost.appendChild(inputCost);
-
-        // Subtotal
-        const tdSubtotal = document.createElement('td');
-        tdSubtotal.className = 'purchase-detail-subtotal';
-        tdSubtotal.textContent = '€ 0.00';
-
-        // Botón eliminar
-        const tdActions = document.createElement('td');
-        const btnRemove = document.createElement('button');
-        btnRemove.type = 'button';
-        btnRemove.className = 'table-action-btn danger btn-remove-row';
-        btnRemove.title = 'Eliminar';
-        const iconRemove = document.createElement('span');
-        iconRemove.className = 'material-symbols-outlined';
-        iconRemove.textContent = 'delete';
-        btnRemove.appendChild(iconRemove);
-        tdActions.appendChild(btnRemove);
-
-        tr.appendChild(tdProduct);
-        tr.appendChild(tdQty);
-        tr.appendChild(tdCost);
-        tr.appendChild(tdSubtotal);
-        tr.appendChild(tdActions);
-
-        return tr;
+    if (!form.company_id.value) {
+        toast.show('Debe seleccionar una empresa', 'warning');
+        return;
     }
 
-    // ─── Submit del formulario ─────────────────────────────────────
-    const formNewPurchase = document.getElementById('form-new-purchase');
-    if (formNewPurchase) {
-        formNewPurchase.addEventListener('submit', function (e) {
-            e.preventDefault();
-            // El backend conectará aquí el POST
-            console.log('Formulario nueva compra enviado');
-        });
-    }
+    const data = {
+        company_id: parseInt(form.company_id.value),
+        supplier_id: parseInt(form.supplier_id.value),
+        details: details
+    };
 
-});
+    try {
+        const response = await serviceProvider.purchases.create(data);
+        if (response.success) {
+            if (window.modal) window.modal.hide('modal-purchase');
+            const modalEl = document.getElementById('modal-purchase');
+            if (modalEl) modalEl.remove();
+
+            await loadPurchasesData();
+        } else {
+            window.modal.showAlert('Atención', response.message || 'Error al crear compra', 'error');
+        }
+    } catch (error) {
+        window.modal.showAlert('Atención', error.message || 'Error al crear compra', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initPurchasesPage);

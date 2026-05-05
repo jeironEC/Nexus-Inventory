@@ -11,6 +11,7 @@ class PurchaseReturnCreateSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     purchase = serializers.PrimaryKeyRelatedField(
         queryset=Purchase.objects.all(),
+        required=False,
     )
     purchase_id = serializers.PrimaryKeyRelatedField(
         source="purchase",
@@ -21,13 +22,23 @@ class PurchaseReturnCreateSerializer(serializers.Serializer):
     reason = serializers.CharField(max_length=255)
     details = PurchaseReturnDetailCreateSerializer(many=True)
 
+    def validate(self, data):
+        action = self.context.get("view").action if self.context.get("view") else None
+        if (
+            action == "create"
+            and not data.get("purchase")
+            and not data.get("purchase_id")
+        ):
+            raise serializers.ValidationError({"purchase": "This field is required."})
+        return data
+
     def validate_details(self, value):
         if not value:
             raise serializers.ValidationError("At least one detail is required.")
         return value
 
     def validate_purchase(self, value):
-        if value.state == OperationState.CANCELED:
+        if value and value.state == OperationState.CANCELED:
             raise serializers.ValidationError(
                 "Cannot return items from a canceled purchase."
             )

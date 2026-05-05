@@ -11,6 +11,7 @@ class SaleReturnCreateSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     sale = serializers.PrimaryKeyRelatedField(
         queryset=Sale.objects.all(),
+        required=False,
     )
     sale_id = serializers.PrimaryKeyRelatedField(
         source="sale",
@@ -21,13 +22,19 @@ class SaleReturnCreateSerializer(serializers.Serializer):
     reason = serializers.CharField(max_length=255)
     details = SaleReturnDetailCreateSerializer(many=True)
 
+    def validate(self, data):
+        action = self.context.get("view").action if self.context.get("view") else None
+        if action == "create" and not data.get("sale") and not data.get("sale_id"):
+            raise serializers.ValidationError({"sale": "This field is required."})
+        return data
+
     def validate_details(self, value):
         if not value:
             raise serializers.ValidationError("At least one detail is required.")
         return value
 
     def validate_sale(self, value):
-        if value.state == OperationState.CANCELED:
+        if value and value.state == OperationState.CANCELED:
             raise serializers.ValidationError(
                 "Cannot return items from a canceled sale."
             )

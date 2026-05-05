@@ -22,6 +22,7 @@ class PurchaseCreateSerializer(serializers.Serializer):
     )
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=Supplier.objects.all(),
+        required=False,
     )
     supplier_id = serializers.PrimaryKeyRelatedField(
         source="supplier",

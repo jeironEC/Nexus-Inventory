@@ -1,21 +1,39 @@
 # DRF
 from rest_framework import serializers
 
+# Django
+from django.contrib.auth.password_validation import validate_password
+
 # Models
-from nexus_inventory_backend.db.models import User
+from nexus_inventory_backend.db.models import User, Role
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
+    role = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
+
     class Meta:
         model = User
         fields = [
-            "email",
-            "avatar",
             "first_name",
             "last_name",
+            "email",
             "nif",
             "role",
         ]
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
+    def validate_nif(self, value):
+        queryset = User.objects.filter(nif__iexact=value)
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError("A User with this nif already exists.")
+        return value
 
     def validate_email(self, value):
         if not value:

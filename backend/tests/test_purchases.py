@@ -120,7 +120,7 @@ class TestPostPurchase:
     ):
         response = api_client_auth.post(purchases_url, payload_purchase, format="json")
         data = response.data
-        assert set(data.keys()) == {"id", "company_id", "supplier_id", "details"}
+        assert set(data.keys()) == {"id", "company", "supplier", "details"}
 
     def test_create_purchase_unauthenticated_returns_401(
         self, api_client, purchases_url, payload_purchase

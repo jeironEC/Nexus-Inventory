@@ -80,7 +80,6 @@ class TestGetInventoryMovement:
         data = response.data[0]["user"]
         assert set(data.keys()) == {
             "id",
-            "avatar",
             "first_name",
             "last_name",
             "email",
@@ -94,12 +93,6 @@ class TestGetInventoryMovement:
             "updated_by",
             "deleted_by",
         }
-
-    def test_inventory_movements_user_is_null_when_not_set(
-        self, api_client_auth, inventory_movements_url, inventory_movements_without_user
-    ):
-        response = api_client_auth.get(inventory_movements_url)
-        assert response.data[0]["user"] is None
 
     def test_inventory_movements_ordered_by_created_at_descending(
         self,

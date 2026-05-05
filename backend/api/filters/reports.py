@@ -14,7 +14,12 @@ class SaleReportFilter(django_filters.FilterSet):
     )
     customer_id = django_filters.NumberFilter(field_name="customer__id")
     period = django_filters.ChoiceFilter(
-        choices=[("day", "Day"), ("week", "Week"), ("month", "Month")],
+        choices=[
+            ("day", "Day"),
+            ("week", "Week"),
+            ("month", "Month"),
+            ("year", "Year"),
+        ],
         method="filter_noop",
     )
 
@@ -31,7 +36,12 @@ class PurchaseReportFilter(django_filters.FilterSet):
     )
     supplier_id = django_filters.NumberFilter(field_name="supplier__id")
     period = django_filters.ChoiceFilter(
-        choices=[("day", "Day"), ("week", "Week"), ("month", "Month")],
+        choices=[
+            ("day", "Day"),
+            ("week", "Week"),
+            ("month", "Month"),
+            ("year", "Year"),
+        ],
         method="filter_noop",
     )
 

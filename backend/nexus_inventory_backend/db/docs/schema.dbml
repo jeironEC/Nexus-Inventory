@@ -52,7 +52,6 @@ Table role {
 Table user {
     id         bigint [pk, increment]
     role_id    bigint [not null, ref: > role.id]
-    avatar     varchar(500)
     first_name varchar(100) [not null]
     last_name  varchar(100) [not null]
     email      varchar(120) [unique, not null]
@@ -74,6 +73,7 @@ Table password_reset_otp {
     otp_hash    varchar(128) [not null]
     is_used     boolean [not null, default: false]
     reset_token UUID
+    expires_at  timestamp
     created_at  timestamp [default: 'now()']
     updated_at  TIMESTAMP
     deleted_at  TIMESTAMP

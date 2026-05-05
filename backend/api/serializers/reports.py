@@ -149,3 +149,11 @@ class ReturnDetailReportSerializer(serializers.Serializer):
     reason = serializers.CharField()
     total_amount = serializers.DecimalField(max_digits=14, decimal_places=2)
     state = serializers.CharField()
+
+
+class ProductBySupplierSerializer(serializers.Serializer):
+    supplier_id = serializers.IntegerField()
+    supplier_name = serializers.CharField()
+    total_products = serializers.IntegerField()
+    total_quantity_purchased = serializers.IntegerField()
+    total_spent = serializers.DecimalField(max_digits=14, decimal_places=2)

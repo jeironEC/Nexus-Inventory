@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS role (
 CREATE TABLE IF NOT EXISTS user (
     id         BIGINT PRIMARY KEY AUTO_INCREMENT,
     role_id    BIGINT NOT NULL,
-    avatar     VARCHAR(500) NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name  VARCHAR(100) NOT NULL,
     email      VARCHAR(120) UNIQUE NOT NULL,
@@ -47,6 +46,7 @@ CREATE TABLE IF NOT EXISTS password_reset_otp (
     otp_hash    VARCHAR(128) NOT NULL,
     is_used     BOOLEAN NOT NULL DEFAULT FALSE,
     reset_token UUID NULL,
+    expires_at  TIMESTAMP NULL,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NULL,
     deleted_at  TIMESTAMP NULL,

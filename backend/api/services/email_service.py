@@ -11,17 +11,17 @@ from django.utils import timezone
 from email.mime.image import MIMEImage
 
 
-def send_reset_password_email(email, otp, user):
+def send_reset_password_email(email, otp):
     subject = "Solicitud de cambio de contraseña"
     year_actual = timezone.now().year
 
     text_content = render_to_string(
         "email/reset_password.txt",
-        {"email": email, "otp": otp, "user": user, "year_actual": year_actual},
+        {"email": email, "otp": otp, "year_actual": year_actual},
     )
     html_content = render_to_string(
         "email/reset_password.html",
-        {"email": email, "otp": otp, "user": user, "year_actual": year_actual},
+        {"email": email, "otp": otp, "year_actual": year_actual},
     )
 
     email = EmailMultiAlternatives(

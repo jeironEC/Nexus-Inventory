@@ -1,3 +1,6 @@
+# Internal
+import secrets
+
 # Django environ
 import environ
 
@@ -9,6 +12,7 @@ import django.db.models.signals
 from pathlib import Path
 from configurations import Configuration
 from corsheaders.defaults import default_headers
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,13 +20,16 @@ env = environ.Env(DEBUG=(bool, False))
 
 environ.Env.read_env(BASE_DIR / ".env")
 
+if not env("DJANGO_SECRET_KEY", default=None):
+    import os
+
+    os.environ["DJANGO_SECRET_KEY"] = secrets.token_urlsafe(50)
+
 
 class Base(Configuration):
     """Configuración base común a todos los entornos"""
 
-    SECRET_KEY = env(
-        "DJANGO_SECRET_KEY", default="django-insecure-fallback-key-change-in-production"
-    )
+    SECRET_KEY = env("DJANGO_SECRET_KEY", default=secrets.token_urlsafe(50))
 
     DEBUG = True
 
@@ -42,11 +49,9 @@ class Base(Configuration):
         "api",
         "django_filters",
         "corsheaders",
-        "django_prometheus",
     ]
 
     MIDDLEWARE = [
-        "django_prometheus.middleware.PrometheusBeforeMiddleware",
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "corsheaders.middleware.CorsMiddleware",
@@ -55,8 +60,6 @@ class Base(Configuration):
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        "nexus_inventory_backend.middleware.MetricsMiddleware",
-        "django_prometheus.middleware.PrometheusAfterMiddleware",
     ]
 
     CORS_ALLOWED_ORIGINS = [
@@ -143,9 +146,11 @@ class Base(Configuration):
         "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
         "DEFAULT_THROTTLE_CLASSES": [
             "rest_framework.throttling.UserRateThrottle",
+            "rest_framework.throttling.AnonRateThrottle",
         ],
         "DEFAULT_THROTTLE_RATES": {
-            "user": "10/min",
+            "user": "100/min",
+            "anon": "10/min",
         },
         "DEFAULT_AUTHENTICATION_CLASSES": (
             "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -153,6 +158,13 @@ class Base(Configuration):
         "DEFAULT_FILTER_BACKENDS": [
             "django_filters.rest_framework.DjangoFilterBackend"
         ],
+    }
+
+    SIMPLE_JWT = {
+        "ACCESS_TOKEN_LIFETIME": timedelta(hours=8),
+        "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+        "ROTATE_REFRESH_TOKENS": True,
+        "BLACKLIST_AFTER_ROTATION": True,
     }
 
     SPECTACULAR_SETTINGS = {
@@ -191,39 +203,6 @@ class Base(Configuration):
         ],
     )
 
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "standard": {
-                "format": "{levelname} {asctime} [{name}] {message}",
-                "style": "{",
-            },
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "standard",
-            },
-        },
-        "root": {
-            "handlers": ["console"],
-            "level": "INFO",
-        },
-        "loggers": {
-            "django": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "app": {
-                "handlers": ["console"],
-                "level": "DEBUG",
-                "propagate": False,
-            },
-        },
-    }
-
     LOW_STOCK_THRESHOLD = env.int("LOW_STOCK_THRESHOLD", default=5)
     DEFAULT_LIMIT = env.int("DEFAULT_LIMIT", default=10)
 
@@ -248,13 +227,13 @@ class Docker(Base):
             "ENGINE": "django.db.backends.postgresql",
             "NAME": env("DATABASE_NAME", default="nexus_inventory"),
             "USER": env("DATABASE_USERNAME", default="postgres"),
-            "PASSWORD": env("DATABASE_PASSWORD", default="postgres"),
+            "PASSWORD": env("DATABASE_PASSWORD", default=None),
             "HOST": env("DATABASE_HOST", default="localhost"),
             "PORT": env.int("DATABASE_PORT", default=5432),
         }
     }
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
-    SECRET_KEY = env("SECRET_KEY", default="no_hack_me_please")
+    SECRET_KEY = env("SECRET_KEY", default=secrets.token_urlsafe(50))
 
 
 class Production(Docker):
@@ -262,7 +241,7 @@ class Production(Docker):
 
     DEBUG = False
 
-    SECURE_SSL_REDIRECT = False
+    SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

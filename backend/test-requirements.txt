@@ -332,7 +332,6 @@ django==5.2.13 \
     #   django-cors-headers
     #   django-extensions
     #   django-filter
-    #   django-prometheus
     #   djangorestframework
     #   djangorestframework-simplejwt
     #   drf-nested-routers
@@ -359,10 +358,6 @@ django-extensions==4.1 \
 django-filter==25.2 \
     --hash=sha256:760e984a931f4468d096f5541787efb8998c61217b73006163bf2f9523fe8f23 \
     --hash=sha256:9c0f8609057309bba611062fe1b720b4a873652541192d232dd28970383633e3
-    # via nexus_inventory_backend (pyproject.toml)
-django-prometheus==2.4.1 \
-    --hash=sha256:073628243d2a6de6a8a8c20e5b512872dfb85d66e1b60b28bcf1eca0155dad95 \
-    --hash=sha256:7fe5af7f7c9ad9cd8a429fe0f3f1bf651f0e244f77162147869eab7ec09cc5e7
     # via nexus_inventory_backend (pyproject.toml)
 djangorestframework==3.17.1 \
     --hash=sha256:a6def5f447fe78ff853bff1d47a3c59bf38f5434b031780b351b0c73a62db1a5 \
@@ -577,10 +572,6 @@ pluggy==1.6.0 \
     # via
     #   pytest
     #   pytest-cov
-prometheus-client==0.24.1 \
-    --hash=sha256:150db128af71a5c2482b36e588fc8a6b95e498750da4b17065947c16070f4055 \
-    --hash=sha256:7e0ced7fbbd40f7b84962d5d2ab6f17ef88a72504dcf7c0b40737b43b2a461f9
-    # via django-prometheus
 psycopg2-binary==2.9.11 \
     --hash=sha256:00ce1830d971f43b667abe4a56e42c1e2d594b32da4802e44a73bacacb25535f \
     --hash=sha256:04195548662fa544626c8ea0f06561eb6203f1984ba5b4562764fbeb4c3d14b1 \

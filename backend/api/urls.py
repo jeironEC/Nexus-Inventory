@@ -41,8 +41,8 @@ from .views import (
 
 router = SimpleRouter()
 
-router.register("users", UserViewSet, basename="users")
 router.register("users", UserMeViewSet, basename="user")
+router.register("users", UserViewSet, basename="users")
 router.register(r"password-reset", PasswordResetViewSet, basename="password-reset")
 router.register("roles", UserRoleViewSet, basename="roles")
 router.register("companies", CompanyViewSet, basename="companies")

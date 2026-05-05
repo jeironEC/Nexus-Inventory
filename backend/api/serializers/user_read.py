@@ -6,10 +6,14 @@ from nexus_inventory_backend.db.models import User
 
 # Serializers
 from .user_role import RoleSerializer
+from .user_read_self import UserReadSelf
 
 
 class UserReadSerializer(serializers.ModelSerializer):
     role = RoleSerializer(read_only=True)
+    created_by = UserReadSelf(read_only=True)
+    updated_by = UserReadSelf(read_only=True)
+    deleted_by = UserReadSelf(read_only=True)
 
     class Meta:
         model = User
@@ -20,7 +24,6 @@ class UserReadSerializer(serializers.ModelSerializer):
             "email",
             "nif",
             "role",
-            "avatar",
             "is_active",
             "created_at",
             "updated_at",

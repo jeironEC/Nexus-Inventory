@@ -1,19 +1,18 @@
 services:
   db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: nexus_inventory
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    env_file:
+      - .env.prod
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    networks:
+      - nexus_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   backend:
     build:
@@ -21,27 +20,26 @@ services:
       dockerfile: Dockerfile.prod
     ports:
       - "8000:8000"
+    env_file:
+      - .env.prod
     environment:
       - DJANGO_SETTINGS_MODULE=nexus_inventory_backend.settings
       - DJANGO_CONFIGURATION=Production
-      - DJANGO_SECRET_KEY=django-insecure-prod-key-change-in-production
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
-      - DATABASE_NAME=nexus_inventory
-      - DATABASE_USERNAME=postgres
-      - DATABASE_PASSWORD=postgres
       - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-      - SECURE_SSL_REDIRECT=False
+      - SECURE_SSL_REDIRECT=True
+    volumes:
+      - ./ssl:/app/ssl:ro
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./ssl:/app/ssl:ro
+    networks:
+      - nexus_net
+    restart: unless-stopped
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile.prod
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     ports:
       - "80:80"
       - "443:443"
@@ -49,26 +47,13 @@ services:
       - ./ssl:/etc/ssl:ro
     depends_on:
       - backend
+    networks:
+      - nexus_net
+    restart: unless-stopped
 
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    depends_on:
-      - backend
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - prometheus
+networks:
+  nexus_net:
+    driver: bridge
 
 volumes:
   postgres_data:

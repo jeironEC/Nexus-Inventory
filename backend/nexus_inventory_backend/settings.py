@@ -60,7 +60,6 @@ class Base(Configuration):
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        "nexus_inventory_backend.middleware.MetricsMiddleware",
     ]
 
     CORS_ALLOWED_ORIGINS = [
@@ -203,39 +202,6 @@ class Base(Configuration):
             ),
         ],
     )
-
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "standard": {
-                "format": "{levelname} {asctime} [{name}] {message}",
-                "style": "{",
-            },
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "standard",
-            },
-        },
-        "root": {
-            "handlers": ["console"],
-            "level": "INFO",
-        },
-        "loggers": {
-            "django": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "app": {
-                "handlers": ["console"],
-                "level": "INFO",
-                "propagate": False,
-            },
-        },
-    }
 
     LOW_STOCK_THRESHOLD = env.int("LOW_STOCK_THRESHOLD", default=5)
     DEFAULT_LIMIT = env.int("DEFAULT_LIMIT", default=10)

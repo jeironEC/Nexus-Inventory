@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Devoluciones de Compra - Nexus Inventory</title>
@@ -12,214 +13,102 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/purchase_returns.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
 
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div class="app-layout">
-
+        <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
-        <main class="main-content" id="main-content">
-
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
             <div class="page-body section-stack">
-
-                <!-- ── Filtros ── -->
+                <!-- Filtros -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Filtros</h3>
                     </div>
-                    <div class="filter-grid">
-
-                        <div class="form-group">
-                            <label class="form-label" for="purchase-returns-filter-purchase-id">Compra</label>
-                            <input type="text" class="form-input" id="purchase-returns-filter-purchase-id" name="purchase_id"
-                                placeholder="Todas las compras"
-                                autocomplete="off"
-                                list="purchases-filter-list">
-                            <datalist id="purchases-filter-list">
-                                <!-- Se rellena dinámico desde el backend -->
-                            </datalist>
+                    <div class="card-body">
+                        <div class="filter-grid">
+                            <div class="form-group">
+                                <label class="form-label">Estado</label>
+                                <select class="form-input form-select" id="purchase-return-filter-state">
+                                    <option value="">Todos los estados</option>
+                                    <option value="COMPLETED">Completada</option>
+                                    <option value="CANCELED">Cancelada</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Compra</label>
+                                <select class="form-input form-select" id="purchase-return-filter-purchase-id">
+                                    <option value="">Todas las compras</option>
+                                    <!-- Dinámico -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-input" id="purchase-return-filter-date-from">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-input" id="purchase-return-filter-date-to">
+                            </div>
+                            <div class="filter-actions">
+                                <button class="btn btn-secondary w-full" id="btn-apply-filters">
+                                    <span class="material-symbols-outlined">filter_list</span>
+                                    Aplicar Filtros
+                                </button>
+                            </div>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="purchase-returns-filter-state">Estado</label>
-                            <select class="form-input" id="purchase-returns-filter-state">
-                                <option value="">Todos los estados</option>
-                                <option value="PENDING">Pendiente</option>
-                                <option value="COMPLETED">Completada</option>
-                                <option value="CANCELLED">Cancelada</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="purchase-returns-filter-date-from">Desde</label>
-                            <input type="date" class="form-input" id="purchase-returns-filter-date-from">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="purchase-returns-filter-date-to">Hasta</label>
-                            <input type="date" class="form-input" id="purchase-returns-filter-date-to">
-                        </div>
-
-                        <div class="filter-actions">
-                            <button class="btn btn-secondary" id="btn-apply-filters">
-                                <span class="material-symbols-outlined">filter_list</span>
-                                Aplicar Filtros
-                            </button>
-                        </div>
-
                     </div>
                 </div>
 
-                <!-- ── Tabla ── -->
+                <!-- Tabla -->
                 <div class="card">
                     <div class="table-container">
                         <table class="table">
                             <thead>
-                                <tr>
-                                    <th>Nº Devolución</th>
-                                    <th>Nº Compra</th>
-                                    <th>Proveedor</th>
-                                    <th>Motivo</th>
-                                    <th>Total</th>
-                                    <th>Estado</th>
-                                    <th>Fecha</th>
-                                    <th>Acciones</th>
-                                </tr>
                             </thead>
-                            <tbody id="purchase-returns-tbody">
-                                <!-- Datos dinámicos del backend -->
+                            <tbody>
                             </tbody>
                         </table>
                     </div>
-                    <div id="purchase-returns-pagination" class="pagination">
+
+                    <div class="pagination">
                         <button class="pagination-btn" aria-label="Página anterior" disabled>
                             <span class="material-symbols-outlined">chevron_left</span>
                         </button>
-                        <button class="pagination-btn active">1</button>
                         <button class="pagination-btn" aria-label="Página siguiente">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </button>
-                        <span class="pagination-info">Mostrando registros de devoluciones</span>
+                        <span class="pagination-info">Mostrando registros</span>
                     </div>
-                </div>
 
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- ── Modal: Crear Devolución de Compra ── -->
-    <div class="modal-backdrop" id="modal-new-purchase-return" style="display:none;">
-        <div class="modal modal-xl">
-            <div class="modal-header">
-                <h3 class="modal-title">Nueva Devolución de Compra</h3>
-                <button class="modal-close" aria-label="Cerrar">&times;</button>
-            </div>
+    <!-- Componentes -->
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
 
-            <form id="form-new-purchase-return">
-                <div class="modal-body">
-
-                    <!-- Datos generales -->
-                    <div class="form-group">
-                        <label class="form-label" for="new-purchase-return-purchase">Compra a Devolver</label>
-                        <input type="text" class="form-input" id="new-purchase-return-purchase" name="purchase_id"
-                            placeholder="Escribe para buscar una compra..."
-                            autocomplete="off"
-                            list="purchases-modal-list">
-                        <datalist id="purchases-modal-list">
-                            <!-- Se rellena dinámico desde el backend -->
-                        </datalist>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="new-purchase-return-reason">Motivo de la Devolución</label>
-                        <textarea class="form-input" id="new-purchase-return-reason" name="reason" rows="3" placeholder="Describe el motivo de la devolución..."></textarea>
-                    </div>
-
-                    <!-- Detalles: productos a devolver -->
-                    <div class="return-details">
-                        <div class="return-details-header">
-                            <h4 class="return-details-title">Productos a Devolver</h4>
-                            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-product">
-                                <span class="material-symbols-outlined">add</span>
-                                Añadir Producto
-                            </button>
-                        </div>
-
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad</th>
-                                        <th>Coste Unitario</th>
-                                        <th>Subtotal</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="purchase-return-details-tbody">
-                                    <tr class="return-detail-row">
-                                        <td>
-                                            <input type="text" class="form-input" name="product_id"
-                                                placeholder="Buscar producto..."
-                                                autocomplete="off"
-                                                list="products-purchase-return-list">
-                                            <datalist id="products-purchase-return-list">
-                                                <!-- Se rellena dinámico desde el backend -->
-                                            </datalist>
-                                        </td>
-                                        <td>
-                                            <input type="number" class="form-input" name="quantity" placeholder="1" min="1" value="1">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" class="form-input" name="unit_cost" placeholder="0.00">
-                                        </td>
-                                        <td class="return-detail-subtotal">€ 0.00</td>
-                                        <td>
-                                            <button type="button" class="table-action-btn danger btn-remove-row" title="Eliminar">
-                                                <span class="material-symbols-outlined">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Total -->
-                        <div class="return-totals">
-                            <div class="return-total-row return-total-final">
-                                <span class="return-total-label">Total a Devolver:</span>
-                                <span class="return-total-value" id="purchase-return-total">€ 0.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="material-symbols-outlined">save</span>
-                        Crear Devolución
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Componentes globales -->
-    <script src="../js/components/modal.js"></script>
-    <script src="../js/components/sidebar.js"></script>
-    <script src="../js/components/page_header.js"></script>
-    <!-- Lógica de la página -->
-    <script src="../js/pages/purchase_returns.js"></script>
+    <!-- Scripts de la página -->
+    <script type="module" src="/js/pages/purchase_returns.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

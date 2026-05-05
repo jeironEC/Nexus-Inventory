@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - Nexus Inventory</title>
@@ -12,35 +13,39 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/profile.css">
-
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div class="app-layout">
-
+        <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
+        <!-- Contenido principal -->
         <main class="main-content" id="main-content">
-
+            <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
             <div class="page-body section-stack">
 
                 <!-- ── Tarjeta de cabecera del perfil ── -->
-                <div class="card profile-card-header">
-                    <div class="profile-avatar-wrapper">
-                        <div class="profile-avatar" id="profile-avatar">
+                <div class="card account-card-header">
+                    <div class="account-avatar-wrapper">
+                        <div class="account-avatar" id="profile-avatar">
                             <span id="profile-avatar-initials">NX</span>
                         </div>
                     </div>
-                    <div class="profile-info">
-                        <h2 class="profile-name" id="profile-name">Nombre Apellidos</h2>
-                        <p class="profile-email" id="profile-email">correo@ejemplo.com</p>
+                    <div class="account-info">
+                        <h2 class="account-name" id="profile-name">Nombre Apellidos</h2>
+                        <p class="account-email" id="profile-email">correo@ejemplo.com</p>
                         <span class="badge badge-primary" id="profile-role">Rol</span>
                     </div>
                 </div>
@@ -76,58 +81,19 @@
                             </div>
                         </div>
 
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <span class="material-symbols-outlined">save</span>
-                                Guardar Cambios
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- ── Cambiar Contraseña ── -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Cambiar Contraseña</h3>
-                    </div>
-
-                    <form id="form-change-password">
-                        <div class="form-group">
-                            <label class="form-label" for="profile-current-password">Contraseña Actual</label>
-                            <div class="password-wrapper">
-                                <input type="password" class="form-input" id="profile-current-password" name="current_password" placeholder="••••••••">
-                                <button type="button" class="password-toggle" data-target="profile-current-password" aria-label="Mostrar contraseña">
-                                    <span class="material-symbols-outlined">visibility_off</span>
-                                </button>
-                            </div>
-                        </div>
-
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="profile-new-password">Nueva Contraseña</label>
-                                <div class="password-wrapper">
-                                    <input type="password" class="form-input" id="profile-new-password" name="new_password" placeholder="••••••••">
-                                    <button type="button" class="password-toggle" data-target="profile-new-password" aria-label="Mostrar contraseña">
-                                        <span class="material-symbols-outlined">visibility_off</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="profile-confirm-password">Confirmar Nueva Contraseña</label>
-                                <div class="password-wrapper">
-                                    <input type="password" class="form-input" id="profile-confirm-password" name="confirm_password" placeholder="••••••••">
-                                    <button type="button" class="password-toggle" data-target="profile-confirm-password" aria-label="Mostrar contraseña">
-                                        <span class="material-symbols-outlined">visibility_off</span>
-                                    </button>
-                                </div>
+                                <label class="form-label" for="profile-role-select">Rol</label>
+                                <select class="form-input form-select" id="profile-role-select" name="role">
+                                    <option value="">Cargando roles...</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <span class="material-symbols-outlined">lock_reset</span>
-                                Cambiar Contraseña
+                            <button type="submit" class="btn btn-primary" id="btn-save-profile">
+                                <span class="material-symbols-outlined">save</span>
+                                Guardar Cambios
                             </button>
                         </div>
                     </form>
@@ -139,23 +105,23 @@
                         <h3 class="card-title">Recursos</h3>
                     </div>
 
-                    <div class="profile-resources">
-                        <a href="terms.html" class="profile-resource-link">
+                    <div class="account-resources">
+                        <a href="/html/terms.html" class="account-resource-link">
                             <span class="material-symbols-outlined">description</span>
-                            <div class="profile-resource-text">
-                                <span class="profile-resource-title">Términos y Condiciones</span>
-                                <span class="profile-resource-desc">Lee los términos de uso de Nexus Inventory</span>
+                            <div class="account-resource-text">
+                                <span class="account-resource-title">Términos y Condiciones</span>
+                                <span class="account-resource-desc">Lee los términos de uso de Nexus Inventory</span>
                             </div>
-                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                            <span class="material-symbols-outlined account-resource-arrow">chevron_right</span>
                         </a>
 
-                        <a href="manual.html" class="profile-resource-link">
+                        <a href="/html/manual.html" class="account-resource-link">
                             <span class="material-symbols-outlined">menu_book</span>
-                            <div class="profile-resource-text">
-                                <span class="profile-resource-title">Manual de Uso</span>
-                                <span class="profile-resource-desc">Aprende a usar todas las funciones del sistema</span>
+                            <div class="account-resource-text">
+                                <span class="account-resource-title">Manual de Uso</span>
+                                <span class="account-resource-desc">Aprende a usar todas las funciones del sistema</span>
                             </div>
-                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                            <span class="material-symbols-outlined account-resource-arrow">chevron_right</span>
                         </a>
                     </div>
                 </div>
@@ -163,11 +129,13 @@
         </main>
     </div>
 
-    <!-- Componentes globales -->
-    <script src="../js/components/modal.js"></script>
-    <script src="../js/components/sidebar.js"></script>
-    <script src="../js/components/page_header.js"></script>
-    <!-- Lógica de la página -->
-    <script src="../js/pages/profile.js"></script>
+    <!-- Componentes -->
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+
+    <!-- Scripts de la página -->
+    <script type="module" src="/js/pages/profile.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

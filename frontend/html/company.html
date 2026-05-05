@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil Empresa - Nexus Inventory</title>
@@ -12,35 +13,42 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/company.css">
-
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div class="app-layout">
-
+        <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
+        <!-- Contenido principal -->
         <main class="main-content" id="main-content">
-
+            <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
             <div class="page-body section-stack">
 
                 <!-- ── Tarjeta de cabecera de la empresa ── -->
-                <div class="card company-card-header">
-                    <div class="company-logo-header-wrapper">
-                        <div class="company-logo-header" id="company-logo-header">
+                <div class="card account-card-header">
+                    <div class="account-logo-header-wrapper">
+                        <div class="account-logo-header" id="company-logo-header">
                             <span class="material-symbols-outlined">business</span>
                         </div>
+                        <button type="button" class="account-logo-edit" id="company-logo-edit" aria-label="Cambiar logo">
+                            <span class="material-symbols-outlined">photo_camera</span>
+                        </button>
+                        <input type="file" id="logo-input" name="logo_file" accept="image/*" style="display: none;">
                     </div>
-                    <div class="company-info">
-                        <h2 class="company-name" id="company-display-name">Nombre de la Empresa</h2>
-                        <p class="company-nif" id="company-display-nif">NIF: B12345678</p>
+                    <div class="account-info">
+                        <h2 class="account-name" id="company-display-name">Nombre de la Empresa</h2>
+                        <p class="account-nif" id="company-display-nif">NIF: B12345678</p>
                         <span class="badge badge-success" id="company-state">Activa</span>
                     </div>
                 </div>
@@ -87,7 +95,7 @@
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="btn-save-company">
                                 <span class="material-symbols-outlined">save</span>
                                 Guardar Cambios
                             </button>
@@ -101,23 +109,23 @@
                         <h3 class="card-title">Recursos</h3>
                     </div>
 
-                    <div class="profile-resources">
-                        <a href="terms.html" class="profile-resource-link">
+                    <div class="account-resources">
+                        <a href="/html/terms.html" class="account-resource-link">
                             <span class="material-symbols-outlined">description</span>
-                            <div class="profile-resource-text">
-                                <span class="profile-resource-title">Términos y Condiciones</span>
-                                <span class="profile-resource-desc">Lee los términos de uso de Nexus Inventory</span>
+                            <div class="account-resource-text">
+                                <span class="account-resource-title">Términos y Condiciones</span>
+                                <span class="account-resource-desc">Lee los términos de uso de Nexus Inventory</span>
                             </div>
-                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                            <span class="material-symbols-outlined account-resource-arrow">chevron_right</span>
                         </a>
 
-                        <a href="manual.html" class="profile-resource-link">
+                        <a href="/html/manual.html" class="account-resource-link">
                             <span class="material-symbols-outlined">menu_book</span>
-                            <div class="profile-resource-text">
-                                <span class="profile-resource-title">Manual de Uso</span>
-                                <span class="profile-resource-desc">Aprende a usar todas las funciones del sistema</span>
+                            <div class="account-resource-text">
+                                <span class="account-resource-title">Manual de Uso</span>
+                                <span class="account-resource-desc">Aprende a usar todas las funciones del sistema</span>
                             </div>
-                            <span class="material-symbols-outlined profile-resource-arrow">chevron_right</span>
+                            <span class="material-symbols-outlined account-resource-arrow">chevron_right</span>
                         </a>
                     </div>
                 </div>
@@ -125,11 +133,12 @@
         </main>
     </div>
 
-    <!-- Componentes globales -->
-    <script src="../js/components/modal.js"></script>
-    <script src="../js/components/sidebar.js"></script>
-    <script src="../js/components/page_header.js"></script>
-    <!-- Lógica de la página -->
-    <script src="../js/pages/company.js"></script>
+    <!-- Componentes -->
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+
+    <!-- Scripts de la página -->
+    <script type="module" src="/js/pages/company.js"></script>
 </body>
 </html>

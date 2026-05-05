@@ -1,0 +1,40 @@
+<div class="modal-backdrop" id="modal-supplier">
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Nuevo Proveedor</h3>
+                    <button class="modal-close" aria-label="Cerrar">&times;</button>
+                </div>
+                <form id="form-supplier">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">NIF *</label>
+                            <input type="text" name="nif" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" name="number_phone" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección</label>
+                            <textarea name="address" class="form-input" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Proveedor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

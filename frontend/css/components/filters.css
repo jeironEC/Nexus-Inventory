@@ -1,0 +1,69 @@
+/* ========================================
+ * Styles for filtering and search bars
+ * ======================================== */
+
+.filter-group label,
+.filter-grid .form-label {
+    color: var(--white);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    opacity: 1;
+    text-transform: uppercase;
+}
+
+.filter-grid {
+    align-items: flex-end;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.card-body .filter-grid {
+    margin-bottom: 0;
+}
+
+.filter-grid .form-group {
+    margin-bottom: 0;
+    min-width: 0;
+}
+
+.filter-actions {
+    display: contents;
+}
+
+.filter-actions.has-reset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-actions.has-reset .btn {
+    flex: 1;
+    height: 46px;
+    min-width: 120px;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+
+.filter-actions .btn {
+    align-self: flex-end;
+    height: 46px;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+
+/* ======================
+ * FILTERS RESPONSIVE
+ * ====================== */
+
+@media (max-width: 768px) {
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+}

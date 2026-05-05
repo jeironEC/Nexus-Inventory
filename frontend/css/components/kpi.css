@@ -1,0 +1,67 @@
+/* ========================================
+ * Styles for KPI indicator cards
+ * ======================================== */
+
+/* ======================
+ * KPI CARDS
+ * ====================== */
+
+.card-kpi {
+    background: rgba(4, 85, 191, 0.08);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+}
+
+.card-kpi-icon {
+    color: var(--royal);
+    font-size: 36px;
+}
+
+.card-kpi-value {
+    color: var(--sky);
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.card-kpi-label {
+    color: rgba(206, 232, 242, 0.5);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ======================
+ * STATISTICS / KPI GRID
+ * ====================== */
+
+.stats-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* ======================
+ * KPI RESPONSIVE
+ * ====================== */
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-kpi-value {
+        font-size: 28px;
+    }
+}

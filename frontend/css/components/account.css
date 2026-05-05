@@ -1,0 +1,278 @@
+/* ==============================================================
+ * Shared styles for account-related pages (profile, company)
+ * ============================================================== */
+
+/* ==============================================================
+ * CARD HEADER (AVATAR / LOGO + NAME + ROLE / STATE)
+ * ============================================================== */
+
+.account-card-header {
+    align-items: center;
+    display: flex;
+    gap: 24px;
+    padding: 32px 24px;
+}
+
+.account-avatar-wrapper,
+.account-logo-header-wrapper {
+    flex-shrink: 0;
+    position: relative;
+}
+
+.account-avatar,
+.account-logo-header {
+    align-items: center;
+    background: var(--royal);
+    border: 3px solid rgba(4, 135, 217, 0.3);
+    border-radius: 50%;
+    color: var(--white);
+    display: flex;
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+    height: 100px;
+    justify-content: center;
+    overflow: hidden;
+    width: 100px;
+}
+
+.account-avatar img,
+.account-logo-header img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.account-avatar-edit,
+.account-logo-edit {
+    align-items: center;
+    background: var(--sky);
+    border: 3px solid var(--midnight);
+    border-radius: 50%;
+    bottom: 0;
+    color: var(--white);
+    cursor: pointer;
+    display: flex;
+    height: 36px;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    transition: all var(--transition-fast);
+    width: 36px;
+}
+
+.account-avatar-edit:hover,
+.account-logo-edit:hover {
+    background: var(--royal);
+    transform: scale(1.05);
+}
+
+.account-avatar-edit .material-symbols-outlined,
+.account-logo-edit .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.account-logo-header .material-symbols-outlined {
+    font-size: 48px;
+}
+
+.account-logo-header .logo-letter {
+    font-size: 48px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.account-name {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.account-email,
+.account-nif {
+    color: rgba(206, 232, 242, 0.6);
+    font-family: var(--font-mono);
+    font-size: 14px;
+}
+
+.account-info .badge {
+    align-self: flex-start;
+}
+
+/* ==================
+ * FORM ACTIONS
+ * ================== */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+/* ==================
+ * DANGER ZONE
+ * ================== */
+
+.account-danger-zone {
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.account-danger-content {
+    align-items: center;
+    display: flex;
+    gap: 24px;
+    justify-content: space-between;
+}
+
+.account-danger-title {
+    color: #ff6b6b;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.account-danger-desc {
+    color: rgba(206, 232, 242, 0.6);
+    font-size: 14px;
+}
+
+/* ==================
+ * COMPANY META INFO
+ * ================== */
+
+.account-meta {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.account-meta-item {
+    background: rgba(4, 85, 191, 0.08);
+    border: 1px solid rgba(4, 85, 191, 0.15);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+}
+
+.account-meta-label {
+    color: rgba(206, 232, 242, 0.5);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.account-meta-value {
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 14px;
+}
+
+/* ==================
+ * TEXTAREA
+ * ==================*/
+
+textarea.form-input {
+    font-family: var(--font-body);
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* ====================
+ * RESOURCES (PROFILE)
+ * ==================== */
+
+.account-resources {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.account-resource-link {
+    align-items: center;
+    background: rgba(4, 85, 191, 0.05);
+    border: 1px solid rgba(4, 85, 191, 0.15);
+    border-radius: var(--radius);
+    color: inherit;
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.account-resource-link:hover {
+    background: rgba(4, 85, 191, 0.12);
+    border-color: rgba(4, 135, 217, 0.3);
+    color: inherit;
+}
+
+.account-resource-link .material-symbols-outlined:first-child {
+    color: var(--sky);
+    font-size: 24px;
+}
+
+.account-resource-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.account-resource-title {
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.account-resource-desc {
+    color: rgba(206, 232, 242, 0.5);
+    font-size: 13px;
+}
+
+.account-resource-arrow {
+    color: rgba(206, 232, 242, 0.4);
+    transition: transform var(--transition-fast);
+}
+
+.account-resource-link:hover .account-resource-arrow {
+    color: var(--sky);
+    transform: translateX(4px);
+}
+
+/* ==================
+ * RESPONSIVE
+ * ==================*/
+
+@media (max-width: 768px) {
+    .account-card-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .account-info {
+        align-items: center;
+    }
+
+    .account-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .account-danger-content {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .account-danger-content .btn {
+        width: 100%;
+    }
+}

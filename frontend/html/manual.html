@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manual de Uso - Nexus Inventory</title>
@@ -12,114 +13,132 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/static_pages.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
 
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div class="app-layout">
-
+        <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
+        <!-- Contenido principal -->
         <main class="main-content" id="main-content">
-
+            <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
-            <div class="page-body section-stack">
+            <div class="page-body">
+                <!-- Contenido del manual -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Manual de Uso</h3>
+                    </div>
+                    <div class="card-body content-page">
+                        <div class="content-section">
+                            <h4>1. Inicio de Sesión</h4>
+                            <p>Accede al sistema con tu correo electrónico y contraseña proporcionados por el administrador. Si olvidaste tu contraseña, utiliza el enlace "¿Olvidaste tu contraseña?" en la pantalla de login.</p>
+                        </div>
 
-                <div class="card static-page">
+                        <div class="content-section">
+                            <h4>2. Dashboard</h4>
+                            <p>El panel principal muestra un resumen del estado actual del negocio:</p>
+                            <ul class="feature-list">
+                                <li><strong>Ventas Hoy:</strong> Total de ventas realizadas en el día.</li>
+                                <li><strong>Compras Hoy:</strong> Total de compras registradas en el día.</li>
+                                <li><strong>Stock Bajo:</strong> Productos que necesitan reposición.</li>
+                                <li><strong>Clientes Nuevos:</strong> Clientes registrados recientemente.</li>
+                            </ul>
+                        </div>
 
-                    <div class="static-page-header">
-                        <span class="material-symbols-outlined static-page-icon">menu_book</span>
-                        <div>
-                            <h1 class="static-page-title">Manual de Uso</h1>
-                            <p class="static-page-subtitle">Guía completa para sacar el máximo provecho de Nexus Inventory</p>
+                        <div class="content-section">
+                            <h4>3. Gestión de Inventario</h4>
+                            <p>En la sección <strong>Inventario</strong> puedes consultar el stock actual de todos los productos. Utiliza los filtros para buscar por nombre, ID, cantidad o fechas.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>4. Productos y Categorías</h4>
+                            <p>Crea, edita y desactiva los productos del catálogo desde la sección <strong>Productos</strong>. Asigna cada producto a una categoría desde <strong>Categorías</strong>.</p>
+                            <p>Para crear un producto necesitarás: nombre, código único, categoría, precio de venta, precio de compra y opcionalmente un descuento.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>5. Clientes y Proveedores</h4>
+                            <p>Gestiona la base de datos de clientes y proveedores desde sus respectivas secciones. Cada registro guarda nombre, NIF, email, teléfono y dirección.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>6. Realizar una Venta</h4>
+                            <p>Desde <strong>Ventas → Nueva Venta</strong>:</p>
+                            <ol class="feature-list">
+                                <li>Selecciona la empresa y el cliente.</li>
+                                <li>Elige el método de pago (efectivo, tarjeta, transferencia).</li>
+                                <li>Añade los productos a la venta indicando cantidad y precio unitario.</li>
+                                <li>Revisa el total y confirma la venta.</li>
+                            </ol>
+                            <p>El sistema generará automáticamente la factura asociada.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>7. Realizar una Compra</h4>
+                            <p>Desde <strong>Compras → Nueva Compra</strong>:</p>
+                            <ol class="feature-list">
+                                <li>Selecciona la empresa y el proveedor.</li>
+                                <li>Añade los productos comprados con cantidad y coste unitario.</li>
+                                <li>Confirma la compra y el inventario se actualizará automáticamente.</li>
+                            </ol>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>8. Devoluciones</h4>
+                            <p>Las devoluciones se gestionan desde las secciones correspondientes:</p>
+                            <ul class="feature-list">
+                                <li><strong>Devoluciones de Venta:</strong> cuando un cliente devuelve productos.</li>
+                                <li><strong>Devoluciones de Compra:</strong> cuando devuelves productos a un proveedor.</li>
+                            </ul>
+                            <p>En ambos casos debes indicar la operación original, el motivo y los productos a devolver.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>9. Facturas</h4>
+                            <p>Todas las facturas generadas (de ventas y compras) se listan en la sección <strong>Facturas</strong>. Desde aquí puedes ver detalles, descargar el PDF o cancelarlas.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>10. Reportes</h4>
+                            <p>La sección <strong>Reportes</strong> ofrece informes detallados sobre ventas, compras, inventario, productos, clientes y facturación. Puedes exportar cada reporte en PDF.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>11. Mi Perfil</h4>
+                            <p>Desde tu perfil puedes:</p>
+                            <ul class="feature-list">
+                                <li>Cambiar tu foto de avatar.</li>
+                                <li>Actualizar tu información personal.</li>
+                                <li>Cambiar tu contraseña.</li>
+                            </ul>
+                        </div>
+
+                        <div class="content-section">
+                            <h4>12. Soporte</h4>
+                            <p>Si tienes dudas o problemas técnicos, contacta con el administrador del sistema.</p>
                         </div>
                     </div>
-
-                    <div class="static-page-content">
-
-                        <h2>1. Inicio de Sesión</h2>
-                        <p>Accede al sistema con tu correo electrónico y contraseña proporcionados por el administrador. Si olvidaste tu contraseña, utiliza el enlace "¿Olvidaste tu contraseña?" en la pantalla de login.</p>
-
-                        <h2>2. Dashboard</h2>
-                        <p>El panel principal muestra un resumen del estado actual del negocio:</p>
-                        <ul>
-                            <li><strong>Ventas Hoy:</strong> Total de ventas realizadas en el día.</li>
-                            <li><strong>Compras Hoy:</strong> Total de compras registradas en el día.</li>
-                            <li><strong>Stock Bajo:</strong> Productos que necesitan reposición.</li>
-                            <li><strong>Clientes Nuevos:</strong> Clientes registrados recientemente.</li>
-                        </ul>
-
-                        <h2>3. Gestión de Inventario</h2>
-                        <p>En la sección <strong>Inventario</strong> puedes consultar el stock actual de todos los productos. Utiliza los filtros para buscar por nombre, ID, cantidad o fechas.</p>
-
-                        <h2>4. Productos y Categorías</h2>
-                        <p>Crea, edita y desactiva los productos del catálogo desde la sección <strong>Productos</strong>. Asigna cada producto a una categoría desde <strong>Categorías</strong>.</p>
-                        <p>Para crear un producto necesitarás: nombre, código único, categoría, precio de venta, precio de compra y opcionalmente un descuento.</p>
-
-                        <h2>5. Clientes y Proveedores</h2>
-                        <p>Gestiona la base de datos de clientes y proveedores desde sus respectivas secciones. Cada registro guarda nombre, NIF, email, teléfono y dirección.</p>
-
-                        <h2>6. Realizar una Venta</h2>
-                        <p>Desde <strong>Ventas → Nueva Venta</strong>:</p>
-                        <ol>
-                            <li>Selecciona la empresa y el cliente.</li>
-                            <li>Elige el método de pago (efectivo, tarjeta, transferencia).</li>
-                            <li>Añade los productos a la venta indicando cantidad y precio unitario.</li>
-                            <li>Revisa el total y confirma la venta.</li>
-                        </ol>
-                        <p>El sistema generará automáticamente la factura asociada.</p>
-
-                        <h2>7. Realizar una Compra</h2>
-                        <p>Desde <strong>Compras → Nueva Compra</strong>:</p>
-                        <ol>
-                            <li>Selecciona la empresa y el proveedor.</li>
-                            <li>Añade los productos comprados con cantidad y coste unitario.</li>
-                            <li>Confirma la compra y el inventario se actualizará automáticamente.</li>
-                        </ol>
-
-                        <h2>8. Devoluciones</h2>
-                        <p>Las devoluciones se gestionan desde las secciones correspondientes:</p>
-                        <ul>
-                            <li><strong>Devoluciones de Venta:</strong> cuando un cliente devuelve productos.</li>
-                            <li><strong>Devoluciones de Compra:</strong> cuando devuelves productos a un proveedor.</li>
-                        </ul>
-                        <p>En ambos casos debes indicar la operación original, el motivo y los productos a devolver.</p>
-
-                        <h2>9. Facturas</h2>
-                        <p>Todas las facturas generadas (de ventas y compras) se listan en la sección <strong>Facturas</strong>. Desde aquí puedes ver detalles, descargar el PDF o cancelarlas.</p>
-
-                        <h2>10. Reportes</h2>
-                        <p>La sección <strong>Reportes</strong> ofrece informes detallados sobre ventas, compras, inventario, productos, clientes y facturación. Puedes exportar cada reporte en PDF.</p>
-
-                        <h2>11. Mi Perfil</h2>
-                        <p>Desde tu perfil puedes:</p>
-                        <ul>
-                            <li>Cambiar tu foto de avatar.</li>
-                            <li>Actualizar tu información personal.</li>
-                            <li>Cambiar tu contraseña.</li>
-                        </ul>
-
-                        <h2>12. Soporte</h2>
-                        <p>Si tienes dudas o problemas técnicos, contacta con el administrador del sistema.</p>
-
-                    </div>
                 </div>
-
             </div>
         </main>
     </div>
 
-    <!-- Componentes globales -->
-    <script src="../js/components/modal.js"></script>
-    <script src="../js/components/sidebar.js"></script>
-    <script src="../js/components/page_header.js"></script>
-    <!-- Lógica de la página -->
-    <script src="../js/pages/manual.js"></script>
+    <!-- Componentes -->
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+
+    <!-- Scripts de la página -->
+    <script type="module" src="/js/pages/manual.js"></script>
 </body>
 </html>

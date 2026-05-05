@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturas - Nexus Inventory</title>
@@ -12,202 +13,125 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/invoices.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
 
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div class="app-layout">
-
+        <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
-        <main class="main-content" id="main-content">
-
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
             <div class="page-body section-stack">
-
-                <!-- ── Filtros ── -->
+                <!-- Filtros -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Filtros</h3>
                     </div>
+                    <div class="card-body">
                         <div class="filter-grid">
-
                             <div class="form-group">
-                                <label class="form-label" for="invoices-filter-type">Tipo de Factura</label>
-                                <select class="form-input" id="invoices-filter-type">
+                                <label class="form-label">Estado</label>
+                                <select class="form-input form-select" id="invoice-filter-state">
+                                    <option value="">Todos los estados</option>
+                                    <option value="ISSUED">Emitida</option>
+                                    <option value="CANCELED">Cancelada</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-input form-select" id="invoice-filter-invoice-type">
                                     <option value="">Todos los tipos</option>
                                     <option value="SALE">Venta</option>
                                     <option value="PURCHASE">Compra</option>
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <label class="form-label" for="invoices-filter-state">Estado</label>
-                                <select class="form-input" id="invoices-filter-state">
-                                    <option value="">Todos los estados</option>
-                                    <option value="ISSUED">Emitida</option>
-                                    <option value="PAID">Pagada</option>
-                                    <option value="CANCELLED">Cancelada</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="invoices-filter-payment">Método de Pago</label>
-                                <select class="form-input" id="invoices-filter-payment">
-                                    <option value="">Todos los métodos</option>
-                                    <option value="CASH">Efectivo</option>
-                                    <option value="CARD">Tarjeta</option>
-                                    <option value="TRANSFER">Transferencia</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="invoices-filter-customer">Cliente</label>
-                                <select class="form-input" id="invoices-filter-customer">
-                                    <option value="">Todos los clientes</option>
-                                    <!-- Se rellena dinámico desde el backend -->
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="invoices-filter-pdf">PDF Generado</label>
-                                <select class="form-input" id="invoices-filter-pdf">
+                                <label class="form-label">PDF</label>
+                                <select class="form-input form-select" id="invoice-filter-pdf-generated">
                                     <option value="">Todos</option>
                                     <option value="true">Generado</option>
-                                    <option value="false">No Generado</option>
+                                    <option value="false">Sin Generar</option>
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <label class="form-label" for="invoices-filter-sale">Venta</label>
-                                <select class="form-input" id="invoices-filter-sale">
-                                    <option value="">Todas las ventas</option>
-                                    <!-- Se rellena dinámico desde el backend -->
+                                <label class="form-label">Venta</label>
+                                <select class="form-input form-select" id="invoice-filter-sale-id">
+                                    <option value="">Todas</option>
+                                    <!-- Dinámico -->
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <label class="form-label" for="invoices-filter-purchase">Compra</label>
-                                <select class="form-input" id="invoices-filter-purchase">
-                                    <option value="">Todas las compras</option>
-                                    <!-- Se rellena dinámico desde el backend -->
+                                <label class="form-label">Compra</label>
+                                <select class="form-input form-select" id="invoice-filter-purchase-id">
+                                    <option value="">Todas</option>
+                                    <!-- Dinámico -->
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <label class="form-label" for="invoices-filter-date-from">Desde</label>
-                                <input type="date" class="form-input" id="invoices-filter-date-from">
+                                <label class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-input" id="invoice-filter-date-from">
                             </div>
-
                             <div class="form-group">
-                                <label class="form-label" for="invoices-filter-date-to">Hasta</label>
-                                <input type="date" class="form-input" id="invoices-filter-date-to">
+                                <label class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-input" id="invoice-filter-date-to">
                             </div>
-
                             <div class="filter-actions">
-                                <button class="btn btn-secondary" id="btn-apply-filters">
+                                <button class="btn btn-secondary w-full" id="btn-apply-filters">
                                     <span class="material-symbols-outlined">filter_list</span>
                                     Aplicar Filtros
                                 </button>
                             </div>
-
                         </div>
+                    </div>
                 </div>
 
-                <!-- ── Tabla ── -->
+                <!-- Tabla -->
                 <div class="card">
-
-                    <!-- Botones de vista -->
-                    <div class="table-view-tabs">
-                        <button class="table-view-btn active" id="btn-view-normal">Campos Normales</button>
-                        <button class="table-view-btn" id="btn-view-audit">Campos de Auditoría</button>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
 
-                    <!-- Vista: Campos Normales -->
-                    <div id="view-normal">
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Empresa</th>
-                                        <th>Nº Factura</th>
-                                        <th>Tipo</th>
-                                        <th>Venta Asociada</th>
-                                        <th>Compra Asociada</th>
-                                        <th>PDF Generado</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="invoices-tbody">
-                                    <!-- Datos dinámicos del backend -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="pagination">
-                            <button class="pagination-btn" aria-label="Página anterior" disabled>
-                                <span class="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <button class="pagination-btn active">1</button>
-                            <button class="pagination-btn" aria-label="Página siguiente">
-                                <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                            <span class="pagination-info">Mostrando registros de facturas</span>
-                        </div>
-                    </div>
-
-                    <!-- Vista: Campos de Auditoría -->
-                    <div id="view-audit" style="display:none;">
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nº Factura</th>
-                                        <th>Creado En</th>
-                                        <th>Actualizado En</th>
-                                        <th>Eliminado En</th>
-                                        <th>Creado Por</th>
-                                        <th>Actualizado Por</th>
-                                        <th>Eliminado Por</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="invoices-tbody-audit">
-                                    <!-- Datos dinámicos del backend -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="pagination">
-                            <button class="pagination-btn" aria-label="Página anterior" disabled>
-                                <span class="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <button class="pagination-btn active">1</button>
-                            <button class="pagination-btn" aria-label="Página siguiente">
-                                <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                            <span class="pagination-info">Mostrando registros de facturas</span>
-                        </div>
+                    <div class="pagination">
+                        <button class="pagination-btn" aria-label="Página anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn" aria-label="Página siguiente">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <span class="pagination-info">Mostrando registros</span>
                     </div>
 
                 </div>
-
             </div>
         </main>
     </div>
 
-    <!-- Componentes globales -->
-    <script src="../js/components/modal.js"></script>
-    <script src="../js/components/sidebar.js"></script>
-    <script src="../js/components/page_header.js"></script>
-    <!-- Lógica de la página -->
-    <script src="../js/pages/invoices.js"></script>
+    <!-- Componentes -->
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+
+    <!-- Scripts de la página -->
+    <script type="module" src="/js/pages/invoices.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

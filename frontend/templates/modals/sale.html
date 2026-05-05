@@ -1,0 +1,118 @@
+<div class="modal-backdrop" id="modal-sale" style="display:none;">
+    <div class="modal modal-xxl">
+        <div class="modal-header">
+            <h3 class="modal-title">Nueva Venta</h3>
+            <button class="modal-close" aria-label="Cerrar">&times;</button>
+        </div>
+
+        <form id="form-sale">
+            <div class="modal-body">
+
+               <!-- Datos generales -->
+                <div class="form-row form-row-4">
+                    <div class="form-group">
+                        <label class="form-label" for="new-sale-company">Empresa</label>
+                        <select class="form-input form-select" id="new-sale-company" name="company_id"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-sale-customer">Cliente</label>
+                        <select class="form-input form-select" id="new-sale-customer" name="customer_id"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-sale-payment">Método de Pago</label>
+                        <select class="form-input form-select" id="new-sale-payment" name="payment_method">
+                            <option value="CASH">Efectivo</option>
+                            <option value="CARD">Tarjeta</option>
+                            <option value="TRANSFER">Transferencia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-sale-iva">IVA (%)</label>
+                        <input type="number" step="1" class="form-input" id="new-sale-iva" name="tax_percentage" value="21" placeholder="21">
+                    </div>
+                </div>
+
+                <!-- Detalles: productos de la venta -->
+                <div class="sale-details-wrapper">
+                    <div class="sale-details-main">
+                        <div class="sale-details-header">
+                            <h4 class="sale-details-title">Productos</h4>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-sale-detail">
+                                <span class="material-symbols-outlined">add</span>
+                                Añadir Producto
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Descuento (%)</th>
+                                        <th>Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sale-details-tbody">
+                                    <tr class="sale-detail-row">
+                                        <td>
+                                            <select class="form-input form-select no-choices" name="product_id"></select>
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-input" name="quantity" placeholder="0" min="1" value="0">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-input" name="unit_price" placeholder="0.00">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="1" class="form-input" name="discount_percentage" placeholder="0" min="0" max="100" value="0">
+                                        </td>
+                                        <td class="sale-detail-subtotal">€ 0.00</td>
+                                        <td>
+                                            <button type="button" class="btn-remove-detail" title="Eliminar">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Card de totales -->
+                    <div class="sale-totals-card">
+                        <h4 class="sale-totals-card-title">Totales</h4>
+                        <div class="sale-totals-content">
+                            <div class="totals-item">
+                                <span class="totals-label">Subtotal</span>
+                                <span class="totals-value" id="sale-subtotal">€ 0.00</span>
+                            </div>
+                            <div class="totals-item">
+                                <span class="totals-label">Impuestos</span>
+                                <span class="totals-value" id="sale-tax">€ 0.00</span>
+                            </div>
+                            <div class="totals-item totals-final">
+                                <span class="totals-label">Total</span>
+                                <span class="totals-value" id="sale-total">€ 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-symbols-outlined">save</span>
+                    Crear Venta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

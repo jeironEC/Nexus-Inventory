@@ -1,0 +1,165 @@
+/* ========================================
+ * Styles for table components
+ * ======================================== */
+
+.table-container {
+    background: rgba(2, 40, 89, 0.2);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.table {
+    border-collapse: collapse;
+    text-align: left;
+    width: 100%;
+}
+
+.table th {
+    background: rgba(2, 40, 89, 0.4);
+    border-bottom: 1px solid rgba(4, 85, 191, 0.2);
+    color: rgba(206, 232, 242, 0.4);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    padding: 14px 16px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.table td {
+    border-bottom: 1px solid rgba(4, 85, 191, 0.08);
+    color: rgba(206, 232, 242, 0.8);
+    font-size: 14px;
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background: rgba(4, 85, 191, 0.06);
+}
+
+.table td:first-child {
+    color: var(--white);
+    font-weight: 500;
+}
+
+/* ======================================
+ * COLUMN TYPES FOR SELECTIVE VISIBILITY
+ * ====================================== */
+
+.table.view-normal .col-audit {
+    display: none !important;
+}
+
+.table.view-audit .col-normal {
+    display: none !important;
+}
+
+/* ================================
+ * VIEW TOGGLES (NORMAL AND AUDIT)
+ * ================================ */
+
+ .table-view-toggles {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.table-view-toggles .btn {
+    background: rgba(4, 85, 191, 0.1);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    color: var(--ice);
+    font-size: 12px;
+    padding: 8px 16px;
+}
+
+.table-view-toggles .btn.active {
+    background: var(--royal);
+    border-color: var(--sky);
+    box-shadow: 0 0 15px rgba(4, 135, 217, 0.3);
+    color: var(--white);
+}
+
+/* ======================
+ * SORTABLE HEADERS
+ * ====================== */
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable:hover {
+    background: rgba(4, 135, 217, 0.05);
+    color: var(--sky);
+}
+
+.sortable .material-symbols-outlined {
+    font-size: 14px;
+    margin-left: 4px;
+    opacity: 0.3;
+    vertical-align: middle;
+}
+
+.sortable:hover .material-symbols-outlined {
+    opacity: 1;
+}
+
+/* ======================
+ * TABLE ACTIONS
+ * ====================== */
+.table-actions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.btn-action {
+    align-items: center;
+    background: rgba(4, 85, 191, 0.1);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: 8px;
+    color: var(--ice);
+    cursor: pointer;
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    padding: 0;
+    transition: all var(--transition-fast);
+    width: 32px;
+}
+
+.btn-action:hover {
+    background: var(--royal);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.btn-action.btn-action-danger:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-action .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ======================
+ * TABLE RESPONSIVE
+ * ====================== */
+
+@media (max-width: 768px) {
+    .table th,
+    .table td {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+}

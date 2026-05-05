@@ -1,0 +1,117 @@
+/* ========================================
+ * Styles for modal window components
+ * ======================================== */
+
+.modal-backdrop {
+    align-items: center;
+    background: rgba(1, 13, 38, 0.8);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    opacity: 0;
+    position: fixed;
+    transition: all var(--transition-normal);
+    visibility: hidden;
+    z-index: var(--z-modal-backdrop);
+}
+
+.modal-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: var(--navy);
+    border: 1px solid rgba(4, 85, 191, 0.3);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    max-width: 500px;
+    opacity: 0;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: all var(--transition-normal);
+    width: 100%;
+    z-index: var(--z-modal);
+}
+
+.modal-backdrop.active .modal {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.modal-lg {
+    max-width: 700px;
+}
+
+.modal-xl {
+    max-width: 900px;
+}
+
+.modal-xxl {
+    max-width: 1200px;
+}
+
+.modal-header {
+    align-items: center;
+    border-bottom: 1px solid rgba(4, 85, 191, 0.2);
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 24px;
+}
+
+.modal-title {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.modal-close {
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    color: rgba(206, 232, 242, 0.6);
+    cursor: pointer;
+    display: flex;
+    font-size: 24px;
+    height: 40px;
+    justify-content: center;
+    line-height: 1;
+    transition: all var(--transition-fast);
+    width: 40px;
+}
+
+.modal-close:hover {
+    background: rgba(4, 85, 191, 0.2);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.modal-footer {
+    align-items: center;
+    border-top: 1px solid rgba(4, 85, 191, 0.2);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 24px;
+}
+
+/* ======================
+ * MODAL RESPONSIVE
+ * ====================== */
+
+@media (max-width: 768px) {
+    .modal {
+        margin: 16px;
+        max-width: calc(100% - 32px);
+    }
+}

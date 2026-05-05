@@ -1,0 +1,405 @@
+/* ========================================
+ * Global Styles
+ * ======================================== */
+
+@import './components/table.css';
+@import './components/page_header.css';
+@import './components/sidebar.css';
+@import './components/modal.css';
+@import './components/toast.css';
+@import './components/pagination.css';
+@import './components/choices.css';
+@import './components/badge.css';
+@import './components/kpi.css';
+@import './components/spinner.css';
+@import './components/form.css';
+@import './components/filters.css';
+@import './components/details.css';
+@import './components/account.css';
+@import './components/content-list.css';
+
+
+/* ========================================
+* CSS VARIABLES
+* ======================================== */
+
+:root {
+    --danger: #ef4444;
+    --danger-lt: rgba(239, 68, 68, 0.15);
+    --font-body: 'DM Sans', sans-serif;
+    --font-display: 'Lexend', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --ice: #CEE8F2;
+    --midnight: #010D26;
+    --navy: #022859;
+    --radius: 4px;
+    --radius-lg: 12px;
+    --royal: #0455BF;
+    --shadow-lg: 0 8px 40px rgba(1, 13, 38, 0.6);
+    --shadow-md: 0 4px 24px rgba(1, 13, 38, 0.5);
+    --sky: #0487D9;
+    --success: #10b981;
+    --success-lt: rgba(16, 185, 129, 0.15);
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --warning: #f59e0b;
+    --warning-lt: rgba(245, 158, 11, 0.15);
+    --white: #FFFFFF;
+    --z-dropdown: 1000;
+    --z-modal: 400;
+    --z-modal-backdrop: 300;
+    --z-sticky: 200;
+    --z-tooltip: 500;
+}
+
+/* ========================================
+ * SCROLLBAR
+ * ======================================== */
+
+::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--midnight);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--royal);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sky);
+}
+
+/* ========================================
+ * RESET AND BASE
+ * ======================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    height: 100%;
+    overflow: hidden;
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--midnight);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-weight: 300;
+    height: 100%;
+    line-height: 1.6;
+    overflow: hidden;
+}
+
+a {
+    color: var(--sky);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--ice);
+}
+
+/* ========================================
+ * SKIP LINK
+ * ======================================== */
+
+.skip-link {
+    background: var(--royal);
+    border-radius: var(--radius);
+    color: var(--white);
+    left: 50%;
+    padding: 12px 24px;
+    position: absolute;
+    top: -100px;
+    transform: translateX(-50%);
+    transition: top var(--transition-fast);
+    z-index: var(--z-tooltip);
+}
+
+.skip-link:focus {
+    top: 16px;
+}
+
+:focus-visible {
+    outline: 2px solid var(--sky);
+    outline-offset: 2px;
+}
+
+/* ========================================
+ * MAIN LAYOUT
+ * ======================================== */
+
+.app-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100vh;
+    margin-left: 280px;
+    overflow-y: auto;
+    transition: margin-left var(--transition-normal);
+}
+
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+.page-body {
+    flex: 1;
+    padding: 104px 24px 24px;
+}
+
+/* ========================================
+ * BUTTONS
+ * ======================================== */
+
+.btn {
+    align-items: center;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    gap: 8px;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    padding: 12px 24px;
+    text-decoration: none;
+    transition: all var(--transition-normal);
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--royal);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: var(--sky);
+    box-shadow: 0 8px 24px rgba(4, 135, 217, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--royal);
+    color: var(--ice);
+}
+
+.btn-secondary:hover {
+    background: rgba(4, 85, 191, 0.15);
+    border-color: var(--sky);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--sky);
+    padding: 12px 0;
+}
+
+.btn-ghost:hover {
+    color: var(--ice);
+}
+
+.btn-danger {
+    background: var(--danger-lt);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ff6b6b;
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.btn-success {
+    background: var(--success-lt);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.btn-success:hover {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.btn-warning {
+    background: var(--warning-lt);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fcd34d;
+}
+
+.btn-warning:hover {
+    background: rgba(245, 158, 11, 0.25);
+}
+
+.btn-sm {
+    font-size: 12px;
+    padding: 8px 16px;
+}
+
+.btn-icon {
+    min-height: 40px;
+    min-width: 40px;
+    padding: 10px;
+}
+
+.btn-icon-sm {
+    min-height: 32px;
+    min-width: 32px;
+    padding: 8px;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.btn .material-icons {
+    font-size: 18px;
+}
+
+.btn-sm .material-icons {
+    font-size: 16px;
+}
+
+/* ========================================
+ * CARDS
+ * ======================================== */
+
+.card {
+    background: rgba(4, 85, 191, 0.08);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius-lg);
+    overflow: visible;
+    padding: 24px;
+    position: relative;
+}
+
+.card-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.card-subtitle {
+    color: rgba(206, 232, 242, 0.5);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.pagination-btn .material-symbols-outlined,
+.btn .material-symbols-outlined {
+    display: block;
+    font-size: 20px;
+}
+
+/* ========================================
+ * UTILITIES
+ * ======================================== */
+
+.mb-4 {
+    margin-bottom: 16px !important;
+}
+
+.section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: rgba(206, 232, 242, 0.5);
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* ========================================
+ * HAMBURGER (RESPONSIVE ONLY)
+ * ======================================== */
+
+.btn-menu-toggle {
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    display: none;
+    margin-right: 12px;
+    padding: 8px;
+}
+
+/* ========================================
+ * RESPONSIVE BREAKPOINTS
+ * ======================================== */
+
+@media (max-width: 992px) {
+    .btn-menu-toggle {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .btn-icon {
+        min-width: 40px;
+        width: 40px;
+    }
+}

@@ -1,0 +1,64 @@
+/* ========================================
+ * Styles for the pagination component
+ * ======================================== */
+
+.pagination {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.pagination-btn {
+    align-items: center;
+    background: transparent;
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius);
+    color: rgba(206, 232, 242, 0.6);
+    cursor: pointer;
+    display: flex;
+    height: 36px;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    width: 36px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: rgba(4, 85, 191, 0.15);
+    border-color: var(--sky);
+    color: var(--sky);
+}
+
+.pagination-btn.active {
+    background: var(--royal);
+    border-color: var(--royal);
+    color: var(--white);
+}
+
+.pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.pagination-info {
+    color: rgba(206, 232, 242, 0.5);
+    font-size: 13px;
+    margin-left: auto;
+}
+
+/* ======================
+ * PAGINATION RESPONSIVE
+ * ====================== */
+
+@media (max-width: 480px) {
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pagination-info {
+        margin: 8px 0 0;
+        text-align: center;
+        width: 100%;
+    }
+}

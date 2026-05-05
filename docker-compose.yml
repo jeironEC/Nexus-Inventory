@@ -9,11 +9,15 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - nexus_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
   backend:
     build: ./backend
     ports:
@@ -21,21 +25,41 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: nexus_inventory_backend.settings
       DJANGO_CONFIGURATION: Docker
-      SECRET_KEY: docker-secret-key-please-no-hack-me
+      SECRET_KEY: dev-secret-key-not-for-production
       ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
       DATABASE_NAME: nexus_inventory
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: db
       DATABASE_PORT: "5432"
+    volumes:
+      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - nexus_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/api/health/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
   frontend:
     build: ./frontend
     ports:
       - "80:80"
     depends_on:
       - backend
+    networks:
+      - nexus_net
+    restart: unless-stopped
+
+networks:
+  nexus_net:
+    driver: bridge
+
 volumes:
   postgres_data:

@@ -8,8 +8,15 @@ from ..services.operation_service import create_purchase_return
 
 
 class PurchaseReturnCreateSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     purchase = serializers.PrimaryKeyRelatedField(
         queryset=Purchase.objects.all(),
+    )
+    purchase_id = serializers.PrimaryKeyRelatedField(
+        source="purchase",
+        queryset=Purchase.objects.all(),
+        required=False,
+        write_only=True,
     )
     reason = serializers.CharField(max_length=255)
     details = PurchaseReturnDetailCreateSerializer(many=True)
@@ -28,6 +35,8 @@ class PurchaseReturnCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         details_data = validated_data.pop("details")
+        if "purchase_id" in validated_data:
+            validated_data.pop("purchase_id")
         user = self.context["request"].user
 
         return create_purchase_return(

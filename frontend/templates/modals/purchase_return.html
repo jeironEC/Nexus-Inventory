@@ -1,0 +1,31 @@
+<div class="modal-backdrop" id="modal-purchase-return">
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Registrar Devolución de Compra</h3>
+                    <button class="modal-close" aria-label="Cerrar">&times;</button>
+                </div>
+                <form id="form-purchase-return">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">Compra Original *</label>
+                            <select name="purchase" class="form-input form-select" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Motivo de Devolución *</label>
+                            <textarea name="reason" class="form-input" rows="3" required></textarea>
+                        </div>
+                        <div id="purchase-details-container" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <!-- Dynamic details go here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Devolución</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

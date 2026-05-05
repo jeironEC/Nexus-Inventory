@@ -1,0 +1,108 @@
+/* ========================================
+ * Styles for toast notifications
+ * ======================================== */
+
+#toast-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: fixed;
+    right: 24px;
+    top: 24px;
+    z-index: 9999;
+}
+
+.toast {
+    animation: toast-slide-in 0.3s ease-out forwards;
+    background: var(--midnight);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    color: var(--white);
+    display: flex;
+    gap: 12px;
+    max-width: 450px;
+    min-width: 300px;
+    padding: 16px;
+}
+
+.toast-success {
+    border-left: 4px solid var(--success);
+}
+
+.toast-error {
+    border-left: 4px solid var(--danger);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--warning);
+}
+
+.toast-info {
+    border-left: 4px solid var(--royal);
+}
+
+.toast .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.toast-success .material-symbols-outlined {
+    color: var(--success);
+}
+
+.toast-error .material-symbols-outlined {
+    color: var(--danger);
+}
+
+.toast-warning .material-symbols-outlined {
+    color: var(--warning);
+}
+
+.toast-info .material-symbols-outlined {
+    color: var(--sky);
+}
+
+.toast-content {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 20px;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: var(--white);
+}
+
+.toast-hiding {
+    animation: toast-slide-out 0.3s ease-in forwards;
+}
+
+@keyframes toast-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toast-slide-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}

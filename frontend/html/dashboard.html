@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <title>Dashboard - Nexus Inventory</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components/sidebar.css" />
+    <link rel="stylesheet" href="/css/components/modal.css">
+    <link rel="stylesheet" href="/css/pages/dashboard.css" />
+
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+</head>
+<body>
+    <!-- Skip link para accesibilidad -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Contenido principal -->
+        <main class="main-content" id="main-content">
+            <!-- Encabezado de página -->
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+                <!-- KPIs -->
+                <div class="stats-grid">
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">shopping_cart</span>
+                        <div class="card-kpi-value" data-kpi="total_revenue">€ 0.00</div>
+                        <div class="card-kpi-label">Ventas Hoy</div>
+                    </div>
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">local_shipping</span>
+                        <div class="card-kpi-value" data-kpi="total_purchases">€ 0.00</div>
+                        <div class="card-kpi-label">Compras Hoy</div>
+                    </div>
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">inventory</span>
+                        <div class="card-kpi-value" data-kpi="low_stock_count">0</div>
+                        <div class="card-kpi-label">Stock Bajo</div>
+                    </div>
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">group_add</span>
+                        <div class="card-kpi-value" data-kpi="new_customers">0</div>
+                        <div class="card-kpi-label">Clientes Nuevos</div>
+                    </div>
+                </div>
+
+                <!-- Acciones y últimas ventas -->
+                <div class="dashboard-sections">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Acciones Rápidas</h3></div>
+                        <div class="quick-actions">
+                            <a href="/html/sales.html" class="quick-action"><span class="quick-action-icon material-symbols-outlined">shopping_cart</span><span class="quick-action-text">Ventas</span></a>
+                            <a href="/html/purchases.html" class="quick-action"><span class="quick-action-icon material-symbols-outlined">card_giftcard</span><span class="quick-action-text">Compras</span></a>
+                            <a href="/html/sale_returns.html" class="quick-action"><span class="quick-action-icon material-symbols-outlined">replay</span><span class="quick-action-text">Devoluciones Venta</span></a>
+                            <a href="/html/purchase_returns.html" class="quick-action"><span class="quick-action-icon material-symbols-outlined">replay</span><span class="quick-action-text">Devoluciones Compra</span></a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Últimas Ventas</h3></div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+                                <tbody id="recent-sales-tbody">
+                                    <!-- Datos dinámicos -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="sales-pagination" class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock bajo -->
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Productos con Stock Bajo</h3></div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Estado</th></tr></thead>
+                            <tbody id="low-stock-tbody">
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                        <div id="stock-pagination" class="pagination">
+                            <button class="pagination-btn" aria-label="Página anterior" disabled>
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button class="pagination-btn" aria-label="Página siguiente">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <span class="pagination-info">Mostrando registros</span>
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+    <script type="module" src="/js/pages/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+</body>
+</html>

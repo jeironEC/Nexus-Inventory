@@ -1,0 +1,106 @@
+/* ========================================
+ * Styles for the page header
+ * ======================================== */
+
+.page-header {
+    align-items: center;
+    background: var(--midnight);
+    border-bottom: 1px solid rgba(4, 85, 191, 0.15);
+    display: flex;
+    height: 80px;
+    left: 280px;
+    padding: 24px 32px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: var(--z-sticky);
+}
+
+.page-header-title {
+    color: var(--white);
+    flex: 1;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.page-header-actions {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.header-btn {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+    transition: background var(--transition-fast);
+    width: 36px;
+}
+
+.header-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.header-btn .material-symbols-outlined {
+    color: var(--white);
+    font-size: 20px;
+}
+
+.header-user-avatar {
+    align-items: center;
+    background: var(--royal);
+    border-radius: 50%;
+    color: var(--white);
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    height: 30px;
+    justify-content: center;
+    overflow: hidden;
+    width: 30px;
+}
+
+.header-user-name {
+    color: var(--white);
+    font-size: 14px;
+}
+
+/* ======================
+ * HEADER RESPONSIVE
+ * ====================== */
+
+@media (max-width: 992px) {
+    .page-header {
+        gap: 8px;
+        height: 64px;
+        left: 0;
+        padding: 16px 24px;
+    }
+
+    .page-header-title {
+        flex: 1;
+        font-size: 18px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .page-header-actions {
+        gap: 4px;
+        width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header-title {
+        font-size: 16px;
+    }
+}

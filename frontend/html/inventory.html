@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario - Nexus Inventory</title>
@@ -12,190 +13,128 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/inventory.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
 
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div class="app-layout">
-
         <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
-        <main class="main-content" id="main-content">
-
-            <!-- Header -->
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
             <div class="page-body section-stack">
-
-                <!-- ── KPIs ── -->
-                <div class="stats-grid">
+                <!-- KPI resumen -->
+                <div class="stats-grid mb-4">
                     <div class="card-kpi">
                         <span class="material-symbols-outlined card-kpi-icon">inventory_2</span>
-                        <div class="card-kpi-value">0</div>
+                        <div class="card-kpi-value" data-kpi="total_products">0</div>
                         <div class="card-kpi-label">Total Productos</div>
                     </div>
                     <div class="card-kpi">
-                        <span class="material-symbols-outlined card-kpi-icon">euro</span>
-                        <div class="card-kpi-value">€ 0.00</div>
+                        <span class="material-symbols-outlined card-kpi-icon">payments</span>
+                        <div class="card-kpi-value" data-kpi="total_value">€ 0.00</div>
                         <div class="card-kpi-label">Valor Total</div>
                     </div>
                     <div class="card-kpi">
                         <span class="material-symbols-outlined card-kpi-icon">warning</span>
-                        <div class="card-kpi-value">0</div>
+                        <div class="card-kpi-value" data-kpi="low_stock_count">0</div>
                         <div class="card-kpi-label">Stock Bajo</div>
                     </div>
                     <div class="card-kpi">
-                        <span class="material-symbols-outlined card-kpi-icon">block</span>
-                        <div class="card-kpi-value">0</div>
+                        <span class="material-symbols-outlined card-kpi-icon">error</span>
+                        <div class="card-kpi-value" data-kpi="no_stock_count">0</div>
                         <div class="card-kpi-label">Sin Stock</div>
                     </div>
                 </div>
 
-                <!-- ── Filtros ── -->
+                 <!-- Filtros -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Filtros</h3>
                     </div>
-                    <div class="filter-grid">
-
-                        <div class="form-group">
-                            <label class="form-label" for="inventory-filter-product-id">Producto</label>
-                            <input type="text" class="form-input" id="inventory-filter-product-id"
-                                placeholder="Todos los productos"
-                                autocomplete="off"
-                                list="products-inventory-list">
-                            <datalist id="products-inventory-list">
-                                <!-- Se rellena dinámico desde el backend -->
-                            </datalist>
+                    <div class="card-body">
+                        <div class="filter-grid">
+                            <div class="form-group">
+                                <label class="form-label">Producto</label>
+                                <select class="form-input form-select" id="inventory-filter-product-id">
+                                    <option value="">Todos los productos</option>
+                                    <!-- Dinámico -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-input" id="inventory-filter-product-name" placeholder="Buscar por nombre...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Stock Mín.</label>
+                                <input type="number" class="form-input" id="inventory-filter-quantity-min" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Stock Máx.</label>
+                                <input type="number" class="form-input" id="inventory-filter-quantity-max" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-input" id="inventory-filter-date-from">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-input" id="inventory-filter-date-to">
+                            </div>
+                            <div class="filter-actions">
+                                <button class="btn btn-secondary w-full" id="btn-apply-filters">
+                                    <span class="material-symbols-outlined">filter_list</span>
+                                    Aplicar Filtros
+                                </button>
+                            </div>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="inventory-filter-product-name">Nombre Producto</label>
-                            <input type="text" class="form-input" id="inventory-filter-product-name" placeholder="Nombre del producto...">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="inventory-filter-quantity-min">Cantidad Mín.</label>
-                            <input type="number" class="form-input" id="inventory-filter-quantity-min" placeholder="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="inventory-filter-quantity-max">Cantidad Máx.</label>
-                            <input type="number" class="form-input" id="inventory-filter-quantity-max" placeholder="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="inventory-filter-date-from">Desde</label>
-                            <input type="date" class="form-input" id="inventory-filter-date-from">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="inventory-filter-date-to">Hasta</label>
-                            <input type="date" class="form-input" id="inventory-filter-date-to">
-                        </div>
-
-                        <div class="filter-actions">
-                            <button class="btn btn-secondary w-100" id="btn-apply-filters">
-                                <span class="material-symbols-outlined">filter_list</span>
-                                Aplicar Filtros
-                            </button>
-                        </div>
-
                     </div>
                 </div>
 
-                <!-- ── Tabla ── -->
+                <!-- Tabla -->
                 <div class="card">
-
-                    <!-- Botones de vista -->
-                    <div class="table-view-tabs">
-                        <button class="table-view-btn active" id="btn-view-normal">Campos Normales</button>
-                        <button class="table-view-btn" id="btn-view-audit">Campos de Auditoría</button>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- Vista: Campos Normales -->
-                    <div id="view-normal">
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Producto</th>
-                                        <th>Categoría</th>
-                                        <th>Stock Actual</th>
-                                        <th>P. Unitario</th>
-                                        <th>V. Total</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="inventory-tbody-normal">
-                                    <!-- Datos dinámicos del backend -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="pagination">
-                            <button class="pagination-btn" aria-label="Página anterior" disabled>
-                                <span class="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <button class="pagination-btn active">1</button>
-                            <button class="pagination-btn" aria-label="Página siguiente">
-                                <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                            <span class="pagination-info">Mostrando registros del inventario</span>
-                        </div>
+                    <div class="pagination">
+                        <button class="pagination-btn" aria-label="Página anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn" aria-label="Página siguiente">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <span class="pagination-info">Mostrando registros</span>
                     </div>
-
-                    <!-- Vista: Campos de Auditoría -->
-                    <div id="view-audit" style="display:none;">
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Producto</th>
-                                        <th>Creado En</th>
-                                        <th>Actualizado En</th>
-                                        <th>Eliminado En</th>
-                                        <th>Creado Por</th>
-                                        <th>Actualizado Por</th>
-                                        <th>Eliminado Por</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="inventory-tbody-audit">
-                                    <!-- Datos dinámicos del backend -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="pagination">
-                            <button class="pagination-btn" aria-label="Página anterior" disabled>
-                                <span class="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <button class="pagination-btn active">1</button>
-                            <button class="pagination-btn" aria-label="Página siguiente">
-                                <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                            <span class="pagination-info">Mostrando registros del inventario</span>
-                        </div>
-                    </div>
-
                 </div>
-
             </div>
         </main>
     </div>
 
-    <!-- Componentes globales -->
-    <script src="../js/components/modal.js"></script>
-    <script src="../js/components/sidebar.js"></script>
-    <script src="../js/components/page_header.js"></script>
-    <!-- Lógica de la página -->
-    <script src="../js/pages/inventory.js"></script>
+    <!-- Componentes -->
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+
+    <!-- Scripts de la página -->
+    <script type="module" src="/js/pages/inventory.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

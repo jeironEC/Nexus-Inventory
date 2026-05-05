@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurar Empresa - Nexus Inventory</title>
+    <title>Configuración Inicial - Nexus Inventory</title>
+    <meta name="description" content="Registra tu empresa para comenzar a usar Nexus Inventory.">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,27 +13,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Estilos reutiliza los del login -->
-    <link rel="stylesheet" href="../css/global.css">
-    <link rel="stylesheet" href="../css/login.css">
-    <link rel="stylesheet" href="../css/company-setup.css">
+    <!-- Estilos -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/pages/login.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
 
-    <link rel="icon" type="image/svg+xml" href="../assets/Nexus_Inventory_Logo.svg">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 </head>
 <body>
+    <!-- Skip link para accesibilidad -->
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <main id="main-content" class="login-page">
         <div class="login-container">
-
             <!-- Panel izquierdo - Branding -->
             <div class="login-panel-left">
                 <div class="login-bg-pattern"></div>
                 <div class="login-branding">
                     <h2 class="login-brand-title">Nexus Inventory</h2>
                     <p class="login-brand-desc">
-                        Configura tu empresa para empezar a gestionar tu inventario,
-                        ventas y compras de forma profesional.
+                        Antes de comenzar, registra los datos de tu empresa.
+                        Esta información aparecerá en tus facturas y reportes.
                     </p>
 
                     <div class="login-features">
@@ -40,16 +45,24 @@
                             <span>Empresa</span>
                         </div>
                         <div class="login-feature">
-                            <span class="material-symbols-outlined">verified</span>
-                            <span>Datos Fiscales</span>
+                            <span class="material-symbols-outlined">receipt_long</span>
+                            <span>Facturas</span>
                         </div>
                         <div class="login-feature">
-                            <span class="material-symbols-outlined">image</span>
-                            <span>Logo</span>
+                            <span class="material-symbols-outlined">assessment</span>
+                            <span>Reportes</span>
                         </div>
                         <div class="login-feature">
-                            <span class="material-symbols-outlined">contact_mail</span>
-                            <span>Contacto</span>
+                            <span class="material-symbols-outlined">inventory</span>
+                            <span>Inventario</span>
+                        </div>
+                        <div class="login-feature">
+                            <span class="material-symbols-outlined">point_of_sale</span>
+                            <span>Ventas</span>
+                        </div>
+                        <div class="login-feature">
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                            <span>Compras</span>
                         </div>
                     </div>
                 </div>
@@ -57,64 +70,118 @@
 
             <!-- Panel derecho - Formulario -->
             <div class="login-panel-right">
-                <div class="login-wrapper company-setup-wrapper">
-
+                <div class="login-wrapper">
                     <div class="login-header">
-                        <h1 class="login-title">Configurar tu Empresa</h1>
-                        <p class="login-subtitle">Rellena los datos para empezar a usar Nexus Inventory.</p>
+                        <h1 class="login-title">Configura tu empresa</h1>
+                        <p class="login-subtitle">Introduce los datos de tu empresa para activar el sistema</p>
                     </div>
 
-                    <form id="form-company-setup" class="login-form">
-                        <!-- Nombre y NIF -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="company-name">Nombre de la Empresa</label>
-                                <input type="text" class="form-input" id="company-name" name="name" placeholder="Mi Empresa S.L.">
-                            </div>
+                    <form id="company-setup-form" class="login-form" novalidate>
 
+                        <!-- Fila 1: NIF y Nombre -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div class="form-group">
-                                <label class="form-label" for="company-nif">NIF / CIF</label>
-                                <input type="text" class="form-input" id="company-nif" name="nif" placeholder="B12345678">
+                                <label for="nif" class="form-label">NIF / Número Fiscal *</label>
+                                <input
+                                    type="text"
+                                    id="nif"
+                                    name="nif"
+                                    class="form-input"
+                                    placeholder="B12345678"
+                                    required
+                                    autocomplete="off"
+                                >
                             </div>
-                        </div>
-
-                        <!-- Email y teléfono -->
-                        <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="company-email">Correo electrónico</label>
-                                <input type="email" class="form-input" id="company-email" name="email" placeholder="contacto@empresa.com">
+                                <label for="company_name" class="form-label">Nombre de la Empresa *</label>
+                                <input
+                                    type="text"
+                                    id="company_name"
+                                    name="name"
+                                    class="form-input"
+                                    placeholder="Mi Empresa S.L."
+                                    required
+                                >
                             </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="company-phone">Teléfono</label>
-                                <input type="tel" class="form-input" id="company-phone" name="number_phone" placeholder="+34 600 000 000">
-                            </div>
-                        </div>
-
-                        <!-- Web -->
-                        <div class="form-group">
-                            <label class="form-label" for="company-website">Sitio Web</label>
-                            <input type="url" class="form-input" id="company-website" name="website" placeholder="https://www.empresa.com">
                         </div>
 
                         <!-- Dirección -->
                         <div class="form-group">
-                            <label class="form-label" for="company-address">Dirección</label>
-                            <textarea class="form-input" id="company-address" name="address" rows="2" placeholder="Calle, número, ciudad, código postal..."></textarea>
+                            <label for="address" class="form-label">Dirección *</label>
+                            <input
+                                type="text"
+                                id="address"
+                                name="address"
+                                class="form-input"
+                                placeholder="Calle Ejemplo 123, Madrid"
+                                required
+                            >
+                        </div>
+
+                        <!-- Fila 2: Teléfono y Email -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label for="number_phone" class="form-label">Teléfono *</label>
+                                <input
+                                    type="tel"
+                                    id="number_phone"
+                                    name="number_phone"
+                                    class="form-input"
+                                    placeholder="+34 600 000 000"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="company_email" class="form-label">Correo Empresarial *</label>
+                                <input
+                                    type="email"
+                                    id="company_email"
+                                    name="email"
+                                    class="form-input"
+                                    placeholder="info@miempresa.com"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Fila 3: Website y Logo -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label for="website" class="form-label">Sitio Web</label>
+                                <input
+                                    type="url"
+                                    id="website"
+                                    name="website"
+                                    class="form-input"
+                                    placeholder="https://miempresa.com"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="logo" class="form-label">URL del Logo</label>
+                                <input
+                                    type="url"
+                                    id="logo"
+                                    name="logo"
+                                    class="form-input"
+                                    placeholder="https://miempresa.com/logo.png"
+                                >
+                            </div>
                         </div>
 
                         <!-- Botón submit -->
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            Configurar Empresa
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="btn-company-submit" style="margin-top: 8px;">
+                            <span class="material-symbols-outlined">business_center</span>
+                            Registrar Empresa y Continuar
                         </button>
                     </form>
-
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="../js/pages/company-setup.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/pages/company_setup.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

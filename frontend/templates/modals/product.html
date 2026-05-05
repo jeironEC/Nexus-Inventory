@@ -1,0 +1,50 @@
+<div class="modal-backdrop" id="modal-product">
+    <div class="modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Nuevo Producto</h3>
+                    <button class="modal-close" aria-label="Cerrar">&times;</button>
+                </div>
+                <form id="form-product">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Categoría *</label>
+                            <select name="category" class="form-input form-select" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Código</label>
+                            <input type="text" name="unique_code" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="description" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Precio Venta *</label>
+                                <input type="number" name="sale_price" class="form-input" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Precio Compra</label>
+                                <input type="number" name="purchase_price" class="form-input" step="0.01">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descuento (%)</label>
+                            <input type="number" name="discount_percentage" class="form-input" step="0.01" min="0" max="100">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary modal-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

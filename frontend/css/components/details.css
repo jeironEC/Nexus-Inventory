@@ -1,0 +1,232 @@
+/* ===================================================
+ * Styles for detail rows (sales, purchases, returns)
+ * =================================================== */
+
+.details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.detail-row {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius);
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+    padding: 8px;
+}
+
+.detail-row .form-input {
+    flex: 1;
+}
+
+.detail-row .btn-remove-detail {
+    min-width: auto;
+    padding: 8px 12px;
+}
+
+/* ================================
+ * SALE / PURCHASE DETAILS WRAPPER
+ * ================================ */
+
+.sale-details-wrapper,
+.purchase-details-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.sale-details-main,
+.purchase-details-main {
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius-lg);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* ======================
+ * SECTION HEADER
+ * ====================== */
+
+.sale-details-header,
+.purchase-details-header {
+    align-items: center;
+    background: rgba(4, 85, 191, 0.1);
+    border-bottom: 1px solid rgba(4, 85, 191, 0.2);
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+.sale-details-title,
+.purchase-details-title {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ======================
+ * TABLE INSIDE DETAILS
+ * ====================== */
+
+.sale-details-main .table-container,
+.purchase-details-main .table-container {
+    max-height: 300px;
+    overflow: auto;
+}
+
+.sale-details-main .table,
+.purchase-details-main .table {
+    margin-bottom: 0;
+}
+
+/* ======================
+ * REMOVE ROW BUTTON
+ * ====================== */
+
+.sale-detail-row .btn-remove-detail,
+.purchase-detail-row .btn-remove-detail {
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: rgba(206, 232, 242, 0.4);
+    cursor: pointer;
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    width: 32px;
+}
+
+.sale-detail-row .btn-remove-detail:hover,
+.purchase-detail-row .btn-remove-detail:hover {
+    background: rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: #dc2626;
+}
+
+.sale-detail-row .btn-remove-detail .material-symbols-outlined,
+.purchase-detail-row .btn-remove-detail .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* ========================================
+ * SMALL INPUTS FOR QUANTITY AND DISCOUNT
+ * ======================================== */
+
+.sale-details-main .table th:nth-child(2),
+.sale-details-main .table th:nth-child(4),
+.purchase-details-main .table th:nth-child(2),
+.purchase-details-main .table th:nth-child(4) {
+    text-align: center;
+    width: 100px;
+}
+
+.sale-details-main .table td:nth-child(2) .form-input,
+.sale-details-main .table td:nth-child(4) .form-input,
+.purchase-details-main .table td:nth-child(2) .form-input,
+.purchase-details-main .table td:nth-child(4) .form-input {
+    margin: 0 auto;
+    text-align: center;
+    width: 80px;
+}
+
+/* ==========================================
+ * CELLS WITH POSITION RELATIVE FOR SELECTS
+ * ========================================== */
+
+ .sale-detail-row td,
+.purchase-detail-row td {
+    position: relative;
+}
+
+/* ==============================================
+ * TOTALS CARD (INDEPENDENT ROW, RIGHT-ALIGNED)
+ * ============================================== */
+
+.sale-totals-card,
+.purchase-totals-card {
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius-lg);
+    margin-left: auto;
+    overflow: hidden;
+    width: 240px;
+}
+
+.sale-totals-card-title,
+.purchase-totals-card-title {
+    background: rgba(4, 85, 191, 0.1);
+    border-bottom: 1px solid rgba(4, 85, 191, 0.2);
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    padding: 12px 16px;
+}
+
+.sale-totals-content,
+.purchase-totals-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 12px 16px;
+}
+
+.totals-item {
+    align-items: center;
+    border-bottom: 1px solid rgba(4, 85, 191, 0.15);
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.totals-item:last-child {
+    border-bottom: none;
+}
+
+.totals-label {
+    color: rgba(206, 232, 242, 0.6);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.totals-value {
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 16px;
+}
+
+.totals-divider {
+    background: rgba(4, 85, 191, 0.2);
+    height: 1px;
+}
+
+.totals-item.totals-final {
+    padding-top: 4px;
+}
+
+.totals-item.totals-final .totals-label {
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.totals-item.totals-final .totals-value {
+    color: var(--sky);
+    font-size: 20px;
+    font-weight: 700;
+}

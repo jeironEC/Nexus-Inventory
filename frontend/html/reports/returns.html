@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuarios - Nexus Inventory</title>
+    <title>Reporte de Devoluciones - Nexus Inventory</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +15,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/components/sidebar.css">
     <link rel="stylesheet" href="/css/components/modal.css">
-
     <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
@@ -31,49 +29,34 @@
         <div id="sidebar-container"></div>
 
         <!-- Contenido principal -->
-        <main class="main-content">
+        <main class="main-content" id="main-content">
             <!-- Encabezado de página -->
             <div id="page-header-container"></div>
 
             <div class="page-body section-stack">
                 <!-- Filtros -->
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Filtros</h3>
-                    </div>
+                    <div class="card-header"><h3 class="card-title">Filtros de Devoluciones</h3></div>
                     <div class="card-body">
                         <div class="filter-grid">
                             <div class="form-group">
-                                <label class="form-label">Nombre Completo</label>
-                                <input type="text" class="form-input" id="user-filter-full-name" placeholder="Buscar por nombre o apellido...">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Rol</label>
-                                <select class="form-input form-select" id="user-filter-role-id">
-                                    <option value="">Todos los roles</option>
+                                <label class="form-label">Tipo de Devolución</label>
+                                <select class="form-input form-select" id="report-filter-type">
+                                    <option value="sale">Ventas</option>
+                                    <option value="purchase">Compras</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Estado</label>
-                                <select class="form-input form-select" id="user-filter-state">
-                                    <option value="">Todos los estados</option>
-                                    <option value="ACTIVE">Activo</option>
-                                    <option value="INACTIVE">Inactivo</option>
-                                </select>
+                                <label class="form-label">Desde</label>
+                                <input type="date" class="form-input" id="report-filter-date-from">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Fecha Desde</label>
-                                <input type="date" class="form-input" id="user-filter-date-from">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Fecha Hasta</label>
-                                <input type="date" class="form-input" id="user-filter-date-to">
+                                <label class="form-label">Hasta</label>
+                                <input type="date" class="form-input" id="report-filter-date-to">
                             </div>
                             <div class="filter-actions">
-                                <button class="btn btn-secondary w-full" id="btn-apply-filters">
-                                    <span class="material-symbols-outlined">filter_list</span>
-                                    Aplicar Filtros
-                                </button>
+                                <button class="btn btn-primary w-full" id="btn-apply-filters">Generar Reporte</button>
+                                <button class="btn btn-secondary w-full" id="btn-export-pdf">Exportar PDF</button>
                             </div>
                         </div>
                     </div>
@@ -82,11 +65,9 @@
                 <!-- Tabla -->
                 <div class="card">
                     <div class="table-container">
-                        <table class="table">
-                            <thead>
-                            </thead>
-                            <tbody>
-                            </tbody>
+                        <table class="table" id="report-table">
+                            <thead><tr id="report-table-header"></tr></thead>
+                            <tbody id="report-table-body"></tbody>
                         </table>
                     </div>
                     <div class="pagination">
@@ -96,20 +77,20 @@
                         <button class="pagination-btn" aria-label="Página siguiente">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </button>
-                        <span class="pagination-info">Mostrando registros</span>
+                        <span class="pagination-info">Mostrando datos...</span>
                     </div>
-
                 </div>
             </div>
         </main>
     </div>
+
     <!-- Componentes -->
-    <script type="module" src="/js/components/Modal.js"></script>
     <script type="module" src="/js/components/Sidebar.js"></script>
     <script type="module" src="/js/components/PageHeader.js"></script>
+    <script type="module" src="/js/components/Modal.js"></script>
 
     <!-- Scripts de la página -->
-    <script type="module" src="/js/pages/users.js"></script>
+    <script type="module" src="/js/pages/reports/returns.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

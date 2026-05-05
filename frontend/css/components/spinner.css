@@ -1,0 +1,39 @@
+/* ========================================
+ * Styles for loading indicators
+ * ======================================== */
+
+.spinner {
+    animation: spin 0.8s linear infinite;
+    border: 3px solid rgba(4, 85, 191, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--sky);
+    height: 40px;
+    width: 40px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner-sm {
+    border-width: 2px;
+    height: 20px;
+    width: 20px;
+}
+
+.spinner-lg {
+    border-width: 4px;
+    height: 60px;
+    width: 60px;
+}
+
+.spinner-overlay {
+    align-items: center;
+    background: rgba(1, 13, 38, 0.8);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    z-index: var(--z-modal);
+}

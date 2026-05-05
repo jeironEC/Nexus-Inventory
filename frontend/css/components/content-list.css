@@ -1,0 +1,94 @@
+/* ========================================
+ * Shared styles for content pages (terms, manual, etc.)
+ * ======================================== */
+
+.content-page h4 {
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+}
+
+.content-page p {
+    color: rgba(206, 232, 242, 0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0 0 12px 0;
+}
+
+/* ======================
+ * SECTIONS WITH SPACING
+ * ====================== */
+
+ .content-section {
+    margin-bottom: 28px;
+}
+
+.content-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Bullet lists */
+/* ==================
+ * BULLET LISTS
+ * ================== */
+
+ .feature-list {
+    list-style: none;
+    margin: 12px 0 0 0;
+    padding: 0;
+}
+
+.feature-list li {
+    color: rgba(206, 232, 242, 0.8);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.feature-list li:last-child {
+    margin-bottom: 0;
+}
+
+.feature-list li::before {
+    background: var(--sky);
+    border-radius: 50%;
+    content: '';
+    height: 6px;
+    left: 0;
+    position: absolute;
+    top: 8px;
+    width: 6px;
+}
+
+/* ==================
+ * NUMBERED LISTS
+ * ==================*/
+
+.feature-list ol {
+    counter-reset: step;
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding-left: 0;
+}
+
+.feature-list ol li {
+    counter-increment: step;
+    padding-left: 28px;
+}
+
+.feature-list ol li::before {
+    background: none;
+    color: var(--sky);
+    content: counter(step) ".";
+    font-size: 14px;
+    font-weight: 600;
+    height: auto;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: auto;
+}

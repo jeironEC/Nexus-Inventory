@@ -1,0 +1,64 @@
+/* ========================================
+ * Styles for labels and status badges
+ * ======================================== */
+
+.badge {
+    align-items: center;
+    border-radius: 2px;
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    gap: 5px;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.badge-primary {
+    background: rgba(4, 85, 191, 0.25);
+    border: 1px solid rgba(4, 85, 191, 0.4);
+    color: var(--sky);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fcd34d;
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+.badge-neutral {
+    background: rgba(206, 232, 242, 0.08);
+    border: 1px solid rgba(206, 232, 242, 0.15);
+    color: rgba(206, 232, 242, 0.6);
+}
+
+.badge-dot {
+    background: currentColor;
+    border-radius: 50%;
+    height: 6px;
+    padding: 0;
+    width: 6px;
+}
+
+.badge-sm {
+    font-size: 10px;
+    padding: 2px 6px;
+}
+
+.badge-lg {
+    font-size: 12px;
+    padding: 6px 12px;
+}

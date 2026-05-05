@@ -1,3 +1,5 @@
+// Gestiona la autenticación, tokens y estado del usuario
+
 import { ApiClient } from "../api/ApiClient.js";
 import {
     URL_BASE,
@@ -8,7 +10,7 @@ import {
     REFRESH_KEY,
     USER_KEY,
     CSRFTOKEN_KEY
-} from "../util/const.js";
+} from "../utils/const.js";
 
 class AuthService {
     constructor() {
@@ -17,28 +19,23 @@ class AuthService {
             refreshEndpoint: URL_AUTH_REFRESH,
             onUnauthorized: () => this.logout()
         });
+
+        // Suscribirse a cambios de token para persistirlos automáticamente
+        this.api.subscribe((newToken) => {
+            if (newToken) {
+                localStorage.setItem(TOKEN_KEY, newToken);
+            }
+        });
+
         this.initializeFromStorage();
     }
 
-    initializeFromStorage() {
-        const token = localStorage.getItem(TOKEN_KEY);
-        const refresh = localStorage.getItem(REFRESH_KEY);
-
-        if (token) {
-            this.api.setToken(token);
-        }
-
-        if (refresh) {
-            this.api.setRefreshToken(refresh);
-        }
-
-        const csrfToken = this.getCsrfToken();
-
-        if (csrfToken) {
-            this.api.setCsrfToken(csrfToken);
-        }
+    // Obtiene la instancia del cliente API
+    getApiClient() {
+        return this.api;
     }
 
+    // Obtiene el token CSRF de las cookies
     getCsrfToken() {
         let cookieValue = null;
 
@@ -58,6 +55,47 @@ class AuthService {
         return cookieValue;
     }
 
+    // Extrae información del usuario desde el payload del JWT
+    getUserFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+
+            return {
+                userId: payload.user_id,
+                email: payload.email || payload.sub
+            };
+        } catch (error) {
+            return null;
+        }
+    }
+
+    // Inicializa los tokens desde el almacenamiento local
+    initializeFromStorage() {
+        const token = localStorage.getItem(TOKEN_KEY);
+        const refresh = localStorage.getItem(REFRESH_KEY);
+
+        if (token) {
+            this.api.setToken(token);
+        }
+
+        if (refresh) {
+            this.api.setRefreshToken(refresh);
+        }
+
+        const csrfToken = this.getCsrfToken();
+
+        if (csrfToken) {
+            this.api.setCsrfToken(csrfToken);
+        }
+    }
+
+    // Verifica si el usuario está autenticado
+    isAuthenticated() {
+        const token = localStorage.getItem(TOKEN_KEY);
+        return token && !this.isTokenExpired(token);
+    }
+
+    // Verifica si un token JWT ha expirado
     isTokenExpired(token) {
         if (!token) {
             return true;
@@ -72,90 +110,51 @@ class AuthService {
         }
     }
 
+    // Realiza el inicio de sesión
     async login(email, password) {
         try {
-            const response = await this.api.post(URL_AUTH_TOKEN, { email, password });
+            // Desactivar reintento de refresco para el login para evitar bucles con tokens viejos
+            const response = await this.api.post(URL_AUTH_TOKEN,
+                { email, password },
+                { retryRefresh: false }
+            );
+
+            if (!response.data || !response.data.access) {
+                throw new Error('La respuesta del servidor es inválida (Tokens faltantes).');
+            }
 
             const accessToken = response.data.access;
             const refreshToken = response.data.refresh;
 
-            this.setToken(accessToken);
-            this.setRefreshToken(refreshToken);
-            this.setCsrfToken(this.getCsrfToken());
+            this.api.setToken(accessToken);
+            this.api.setRefreshToken(refreshToken);
+
+            const csrfToken = this.getCsrfToken();
+            if (csrfToken) {
+                this.api.setCsrfToken(csrfToken);
+            }
 
             localStorage.setItem(TOKEN_KEY, accessToken);
             localStorage.setItem(REFRESH_KEY, refreshToken);
 
-            return { success: true, user: this.getUserFromToken(accessToken) }
+            // Guardar info básica del usuario si está disponible
+            const user = this.getUserFromToken(accessToken);
+            if (user) {
+                localStorage.setItem(USER_KEY, JSON.stringify(user));
+            }
+
+            return { success: true, user }
         } catch (error) {
             throw error;
         }
     }
 
+    // Cierra la sesión y limpia el almacenamiento
     logout() {
         this.api.clearTokens();
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REFRESH_KEY);
         localStorage.removeItem(USER_KEY);
-    }
-
-    async refreshToken() {
-        const refresh = localStorage.getItem(REFRESH_KEY);
-
-        if (!refresh) {
-            throw new Error('No refresh token available');
-        }
-
-        try {
-            const response = await this.api.post(URL_AUTH_REFRESH, { refresh });
-
-            const accessToken = response.data.access;
-            this.setToken(accessToken);
-            localStorage.setItem(TOKEN_KEY, accessToken);
-
-            return accessToken;
-        } catch (error) {
-            this.logout();
-            throw error;
-        }
-    }
-
-    isAuthenticated() {
-        const token = localStorage.getItem(TOKEN_KEY);
-        return token && !this.isTokenExpired(token);
-    }
-
-    getToken() {
-        return localStorage.getItem(TOKEN_KEY);
-    }
-
-    setToken(token) {
-        this.api.setToken(token);
-    }
-
-    setRefreshToken(token) {
-        this.api.setRefreshToken(token);
-    }
-
-    setCsrfToken(token) {
-        this.api.setCsrfToken(token);
-    }
-
-    getUserFromToken(token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-
-            return {
-                userId: payload.user_id,
-                email: payload.email || payload.sub
-            };
-        } catch (error) {
-            return null;
-        }
-    }
-
-    getApiClient() {
-        return this.api;
     }
 }
 

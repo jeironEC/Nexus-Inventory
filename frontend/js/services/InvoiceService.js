@@ -1,25 +1,21 @@
-import { authService } from "./AuthService.js";
-import {
-    URL_INVOICES,
-} from "../util/const.js";
+// Servicio para gestionar facturas
 
-class InvoiceService {
-    get api() {
-        return authService.getApiClient();
+import { BaseService } from "./BaseService.js";
+import { URL_INVOICES } from "../utils/const.js";
+
+class InvoiceService extends BaseService {
+    constructor() {
+        super(URL_INVOICES);
     }
 
-    async getAllInvoices(filtros = {}) {
-        const params = new URLSearchParams(filtros).toString();
-        const endpoint = params ? `${URL_INVOICES}?${params}` : `${URL_INVOICES}`;
-        return await this.api.get(endpoint);
-    }
-
-    async getInvoiceById(id) {
-        return await this.api.get(`${URL_INVOICES}${id}/`);
-    }
-
+    // Cancela una factura
     async cancel(id) {
         return await this.api.patch(`${URL_INVOICES}${id}/cancel/`);
+    }
+
+    // Descarga el PDF de una factura
+    async downloadPdf(id) {
+        return await this.api.get(`${URL_INVOICES}${id}/pdf/`, { responseType: 'blob' });
     }
 }
 

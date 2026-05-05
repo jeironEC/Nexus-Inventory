@@ -1,94 +1,43 @@
-# DRF
 from rest_framework import serializers
 
-# Django
-from django.db import transaction
+from nexus_inventory_backend.db.models import Purchase
+from nexus_inventory_backend.db.enums import OperationState
 
-# Models
-from nexus_inventory_backend.db.models import (
-    PurchaseReturn,
-    PurchaseReturnDetail,
-    InventoryMovement,
-    Purchase,
-    Inventory,
-)
-
-# Enums
-from nexus_inventory_backend.db.enums import MovementType, OperationState
-
-# Serializers
 from .purchase_return_detail_create import PurchaseReturnDetailCreateSerializer
+from ..services.operation_service import create_purchase_return
 
 
-class PurchaseReturnCreateSerializer(serializers.ModelSerializer):
-    purchase_id = serializers.PrimaryKeyRelatedField(
+class PurchaseReturnCreateSerializer(serializers.Serializer):
+    purchase = serializers.PrimaryKeyRelatedField(
         queryset=Purchase.objects.all(),
-        source="purchase",
     )
+    reason = serializers.CharField(max_length=255)
     details = PurchaseReturnDetailCreateSerializer(many=True)
-
-    class Meta:
-        model = PurchaseReturn
-        fields = [
-            "id",
-            "purchase_id",
-            "reason",
-            "details",
-        ]
-        read_only_fields = ["id"]
 
     def validate_details(self, value):
         if not value:
             raise serializers.ValidationError("At least one detail is required.")
         return value
 
-    def validate_purchase_id(self, value):
+    def validate_purchase(self, value):
         if value.state == OperationState.CANCELED:
             raise serializers.ValidationError(
                 "Cannot return items from a canceled purchase."
             )
         return value
 
-    @transaction.atomic
     def create(self, validated_data):
         details_data = validated_data.pop("details")
         user = self.context["request"].user
 
-        total_amount = sum(
-            detail["quantity"] * detail["unit_cost"] for detail in details_data
-        )
-
-        purchase_return = PurchaseReturn.objects.create(
-            **validated_data,
+        return create_purchase_return(
+            details_data=details_data,
             user=user,
-            total_amount=total_amount,
+            **validated_data,
         )
 
-        for detail in details_data:
-            product = detail["product"]
-            quantity = detail["quantity"]
-            unit_cost = detail["unit_cost"]
-
-            inventory_movement = InventoryMovement.objects.create(
-                product=product,
-                user=user,
-                movement_type=MovementType.OUT,
-                quantity=quantity,
-            )
-
-            inventory, _ = Inventory.objects.get_or_create(
-                product=product, defaults={"quantity": 0}
-            )
-            inventory.quantity -= quantity
-            inventory.save()
-
-            PurchaseReturnDetail.objects.create(
-                purchase_return=purchase_return,
-                product=product,
-                inventory_movement=inventory_movement,
-                quantity=quantity,
-                unit_cost=unit_cost,
-                subtotal=quantity * unit_cost,
-            )
-
-        return purchase_return
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

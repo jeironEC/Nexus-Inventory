@@ -113,7 +113,7 @@ class TestPostPurchaseReturn:
             subtotal=200.00,
         )
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}
@@ -145,7 +145,7 @@ class TestPostPurchaseReturn:
             subtotal=200.00,
         )
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}
@@ -178,7 +178,7 @@ class TestPostPurchaseReturn:
             subtotal=200.00,
         )
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}
@@ -217,7 +217,7 @@ class TestPostPurchaseReturn:
             subtotal=200.00,
         )
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}
@@ -225,7 +225,7 @@ class TestPostPurchaseReturn:
         }
         response = api_client_auth.post(purchase_returns_url, payload, format="json")
         data = response.data
-        assert "purchase" in data or "purchase_id" in data
+        assert "purchase" in data
         assert data["reason"] == "Product defective"
 
     def test_create_purchase_return_unauthenticated_returns_401(
@@ -251,7 +251,7 @@ class TestPostPurchaseReturn:
             subtotal=200.00,
         )
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}
@@ -267,7 +267,7 @@ class TestPostPurchaseReturn:
         purchase,
     ):
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [],
         }
@@ -297,7 +297,7 @@ class TestPostPurchaseReturn:
             subtotal=200.00,
         )
         payload = {
-            "purchase_id": purchase.pk,
+            "purchase": purchase.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 100, "unit_cost": "100.00"}

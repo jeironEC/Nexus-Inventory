@@ -94,8 +94,8 @@ class TestPostSale:
 
         assert set(data.keys()) == {
             "id",
-            "company_id",
-            "customer_id",
+            "company",
+            "customer",
             "tax_percentage",
             "payment_method",
             "details",

@@ -1,3 +1,6 @@
+# Internal
+import secrets
+
 # Django environ
 import environ
 
@@ -17,13 +20,16 @@ env = environ.Env(DEBUG=(bool, False))
 
 environ.Env.read_env(BASE_DIR / ".env")
 
+if not env("DJANGO_SECRET_KEY", default=None):
+    import os
+
+    os.environ["DJANGO_SECRET_KEY"] = secrets.token_urlsafe(50)
+
 
 class Base(Configuration):
     """Configuración base común a todos los entornos"""
 
-    SECRET_KEY = env(
-        "DJANGO_SECRET_KEY", default="django-insecure-fallback-key-change-in-production"
-    )
+    SECRET_KEY = env("DJANGO_SECRET_KEY", default=secrets.token_urlsafe(50))
 
     DEBUG = True
 
@@ -144,9 +150,11 @@ class Base(Configuration):
         "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
         "DEFAULT_THROTTLE_CLASSES": [
             "rest_framework.throttling.UserRateThrottle",
+            "rest_framework.throttling.AnonRateThrottle",
         ],
         "DEFAULT_THROTTLE_RATES": {
-            "user": "10/min",
+            "user": "100/min",
+            "anon": "10/min",
         },
         "DEFAULT_AUTHENTICATION_CLASSES": (
             "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -160,7 +168,7 @@ class Base(Configuration):
         "ACCESS_TOKEN_LIFETIME": timedelta(hours=8),
         "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
         "ROTATE_REFRESH_TOKENS": True,
-        "BLACKLIST_AFTER_ROTATION": False,
+        "BLACKLIST_AFTER_ROTATION": True,
     }
 
     SPECTACULAR_SETTINGS = {
@@ -226,7 +234,7 @@ class Base(Configuration):
             },
             "app": {
                 "handlers": ["console"],
-                "level": "DEBUG",
+                "level": "INFO",
                 "propagate": False,
             },
         },
@@ -256,13 +264,13 @@ class Docker(Base):
             "ENGINE": "django.db.backends.postgresql",
             "NAME": env("DATABASE_NAME", default="nexus_inventory"),
             "USER": env("DATABASE_USERNAME", default="postgres"),
-            "PASSWORD": env("DATABASE_PASSWORD", default="postgres"),
+            "PASSWORD": env("DATABASE_PASSWORD", default=None),
             "HOST": env("DATABASE_HOST", default="localhost"),
             "PORT": env.int("DATABASE_PORT", default=5432),
         }
     }
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
-    SECRET_KEY = env("SECRET_KEY", default="no_hack_me_please")
+    SECRET_KEY = env("SECRET_KEY", default=secrets.token_urlsafe(50))
 
 
 class Production(Docker):
@@ -270,7 +278,7 @@ class Production(Docker):
 
     DEBUG = False
 
-    SECURE_SSL_REDIRECT = False
+    SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

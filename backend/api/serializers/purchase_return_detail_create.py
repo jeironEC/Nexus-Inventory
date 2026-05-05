@@ -22,13 +22,13 @@ class PurchaseReturnDetailCreateSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        purchase_id = self.context.get("purchase_id")
+        purchase = self.context.get("purchase")
         product = attrs["product"]
         quantity = attrs["quantity"]
 
         purchased_quantity = (
             PurchaseDetail.objects.filter(
-                purchase_id=purchase_id, product=product
+                purchase_id=purchase, product=product
             ).aggregate(total=models.Sum("quantity"))["total"]
             or 0
         )

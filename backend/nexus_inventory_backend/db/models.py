@@ -37,9 +37,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
 
         if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superiser must hava is_staff on True.")
+            raise ValueError("Superuser must hava is_staff on True.")
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superiser must hava is_superuser on True.")
+            raise ValueError("Superuser must hava is_superuser on True.")
 
         admin_role, _ = Role.objects.get_or_create(
             name="ADMIN", defaults={"description": "Administrator role"}

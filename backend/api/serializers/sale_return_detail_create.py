@@ -22,12 +22,12 @@ class SaleReturnDetailCreateSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        sale_id = self.context.get("sale_id")
+        sale = self.context.get("sale")
         product = attrs["product"]
         quantity = attrs["quantity"]
 
         sold_quantity = (
-            SaleDetail.objects.filter(sale_id=sale_id, product=product).aggregate(
+            SaleDetail.objects.filter(sale_id=sale, product=product).aggregate(
                 total=models.Sum("quantity")
             )["total"]
             or 0

@@ -64,8 +64,8 @@ class TestPasswordResetVerify:
 
         otp_code, record = valid_otp
 
-        record.created_at = timezone.now() - timedelta(minutes=10)
-        record.save(update_fields=["created_at"])
+        record.expires_at = timezone.now() - timedelta(minutes=16)
+        record.save(update_fields=["expires_at"])
 
         response = api_client_auth.post(
             url_password_reset_verify,

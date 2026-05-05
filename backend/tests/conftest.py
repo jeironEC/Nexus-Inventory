@@ -600,8 +600,8 @@ def payload_customer():
 @pytest.fixture
 def payload_sale(company, customer, product, inventory):
     return {
-        "company_id": company.pk,
-        "customer_id": customer.pk,
+        "company": company.pk,
+        "customer": customer.pk,
         "payment_method": "CASH",
         "details": [{"product_id": product.pk, "quantity": 2, "unit_price": "100.00"}],
     }
@@ -610,8 +610,8 @@ def payload_sale(company, customer, product, inventory):
 @pytest.fixture
 def payload_another_sale(company, another_customer, another_product, inventory):
     return {
-        "company_id": company.pk,
-        "customer_id": another_customer.pk,
+        "company": company.pk,
+        "customer": another_customer.pk,
         "payment_method": "CARD",
         "details": [
             {"product_id": another_product.pk, "quantity": 1, "unit_price": "50.00"}
@@ -643,8 +643,8 @@ def payload_supplier_no_email():
 @pytest.fixture
 def payload_purchase(company, supplier, product, inventory):
     return {
-        "company_id": company.pk,
-        "supplier_id": supplier.pk,
+        "company": company.pk,
+        "supplier": supplier.pk,
         "details": [{"product_id": product.pk, "quantity": 2, "unit_cost": "100.00"}],
     }
 
@@ -654,8 +654,8 @@ def payload_another_purchase(
     company, another_supplier, another_product, another_inventory
 ):
     return {
-        "company_id": company.pk,
-        "supplier_id": another_supplier.pk,
+        "company": company.pk,
+        "supplier": another_supplier.pk,
         "details": [
             {"product_id": another_product.pk, "quantity": 1, "unit_cost": "250.00"}
         ],
@@ -665,7 +665,7 @@ def payload_another_purchase(
 @pytest.fixture
 def payload_sale_return(sale, product, sale_detail):
     return {
-        "sale_id": sale.pk,
+        "sale": sale.pk,
         "reason": "Product not as described",
         "details": [{"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}],
     }
@@ -674,7 +674,7 @@ def payload_sale_return(sale, product, sale_detail):
 @pytest.fixture
 def sale_return_payload_no_details(sale):
     return {
-        "sale_id": sale.pk,
+        "sale": sale.pk,
         "reason": "Product not as described",
     }
 
@@ -682,7 +682,7 @@ def sale_return_payload_no_details(sale):
 @pytest.fixture
 def payload_sale_return_exceeds_quantity(sale, product, sale_detail):
     return {
-        "sale_id": sale.pk,
+        "sale": sale.pk,
         "reason": "Product not as described",
         "details": [{"product_id": product.pk, "quantity": 100, "unit_price": "50.00"}],
     }
@@ -691,7 +691,7 @@ def payload_sale_return_exceeds_quantity(sale, product, sale_detail):
 @pytest.fixture
 def payload_purchase_return(purchase, product, purchase_detail):
     return {
-        "purchase_id": purchase.pk,
+        "purchase": purchase.pk,
         "reason": "Product not as described",
         "details": [{"product_id": product.pk, "quantity": 1, "unit_cost": "100.00"}],
     }
@@ -700,7 +700,7 @@ def payload_purchase_return(purchase, product, purchase_detail):
 @pytest.fixture
 def purchase_return_payload_no_details(purchase):
     return {
-        "purchase_id": purchase.pk,
+        "purchase": purchase.pk,
         "reason": "Product not as described",
     }
 
@@ -708,7 +708,7 @@ def purchase_return_payload_no_details(purchase):
 @pytest.fixture
 def payload_purchase_return_exceeds_quantity(purchase, product, purchase_detail):
     return {
-        "purchase_id": purchase.pk,
+        "purchase": purchase.pk,
         "reason": "Product not as described",
         "details": [{"product_id": product.pk, "quantity": 100, "unit_cost": "100.00"}],
     }

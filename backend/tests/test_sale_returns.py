@@ -111,7 +111,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}
@@ -143,7 +143,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}
@@ -176,7 +176,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}
@@ -215,7 +215,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}
@@ -223,7 +223,7 @@ class TestPostSaleReturn:
         }
         response = api_client_auth.post(sale_returns_url, payload, format="json")
         data = response.data
-        assert "sale" in data or "sale_id" in data
+        assert "sale" in data
         assert data["reason"] == "Product defective"
 
     def test_create_sale_return_unauthenticated_returns_401(
@@ -249,7 +249,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 1, "unit_price": "50.00"}
@@ -281,7 +281,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [],
         }
@@ -311,7 +311,7 @@ class TestPostSaleReturn:
             subtotal=100.00,
         )
         payload = {
-            "sale_id": sale.pk,
+            "sale": sale.pk,
             "reason": "Product defective",
             "details": [
                 {"product_id": product.pk, "quantity": 100, "unit_price": "50.00"}

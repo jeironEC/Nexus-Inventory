@@ -13,10 +13,28 @@ class PurchaseCreateSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
+    company_id = serializers.PrimaryKeyRelatedField(
+        source="company",
+        queryset=Company.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=Supplier.objects.all(),
     )
+    supplier_id = serializers.PrimaryKeyRelatedField(
+        source="supplier",
+        queryset=Supplier.objects.all(),
+        required=False,
+        write_only=True,
+    )
     details = PurchaseDetailCreateSerializer(many=True)
+
+    def validate(self, data):
+        if not data.get("supplier") and not data.get("supplier_id"):
+            raise serializers.ValidationError({"supplier": "This field is required."})
+        return data
 
     def validate_details(self, value):
         if not value:
@@ -25,6 +43,10 @@ class PurchaseCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         details_data = validated_data.pop("details")
+        if "supplier_id" in validated_data:
+            validated_data.pop("supplier_id")
+        if "company_id" in validated_data:
+            validated_data.pop("company_id")
         user = self.context["request"].user
 
         return create_purchase(

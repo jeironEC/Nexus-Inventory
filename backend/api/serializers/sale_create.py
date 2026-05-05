@@ -14,10 +14,24 @@ class SaleCreateSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
+    company_id = serializers.PrimaryKeyRelatedField(
+        source="company",
+        queryset=Company.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
     customer = serializers.PrimaryKeyRelatedField(
         queryset=Customer.objects.all(),
         required=False,
         allow_null=True,
+    )
+    customer_id = serializers.PrimaryKeyRelatedField(
+        source="customer",
+        queryset=Customer.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
     )
     payment_method = serializers.ChoiceField(
         choices=["CASH", "CARD", "TRANSFER"],

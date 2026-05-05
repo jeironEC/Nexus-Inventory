@@ -19,12 +19,6 @@ class SaleReturnCreateSerializer(serializers.Serializer):
         required=False,
         write_only=True,
     )
-    sale_id = serializers.PrimaryKeyRelatedField(
-        source="sale",
-        queryset=Sale.objects.all(),
-        required=False,
-        write_only=True,
-    )
     reason = serializers.CharField(max_length=255)
     details = SaleReturnDetailCreateSerializer(many=True)
 

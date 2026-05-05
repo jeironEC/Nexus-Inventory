@@ -19,6 +19,12 @@ class PurchaseReturnCreateSerializer(serializers.Serializer):
         required=False,
         write_only=True,
     )
+    purchase_id = serializers.PrimaryKeyRelatedField(
+        source="purchase",
+        queryset=Purchase.objects.all(),
+        required=False,
+        write_only=True,
+    )
     reason = serializers.CharField(max_length=255)
     details = PurchaseReturnDetailCreateSerializer(many=True)
 

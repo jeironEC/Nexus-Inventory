@@ -30,6 +30,12 @@ class PurchaseCreateSerializer(serializers.Serializer):
         required=False,
         write_only=True,
     )
+    supplier_id = serializers.PrimaryKeyRelatedField(
+        source="supplier",
+        queryset=Supplier.objects.all(),
+        required=False,
+        write_only=True,
+    )
     details = PurchaseDetailCreateSerializer(many=True)
 
     def validate(self, data):

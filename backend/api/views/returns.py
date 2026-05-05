@@ -94,7 +94,9 @@ class SaleReturnViewSet(
     def get_serializer_context(self):
         context = super().get_serializer_context()
         if self.action == "create":
-            context["sale"] = self.request.data.get("sale")
+            context["sale"] = self.request.data.get("sale") or self.request.data.get(
+                "sale_id"
+            )
         return context
 
     def get_cancel_serializer(self, obj):
@@ -197,7 +199,9 @@ class PurchaseReturnViewSet(
     def get_serializer_context(self):
         context = super().get_serializer_context()
         if self.action == "create":
-            context["purchase"] = self.request.data.get("purchase")
+            context["purchase"] = self.request.data.get(
+                "purchase"
+            ) or self.request.data.get("purchase_id")
         return context
 
     def get_cancel_serializer(self, obj):

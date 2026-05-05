@@ -8,11 +8,29 @@ from ..services.operation_service import create_purchase_return
 
 
 class PurchaseReturnCreateSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     purchase = serializers.PrimaryKeyRelatedField(
         queryset=Purchase.objects.all(),
+        required=False,
+    )
+    purchase_id = serializers.PrimaryKeyRelatedField(
+        source="purchase",
+        queryset=Purchase.objects.all(),
+        required=False,
+        write_only=True,
     )
     reason = serializers.CharField(max_length=255)
     details = PurchaseReturnDetailCreateSerializer(many=True)
+
+    def validate(self, data):
+        action = self.context.get("view").action if self.context.get("view") else None
+        if (
+            action == "create"
+            and not data.get("purchase")
+            and not data.get("purchase_id")
+        ):
+            raise serializers.ValidationError({"purchase": "This field is required."})
+        return data
 
     def validate_details(self, value):
         if not value:
@@ -20,7 +38,7 @@ class PurchaseReturnCreateSerializer(serializers.Serializer):
         return value
 
     def validate_purchase(self, value):
-        if value.state == OperationState.CANCELED:
+        if value and value.state == OperationState.CANCELED:
             raise serializers.ValidationError(
                 "Cannot return items from a canceled purchase."
             )
@@ -28,6 +46,8 @@ class PurchaseReturnCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         details_data = validated_data.pop("details")
+        if "purchase_id" in validated_data:
+            validated_data.pop("purchase_id")
         user = self.context["request"].user
 
         return create_purchase_return(

@@ -14,7 +14,6 @@ let saleTable;
 const TABLE_COLUMNS = [
     { label: 'ID', type: 'primary', value: (item) => `#${item.id}` },
     { label: 'Cliente', type: 'primary', value: (item) => item.customer?.first_name ? `${item.customer.first_name} ${item.customer.last_name || ''}`.trim() : 'Anónimo' },
-    { label: 'Usuario', type: 'primary', value: (item) => item.user?.first_name ? formatFullName(item.user) : (item.user?.email || '-') },
     { label: 'Descuento', type: 'normal', value: (item) => formatCurrency(item.discount_amount) },
     { label: 'Subtotal', type: 'normal', value: (item) => formatCurrency(item.subtotal) },
     { label: 'Impuesto (%)', type: 'normal', value: (item) => `${parseFloat(item.tax_percentage || 0)}%` },
@@ -25,7 +24,7 @@ const TABLE_COLUMNS = [
     { label: 'Creado en', type: 'normal', value: (item) => item.created_at ? formatDate(item.created_at, 'dd/mm/yyyy HH:mm') : '-' },
     { label: 'Actualizado en', type: 'normal', value: (item) => item.updated_at ? formatDate(item.updated_at, 'dd/mm/yyyy HH:mm') : '-' },
     { label: 'Eliminado en', type: 'normal', value: (item) => item.deleted_at ? formatDate(item.deleted_at, 'dd/mm/yyyy HH:mm') : '-' },
-    { label: 'Creado por', type: 'audit', value: (item) => item.created_by?.first_name ? formatFullName(item.created_by) : (item.created_by?.email || '-') },
+    { label: 'Creado por', type: 'audit', value: (item) => item.user?.first_name ? formatFullName(item.user) : (item.user?.email || '-') },
     { label: 'Actualizado por', type: 'audit', value: (item) => item.updated_by?.first_name ? formatFullName(item.updated_by) : (item.updated_by?.email || '-') },
     { label: 'Eliminado por', type: 'audit', value: (item) => item.deleted_by?.first_name ? formatFullName(item.deleted_by) : (item.deleted_by?.email || '-') }
 ];

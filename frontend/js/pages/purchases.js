@@ -14,13 +14,12 @@ let purchaseTable;
 const TABLE_COLUMNS = [
     { label: 'ID', type: 'primary', value: (item) => `#${item.id}` },
     { label: 'Proveedor', type: 'primary', value: (item) => item.supplier?.name || 'Proveedor Desconocido' },
-    { label: 'Usuario', type: 'primary', value: (item) => item.user?.first_name ? formatFullName(item.user) : (item.user?.email || '-') },
     { label: 'Total', type: 'normal', value: (item) => formatCurrency(item.total_amount) },
     { label: 'Estado', type: 'normal', value: (item) => `<span class="badge ${item.state === 'COMPLETED' ? 'badge-success' : 'badge-danger'}">${item.state === 'COMPLETED' ? 'Completada' : 'Cancelada'}</span>` },
     { label: 'Creado en', type: 'normal', value: (item) => item.created_at ? formatDate(item.created_at, 'dd/mm/yyyy HH:mm') : '-' },
     { label: 'Actualizado en', type: 'normal', value: (item) => item.updated_at ? formatDate(item.updated_at, 'dd/mm/yyyy HH:mm') : '-' },
     { label: 'Eliminado en', type: 'normal', value: (item) => item.deleted_at ? formatDate(item.deleted_at, 'dd/mm/yyyy HH:mm') : '-' },
-    { label: 'Creado por', type: 'audit', value: (item) => item.created_by?.first_name ? formatFullName(item.created_by) : (item.created_by?.email || '-') },
+    { label: 'Creado por', type: 'audit', value: (item) => item.user?.first_name ? formatFullName(item.user) : (item.user?.email || '-') },
     { label: 'Actualizado por', type: 'audit', value: (item) => item.updated_by?.first_name ? formatFullName(item.updated_by) : (item.updated_by?.email || '-') },
     { label: 'Eliminado por', type: 'audit', value: (item) => item.deleted_by?.first_name ? formatFullName(item.deleted_by) : (item.deleted_by?.email || '-') }
 ];

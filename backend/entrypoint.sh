@@ -7,6 +7,9 @@ echo "Ejecutando migraciones..."
 python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
+echo "Inicializando administrador y datos base..."
+python manage.py bootstrap_admin --noinput || true
+
 echo "Arrancando Gunicorn"
 
 exec gunicorn \

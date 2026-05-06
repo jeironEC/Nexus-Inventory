@@ -1,5 +1,6 @@
 import { create, clearChildren, renderHTML } from '../utils/dom.js';
 import { renderRow } from '../utils/base_page.js';
+import { isAdmin } from '../utils/rbac.js';
 
 // Encapsula lógica de renderizado de tablas con soporte para campos de auditoría
 
@@ -13,6 +14,10 @@ export class Table {
         this.columns = config.columns || [];
         this.actions = config.actions || {};
         this.emptyMessage = config.emptyMessage || 'No se encontraron registros';
+
+        if (!isAdmin()) {
+            this.columns = this.columns.filter(col => col.type !== 'audit');
+        }
 
         this.init();
     }

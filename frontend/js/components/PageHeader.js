@@ -114,13 +114,12 @@ class PageHeader {
 
     // Renderiza el encabezado y ejecuta el guard RBAC
     init(title, options = {}) {
-        // ── GUARD RBAC ──────────────────────────────────────────────
+        // GUARD RBAC
         const pageId = getCurrentPageId();
         // Las páginas de login se excluyen del guard
         if (!pageId.includes('login')) {
             enforcePermission(pageId);
         }
-        // ────────────────────────────────────────────────────────────
 
         const headerContainer = document.getElementById('page-header-container');
         if (!headerContainer) {
@@ -135,14 +134,19 @@ class PageHeader {
         const logoutBtn = headerContainer.querySelector('.btn-logout');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
-                window.modal.showConfirm(
-                    'Cerrar Sesión',
-                    '¿Deseas cerrar la sesión activa?',
-                    () => {
-                        authService.logout();
-                        window.location.href = '/index.html';
-                    }
-                );
+                if (window.modal && typeof window.modal.showConfirm === 'function') {
+                    window.modal.showConfirm(
+                        'Cerrar Sesión',
+                        '¿Deseas cerrar la sesión activa?',
+                        () => {
+                            authService.logout();
+                            window.location.href = '/index.html';
+                        }
+                    );
+                } else {
+                    authService.logout();
+                    window.location.href = '/index.html';
+                }
             });
         }
     }

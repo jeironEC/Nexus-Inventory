@@ -4,7 +4,6 @@ import { ApiClient } from "../api/ApiClient.js";
 import {
     URL_BASE,
     URL_PASSWORD_RESET_REQUEST,
-    URL_PASSWORD_RESET_VERIFY,
     URL_PASSWORD_RESET_CONFIRM,
     DEFAULT_TIMEOUT,
     CSRFTOKEN_KEY
@@ -35,7 +34,7 @@ class PasswordResetService {
         return csrfToken ? { headers: { 'X-CSRFTOKEN': csrfToken } } : {};
     }
 
-    // Solicita código OTP para recuperación
+    // Verifica email de admin y permite cambio de contraseña
     async requestRecovery(email) {
         try {
             const response = await this.api.post(
@@ -46,26 +45,7 @@ class PasswordResetService {
 
             return {
                 success: true,
-                message: response.data?.detail || response.data?.message || 'Se ha enviado un código de verificación a tu correo.'
-            };
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Verifica el código OTP
-    async verifyRecoveryOtp(email, otp) {
-        try {
-            const response = await this.api.post(
-                URL_PASSWORD_RESET_VERIFY,
-                { email, otp },
-                this.getSesionOptions()
-            );
-
-            return {
-                success: true,
-                reset_token: response.data?.reset_token,
-                message: response.data?.message || 'Código verificado correctamente.'
+                message: response.data?.detail || response.data?.message || 'Correo verificado. Puedes cambiar tu contraseña.'
             };
         } catch (error) {
             throw error;
@@ -73,11 +53,11 @@ class PasswordResetService {
     }
 
     // Restablece la contraseña
-    async resetPassword(resetToken, newPassword) {
+    async resetPassword(email, newPassword) {
         try {
             const response = await this.api.post(
                 URL_PASSWORD_RESET_CONFIRM,
-                { reset_token: resetToken, new_password: newPassword },
+                { email: email, new_password: newPassword },
                 this.getSesionOptions()
             );
 

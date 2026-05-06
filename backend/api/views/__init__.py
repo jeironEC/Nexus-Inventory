@@ -1,6 +1,5 @@
 from .health import HealthCheckView
 from .auth import EmailTokenObtainPairViewSet, PasswordResetViewSet
-from api.services.email_service import send_reset_password_email
 from .user import UserViewSet, UserMeViewSet, UserRoleViewSet
 from .catalog import (
     CompanyViewSet,

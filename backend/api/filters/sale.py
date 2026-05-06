@@ -18,7 +18,7 @@ class SaleFilter(django_filters.FilterSet):
     payment_method = django_filters.ChoiceFilter(
         field_name="payment_method", choices=PaymentMethod.choices
     )
-    customer_id = django_filters.NumberFilter(field_name="customer__id")
+    customer_id = django_filters.CharFilter(method="filter_customer_id")
 
     # Rangs
     date_from = django_filters.DateFilter(
@@ -28,8 +28,8 @@ class SaleFilter(django_filters.FilterSet):
         field_name="created_at__date", lookup_expr="lte"
     )
 
-    def filter_customer(self, queryset, name, value):
-        if value.lower() == "anonymous":
+    def filter_customer_id(self, queryset, name, value):
+        if value == "null":
             return queryset.filter(customer__isnull=True)
 
         if value.isdigit():

@@ -37,24 +37,6 @@ CREATE TABLE IF NOT EXISTS user (
 );
 
 -- ─────────────────────────────────────────
--- PASSWORD RESET OTP
--- ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS password_reset_otp (
-    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id     BIGINT NOT NULL,
-    email       VARCHAR(255) NOT NULL,
-    otp_hash    VARCHAR(128) NOT NULL,
-    is_used     BOOLEAN NOT NULL DEFAULT FALSE,
-    reset_token UUID NULL,
-    expires_at  TIMESTAMP NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP NULL,
-    deleted_at  TIMESTAMP NULL,
-
-    FOREIGN KEY (user_id) REFERENCES user(id)
-);
-
--- ─────────────────────────────────────────
 -- COMPANY
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS company (

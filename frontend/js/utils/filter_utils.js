@@ -15,7 +15,7 @@ const FILTER_SELECT_MAP = {
         label: (item) => `${item.first_name || ''} ${item.last_name || ''}`.trim() || `Cliente #${item.id}`,
         value: (item) => item.id,
         placeholder: 'Todos los clientes',
-        extraOption: { value: 'anonymous', label: 'Anónimo' }
+        extraOption: { value: 'null', label: 'Anónimo' }
     },
     'purchase-filter-supplier-id': {
         serviceKey: 'suppliers',
@@ -82,6 +82,12 @@ export function getFilterValues(containerSelector) {
 
         if (el.type === 'date' || el.type === 'datetime-local') {
             values[key] = el.value;
+        } else if (el.value === 'true') {
+            values[key] = true;
+        } else if (el.value === 'false') {
+            values[key] = false;
+        } else if (el.value === 'null') {
+            values[key] = null;
         } else if (key === 'payment_method') {
             values[key] = el.value.toUpperCase();
         } else {

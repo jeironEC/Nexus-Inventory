@@ -77,30 +77,6 @@ Reglas de negocio:
 
 ---
 
-### Tabla Password Reset OTP
-La tabla **Password Reset OTP** gestiona los códigos de verificación (OTP) para el restablecimiento de contraseña de los usuarios del sistema.
-Cada registro representa un código temporal generado para un usuario específico, que permite verificar su identidad antes de permitir el cambio de contraseña.
-
-Relaciones:
-```bash
-user (1) ─── (N) password_reset_otp
-```
-
-* Un usuario puede tener múltiples códigos OTP solicitados a lo largo del tiempo.
-
-Reglas de negocio:
-* Cada OTP debe estar asociado a un usuario existente (`user_id NOT NULL`).
-* El campo `email` almacena el correo electrónico al que se envió el código de verificación.
-* El campo `otp_hash` almacena el hash del código OTP generado (nunca el código en texto plano por seguridad).
-* El campo `is_used` indica si el código ya fue utilizado (`TRUE`) o aún está pendiente de uso (`FALSE`).
-* El campo `reset_token` es un UUID opcional que puede usarse para verificar el enlace directo de restablecimiento.
-* La fecha de creación del OTP se registra automáticamente mediante `created_at`.
-* Los códigos OTP deben tener una validez limitada en el tiempo (regla de negocio a nivel de aplicación).
-* Una vez usado o expirado, el OTP no debe ser válido para restablecimientos posteriores.
-* Un usuario no debe poder solicitar múltiples OTP simultáneamente sin límite (regla de negocio a nivel de aplicación).
-
----
-
 ### Tabla Company
 La tabla **Company** almacena los datos de la empresa que usa el sistema.
 Estos datos son necesarios para mostrar en facturas, reportes y otros documentos del sistema.
@@ -590,24 +566,6 @@ CREATE TABLE IF NOT EXISTS user (
     FOREIGN KEY (created_by) REFERENCES user(id),
     FOREIGN KEY (updated_by) REFERENCES user(id),
     FOREIGN KEY (deleted_by) REFERENCES user(id)
-);
-
--- ─────────────────────────────────────────
--- PASSWORD RESET OTP
--- ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS password_reset_otp (
-    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id     BIGINT NOT NULL,
-    email       VARCHAR(255) NOT NULL,
-    otp_hash    VARCHAR(128) NOT NULL,
-    is_used     BOOLEAN NOT NULL DEFAULT FALSE,
-    reset_token UUID NULL,
-    expires_at  TIMESTAMP NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP NULL,
-    deleted_at  TIMESTAMP NULL,
-
-    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 -- ─────────────────────────────────────────

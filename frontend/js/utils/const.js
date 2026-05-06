@@ -12,7 +12,6 @@ export const URL_AUTH_REFRESH = `${URL_AUTH_TOKEN}refresh/`;
 
 // Password reset
 export const URL_PASSWORD_RESET_REQUEST = '/v1/password-reset/request/';
-export const URL_PASSWORD_RESET_VERIFY = '/v1/password-reset/verify/';
 export const URL_PASSWORD_RESET_CONFIRM = '/v1/password-reset/confirm/';
 
 // Users

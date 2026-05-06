@@ -87,23 +87,6 @@ class User(DisplayModel, BaseModel, AbstractUser):
 
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# MODEL PASSWORD RESET OTP
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-class PasswordResetOTP(DisplayModel, TimestampModel):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="password_otps"
-    )
-    email = models.EmailField()
-    otp_hash = models.CharField(max_length=128)
-    is_used = models.BooleanField(default=False)
-    reset_token = models.UUIDField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
-
-    def get_display_fields(self):
-        return ["email", "created_at"]
-
-
-# ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # MODEL COMPANY
 # ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 class Company(DisplayModel, BaseModel):

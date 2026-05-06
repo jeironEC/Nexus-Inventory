@@ -70,10 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const isVerified = sessionStorage.getItem('reset_verified');
-    const resetToken = sessionStorage.getItem('reset_token');
+    const resetEmail = sessionStorage.getItem('reset_email');
 
-    if (!isVerified || !resetToken) {
+    if (!resetEmail) {
         window.location.href = '/html/forgot_password.html';
         return;
     }
@@ -107,11 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalContent = helpers.setButtonLoading(btnSubmit, true);
 
         try {
-            await passwordResetService.resetPassword(resetToken, newPassword);
+            await passwordResetService.resetPassword(resetEmail, newPassword);
 
             sessionStorage.removeItem('reset_email');
-            sessionStorage.removeItem('reset_verified');
-            sessionStorage.removeItem('reset_token');
 
             window.modal.showConfirm(
                 '¡Contraseña actualizada!',

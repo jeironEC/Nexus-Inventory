@@ -1,7 +1,6 @@
 # Internal
 import pytest
 import uuid
-from hashlib import sha256
 
 # DRF
 from rest_framework.test import APIClient
@@ -14,7 +13,6 @@ from django.test import Client
 from nexus_inventory_backend.db.models import (
     User,
     Role,
-    PasswordResetOTP,
     Company,
     Category,
     Product,
@@ -116,54 +114,6 @@ def normal_user(db, cashier_role):
         password="StrongPass123!",
         role=cashier_role,
     )
-
-
-@pytest.fixture
-def valid_otp(admin_user):
-    otp_code = "123456"
-    otp_hash = sha256(otp_code.encode()).hexdigest()
-
-    record = PasswordResetOTP.objects.create(
-        user=admin_user,
-        email=admin_user.email,
-        otp_hash=otp_hash,
-    )
-
-    return otp_code, record
-
-
-@pytest.fixture
-def valid_token(admin_user, valid_otp):
-    otp_code = valid_otp[0]
-    token = uuid.uuid4()
-    otp_hash = sha256(otp_code.encode()).hexdigest()
-
-    PasswordResetOTP.objects.create(
-        user=admin_user,
-        email=admin_user.email,
-        otp_hash=otp_hash,
-        is_used=False,
-        reset_token=token,
-    )
-
-    return token
-
-
-@pytest.fixture
-def used_token(admin_user, valid_otp):
-    otp_code = valid_otp[0]
-    token = uuid.uuid4()
-    otp_hash = sha256(otp_code.encode()).hexdigest()
-
-    PasswordResetOTP.objects.create(
-        user=admin_user,
-        email=admin_user.email,
-        otp_hash=otp_hash,
-        is_used=True,
-        reset_token=token,
-    )
-
-    return token
 
 
 @pytest.fixture
@@ -758,11 +708,6 @@ def role_detail_url():
 @pytest.fixture
 def url_password_reset_request():
     return reverse("password-reset-request")
-
-
-@pytest.fixture
-def url_password_reset_verify():
-    return reverse("password-reset-verify")
 
 
 @pytest.fixture

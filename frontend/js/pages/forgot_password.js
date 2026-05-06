@@ -21,19 +21,14 @@ window.addEventListener('DOMContentLoaded', () => {
         const originalContent = helpers.setButtonLoading(btnSubmit, true);
 
         try {
-            const result = await passwordResetService.requestRecovery(email);
+            await passwordResetService.requestRecovery(email);
             sessionStorage.setItem('reset_email', email);
 
-            let displayMessage = result.message;
-            if (displayMessage.includes('If the email address exists')) {
-                displayMessage = 'Si el correo está registrado, recibirás un código de verificación en tu bandeja de entrada.';
-            }
-
             window.modal.showAlert(
-                'Correo enviado',
-                displayMessage,
+                'Correo validado',
+                'Correo verificado. Ahora puedes establecer tu nueva contraseña.',
                 'success',
-                () => { window.location.href = '/html/verify_otp.html'; }
+                () => { window.location.href = '/html/change_password.html'; }
             );
         } catch (error) {
             const message = error.data?.detail

@@ -1,5 +1,4 @@
 import uuid
-import logging
 from decimal import Decimal
 
 from django.db import transaction
@@ -22,8 +21,6 @@ from nexus_inventory_backend.db.enums import (
     InvoiceState,
     InvoiceType,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def _validate_stock(details_data):
@@ -164,11 +161,8 @@ def create_sale(
     """
     from rest_framework import serializers
 
-    logger.info("Creando venta - detalles: %d, user: %s", len(details_data), user)
-
     stock_errors = _validate_stock(details_data)
     if stock_errors:
-        logger.warning("Stock errors: %s", stock_errors)
         raise serializers.ValidationError(
             {"details": "Stock insufficient", "errors": stock_errors}
         )
@@ -207,8 +201,6 @@ def create_sale(
         )
 
     _create_invoice(sale, InvoiceType.SALE, user)
-
-    logger.info("Venta creada exitosamente - ID: %d", sale.pk)
     return sale
 
 

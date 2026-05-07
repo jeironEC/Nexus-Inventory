@@ -1,5 +1,4 @@
 import { create, clearChildren, renderHTML } from '../utils/dom.js';
-import { isAdmin } from '../utils/rbac.js';
 import { TablePagination } from './Pagination.js';
 
 // Maneja tablas de reportes con columnas dinámicas y paginación

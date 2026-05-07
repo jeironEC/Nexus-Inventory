@@ -40,6 +40,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def validate_role(self, value):
         request = self.context.get("request")
 
+        if not request or not getattr(request, "user", None):
+            return value
+
         if value.name == "admin" and not request.user.role.name == "admin":
             raise serializers.ValidationError("You cannot assign admin role.")
         return value

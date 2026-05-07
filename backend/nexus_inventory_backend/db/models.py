@@ -42,7 +42,7 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must hava is_superuser on True.")
 
         admin_role, _ = Role.objects.get_or_create(
-            name="ADMIN", defaults={"description": "Administrator role"}
+            name="admin", defaults={"description": "Administrador del sistema"}
         )
         extra_fields.setdefault("role", admin_role)
         return self.create_user(email, password, **extra_fields)

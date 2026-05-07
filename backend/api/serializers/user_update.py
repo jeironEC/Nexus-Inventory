@@ -47,6 +47,10 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if value is None:
             return value
         request = self.context.get("request")
+
+        if not request or not getattr(request, "user", None):
+            return value
+
         if isinstance(value, int):
             from nexus_inventory_backend.db.models import Role
 

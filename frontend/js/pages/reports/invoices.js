@@ -4,6 +4,7 @@ import { serviceProvider } from '../../services/ServiceProvider.js';
 import { formatCurrency, formatDate } from '../../utils/helpers.js';
 import { ReportHelper } from '../../components/ReportHelper.js';
 import { ReportTable } from '../../components/ReportTable.js';
+import { initFilterListeners } from '../../utils/filter_utils.js';
 
 let reportTable;
 
@@ -42,7 +43,8 @@ async function initReport() {
         pdfFileName: 'reporte_facturas'
     });
 
-    document.getElementById('btn-apply-filters')?.addEventListener('click', loadReportData);
+    initFilterListeners('.card', loadReportData);
+
     await loadReportData();
 }
 

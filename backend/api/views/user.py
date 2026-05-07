@@ -116,7 +116,10 @@ class UserMeViewSet(SoftDeleteQuerysetMixin, viewsets.GenericViewSet):
 
         if request.method == "PATCH":
             serializer = self.get_serializer_class()(
-                request.user, data=request.data, partial=True
+                request.user,
+                data=request.data,
+                partial=True,
+                context={"request": request},
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()

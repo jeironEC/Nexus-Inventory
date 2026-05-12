@@ -58,6 +58,18 @@ const FILTER_SELECT_MAP = {
         label: (item) => item.name || `Categoría #${item.id}`,
         value: (item) => item.id,
         placeholder: 'Todas las categorías'
+    },
+    'inventory-movement-filter-product-id': {
+        serviceKey: 'products',
+        label: (item) => item.name || `Producto #${item.id}`,
+        value: (item) => item.id,
+        placeholder: 'Todos los productos'
+    },
+    'inventory-movement-filter-user-id': {
+        serviceKey: 'users',
+        label: (item) => item.first_name ? `${item.first_name} ${item.last_name || ''}`.trim() : (item.email || `Usuario #${item.id}`),
+        value: (item) => item.id,
+        placeholder: 'Todos los usuarios'
     }
 };
 

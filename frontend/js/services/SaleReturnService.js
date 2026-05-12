@@ -12,6 +12,10 @@ class SaleReturnService extends BaseService {
     async cancel(id) {
         return await this.api.patch(`${URL_SALE_RETURNS}${id}/cancel/`);
     }
+
+    async getDetailsSaleReturnById(id) {
+        return await this.api.get(`${URL_SALE_RETURNS}${id}/details/`);
+    }
 }
 
 export const saleReturnService = new SaleReturnService();

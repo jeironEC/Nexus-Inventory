@@ -1,4 +1,4 @@
-// Factoría para instanciar servicios de forma dinámica
+// Proveedor para instanciar servicios de forma dinámica
 
 import { BaseService } from './BaseService.js';
 import * as URLs from '../utils/const.js';
@@ -6,6 +6,7 @@ import { saleService } from './SaleService.js';
 import { purchaseService } from './PurchaseService.js';
 import { invoiceService } from './InvoiceService.js';
 import { inventoryService } from './InventoryService.js';
+import { inventoryMovementService } from './InventoryMovementService.js';
 import { saleReturnService } from './SaleReturnService.js';
 import { purchaseReturnService } from './PurchaseReturnService.js';
 import { reportService } from './ReportService.js';
@@ -20,6 +21,7 @@ class ServiceProvider {
     get companies() { return this.getService(URLs.URL_COMPANIES); }
     get customers() { return this.getService(URLs.URL_CUSTOMERS); }
     get inventories() { return inventoryService; }
+    get inventoryMovements() { return inventoryMovementService; }
     get invoices() { return invoiceService; }
     get products() { return this.getService(URLs.URL_PRODUCTS); }
     get purchaseReturns() { return purchaseReturnService; }

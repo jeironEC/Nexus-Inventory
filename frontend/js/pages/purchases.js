@@ -2,11 +2,12 @@
 
 import { toast } from '../components/Toast.js';
 import { serviceProvider } from '../services/ServiceProvider.js';
-import { create } from '../utils/dom.js';
+import { create, parseHTML } from '../utils/dom.js';
 import { initFilterListeners, loadFilterSelects } from '../utils/filter_utils.js';
 import { loadData, showModal, setupTableColumnToggles } from '../utils/base_page.js';
 import { formatCurrency, formatDate, formatFullName } from '../utils/helpers.js';
 import { setupDynamicDetails, getRowsData, populateSelect } from '../utils/form_utils.js';
+import { TemplateLoader } from '../utils/TemplateLoader.js';
 import { Table } from '../components/Table.js';
 
 let purchaseTable;
@@ -24,6 +25,50 @@ const TABLE_COLUMNS = [
     { label: 'Eliminado por', type: 'audit', value: (item) => item.deleted_by?.first_name ? formatFullName(item.deleted_by) : (item.deleted_by?.email || '-') }
 ];
 
+// Muestra el modal con el detalle de una compra
+async function handleShowPurchaseDetail(purchase) {
+    const existingModal = document.getElementById('modal-purchase-detail');
+    if (existingModal) existingModal.remove();
+
+    const templateHtml = await TemplateLoader.load('purchase_detail');
+    const container = create('div');
+    container.appendChild(parseHTML(templateHtml));
+    document.body.appendChild(container.firstElementChild);
+
+    document.getElementById('purchase-detail-id').textContent = `#${purchase.id}`;
+    document.getElementById('purchase-detail-supplier').textContent = purchase.supplier?.name || 'Proveedor desconocido';
+    document.getElementById('purchase-detail-date').textContent = formatDate(purchase.created_at, 'dd/mm/yyyy HH:mm');
+    document.getElementById('purchase-detail-total').textContent = formatCurrency(purchase.total_amount);
+
+    const stateEl = document.getElementById('purchase-detail-state');
+    stateEl.className = purchase.state === 'COMPLETED' ? 'badge badge-success' : 'badge badge-danger';
+    stateEl.textContent = purchase.state === 'COMPLETED' ? 'Completada' : 'Cancelada';
+
+    const tbody = document.getElementById('purchase-detail-tbody');
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner spinner-sm"></div></td></tr>';
+
+    window.modal.show('modal-purchase-detail');
+
+    try {
+        const response = await serviceProvider.purchases.getDetailsPurchaseById(purchase.id);
+        if (response.success && response.data) {
+            const items = response.data.results || response.data;
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.product?.name || 'Producto desconocido'}</td>
+                    <td>${item.quantity}</td>
+                    <td>${formatCurrency(item.unit_cost)}</td>
+                    <td>${formatCurrency(item.subtotal)}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar detalles</td></tr>';
+        }
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error de conexión</td></tr>';
+    }
+}
+
 // Inicializa la página de compras
 async function initPurchasesPage() {
     if (window.sidebar) {
@@ -38,6 +83,9 @@ async function initPurchasesPage() {
         actions: {
             customHtml: (item) => `
                 <div class="table-actions">
+                    <button class="btn-action btn-view-detail" title="Ver Detalle">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
                     ${item.state === 'COMPLETED' ? `
                     <button class="btn-action btn-action-danger btn-cancel-purchase" title="Cancelar Compra">
                         <span class="material-symbols-outlined">cancel</span>
@@ -45,6 +93,8 @@ async function initPurchasesPage() {
                 </div>
             `,
             setupEvents: (tr, item) => {
+                const btnView = tr.querySelector('.btn-view-detail');
+                if (btnView) btnView.addEventListener('click', () => handleShowPurchaseDetail(item));
                 const btnCancel = tr.querySelector('.btn-cancel-purchase');
                 if (btnCancel) btnCancel.addEventListener('click', () => handleCancelPurchase(item));
             }

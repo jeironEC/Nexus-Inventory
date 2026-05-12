@@ -47,7 +47,9 @@ class TestGetInventoryMovement:
             "product",
             "user",
             "quantity",
+            "movement_type",
             "created_at",
+            "source",
         }
 
     def test_inventory_movements_product_nested_fields(

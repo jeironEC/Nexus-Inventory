@@ -35,6 +35,9 @@ export const URL_INVENTORIES = '/v1/inventories/';
 export const URL_LOW_INVENTORIES = `${URL_INVENTORIES}low-stock/`;
 export const URL_PRODUCT_INVENTORIES = `${URL_INVENTORIES}product/`;
 
+// Inventory movement
+export const URL_INVENTORY_MOVEMENTS = '/v1/inventory-movements/';
+
 // Customers
 export const URL_CUSTOMERS = '/v1/customers/';
 

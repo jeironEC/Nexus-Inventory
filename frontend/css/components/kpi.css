@@ -27,6 +27,15 @@
     font-size: 34px;
     font-weight: 700;
     margin-bottom: 4px;
+    line-height: 1.1;
+}
+
+.kpi-detail {
+    color: rgba(206, 232, 242, 0.4);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-top: 4px;
 }
 
 .card-kpi-label {

@@ -331,3 +331,35 @@ def create_purchase_return(purchase, details_data, reason, user):
         )
 
     return purchase_return
+
+
+@transaction.atomic
+def cancel_sale_return(sale_return):
+    """
+    Revierte el inventario al cancelar una devolución de venta.
+    El stock que había aumentado ahora disminuye.
+    """
+    from nexus_inventory_backend.db.models import Inventory
+
+    for detail in sale_return.details.all():
+        inventory, _ = Inventory.objects.get_or_create(
+            product=detail.product, defaults={"quantity": 0}
+        )
+        inventory.quantity -= detail.quantity
+        inventory.save(update_fields=["quantity"])
+
+
+@transaction.atomic
+def cancel_purchase_return(purchase_return):
+    """
+    Revierte el inventario al cancelar una devolución de compra.
+    El stock que había disminuido ahora aumenta.
+    """
+    from nexus_inventory_backend.db.models import Inventory
+
+    for detail in purchase_return.details.all():
+        inventory, _ = Inventory.objects.get_or_create(
+            product=detail.product, defaults={"quantity": 0}
+        )
+        inventory.quantity += detail.quantity
+        inventory.save(update_fields=["quantity"])

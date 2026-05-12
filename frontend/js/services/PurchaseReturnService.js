@@ -12,6 +12,10 @@ class PurchaseReturnService extends BaseService {
     async cancel(id) {
         return await this.api.patch(`${URL_PURCHASE_RETURNS}${id}/cancel/`);
     }
+
+    async getDetailsPurchaseReturnById(id) {
+        return await this.api.get(`${URL_PURCHASE_RETURNS}${id}/details/`);
+    }
 }
 
 export const purchaseReturnService = new PurchaseReturnService();

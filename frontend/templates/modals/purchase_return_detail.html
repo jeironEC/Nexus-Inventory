@@ -1,0 +1,30 @@
+<div class="modal-backdrop" id="modal-purchase-return-detail" style="display:none;">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Detalle de Devolución de Compra</h3>
+            <button class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-summary">
+                <p><strong>ID:</strong> <span id="purchase-return-detail-id"></span></p>
+                <p><strong>Compra Original:</strong> <span id="purchase-return-detail-purchase"></span></p>
+                <p><strong>Fecha:</strong> <span id="purchase-return-detail-date"></span></p>
+                <p><strong>Razón:</strong> <span id="purchase-return-detail-reason"></span></p>
+                <p><strong>Total:</strong> <span id="purchase-return-detail-total"></span></p>
+                <p><strong>Estado:</strong> <span id="purchase-return-detail-state"></span></p>
+            </div>
+            <table class="table detail-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Costo Unit.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-return-detail-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

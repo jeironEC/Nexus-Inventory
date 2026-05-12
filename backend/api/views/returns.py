@@ -21,6 +21,11 @@ from api.serializers.purchase_return_detail_read import (
     PurchaseReturnDetailReadSerializer,
 )
 
+from api.services.operation_service import (
+    cancel_sale_return,
+    cancel_purchase_return,
+)
+
 from api.filters.sale_return import SaleReturnAdminFilter, SaleReturnFilter
 from api.filters.sale_return_detail import (
     SaleReturnDetailAdminFilter,
@@ -83,6 +88,9 @@ class SaleReturnViewSet(
 
     cancel_state = OperationState.CANCELED
     cancel_already_msg = "Sale return is already canceled."
+
+    def on_cancel(self, obj):
+        cancel_sale_return(obj)
 
     def get_serializer_class(self):
         if self.action in ["create", "partial_update"]:
@@ -188,6 +196,9 @@ class PurchaseReturnViewSet(
 
     cancel_state = OperationState.CANCELED
     cancel_already_msg = "Purchase return is already canceled."
+
+    def on_cancel(self, obj):
+        cancel_purchase_return(obj)
 
     def get_serializer_class(self):
         if self.action in ["create", "partial_update"]:

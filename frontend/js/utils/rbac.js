@@ -38,6 +38,7 @@ export const ROLE_PERMISSIONS = {
     [ROLES.PURCHASES]: [
         ...COMMON_PAGES,
         'inventory.html',
+        'inventory_movements.html',
         'categories.html',
         'products.html',
         'suppliers.html',

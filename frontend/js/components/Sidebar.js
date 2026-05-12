@@ -145,7 +145,8 @@ class Sidebar {
                 label: 'Principal',
                 items: [
                     { path: 'html/dashboard.html', page: 'dashboard.html', icon: 'dashboard', text: 'Dashboard' },
-                    { path: 'html/inventory.html', page: 'inventory.html', icon: 'inventory_2', text: 'Inventario' }
+                    { path: 'html/inventory.html', page: 'inventory.html', icon: 'inventory_2', text: 'Inventario' },
+                    { path: 'html/inventory_movements.html', page: 'inventory_movements.html', icon: 'swap_horiz', text: 'Movimientos' }
                 ]
             },
             {

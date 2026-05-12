@@ -2,11 +2,12 @@
 
 import { toast } from '../components/Toast.js';
 import { serviceProvider } from '../services/ServiceProvider.js';
-import { create } from '../utils/dom.js';
+import { create, parseHTML } from '../utils/dom.js';
 import { initFilterListeners, loadFilterSelects } from '../utils/filter_utils.js';
 import { loadData, showModal, setupTableColumnToggles } from '../utils/base_page.js';
 import { formatCurrency, formatDate, formatFullName } from '../utils/helpers.js';
 import { setupDynamicDetails, getRowsData, populateSelect } from '../utils/form_utils.js';
+import { TemplateLoader } from '../utils/TemplateLoader.js';
 import { Table } from '../components/Table.js';
 
 let saleTable;
@@ -29,6 +30,54 @@ const TABLE_COLUMNS = [
     { label: 'Eliminado por', type: 'audit', value: (item) => item.deleted_by?.first_name ? formatFullName(item.deleted_by) : (item.deleted_by?.email || '-') }
 ];
 
+// Muestra el modal con el detalle de una venta
+async function handleShowSaleDetail(sale) {
+    const existingModal = document.getElementById('modal-sale-detail');
+    if (existingModal) existingModal.remove();
+
+    const templateHtml = await TemplateLoader.load('sale_detail');
+    const container = create('div');
+    container.appendChild(parseHTML(templateHtml));
+    document.body.appendChild(container.firstElementChild);
+
+    document.getElementById('sale-detail-id').textContent = `#${sale.id}`;
+    document.getElementById('sale-detail-customer').textContent = sale.customer?.first_name ? `${sale.customer.first_name} ${sale.customer.last_name || ''}`.trim() : 'Anónimo';
+    document.getElementById('sale-detail-date').textContent = formatDate(sale.created_at, 'dd/mm/yyyy HH:mm');
+    document.getElementById('sale-detail-payment').textContent = ({ CASH: 'Efectivo', CARD: 'Tarjeta', TRANSFER: 'Transferencia' }[sale.payment_method] || sale.payment_method || '-');
+    document.getElementById('sale-detail-discount').textContent = formatCurrency(sale.discount_amount);
+    document.getElementById('sale-detail-subtotal-summary').textContent = formatCurrency(sale.subtotal);
+    document.getElementById('sale-detail-tax').textContent = formatCurrency(sale.tax_amount);
+    document.getElementById('sale-detail-total').textContent = formatCurrency(sale.total_amount);
+
+    const stateEl = document.getElementById('sale-detail-state');
+    stateEl.className = sale.state === 'COMPLETED' ? 'badge badge-success' : 'badge badge-danger';
+    stateEl.textContent = sale.state === 'COMPLETED' ? 'Completada' : 'Cancelada';
+
+    const tbody = document.getElementById('sale-detail-tbody');
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner spinner-sm"></div></td></tr>';
+
+    window.modal.show('modal-sale-detail');
+
+    try {
+        const response = await serviceProvider.sales.getDetailsSaleById(sale.id);
+        if (response.success && response.data) {
+            const items = response.data.results || response.data;
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.product?.name || 'Producto desconocido'}</td>
+                    <td>${item.quantity}</td>
+                    <td>${formatCurrency(item.unit_price)}</td>
+                    <td>${formatCurrency(item.subtotal)}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar detalles</td></tr>';
+        }
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error de conexión</td></tr>';
+    }
+}
+
 // Inicializa la página de ventas
 async function initSalesPage() {
     if (window.sidebar) {
@@ -43,6 +92,9 @@ async function initSalesPage() {
         actions: {
             customHtml: (item) => `
                 <div class="table-actions">
+                    <button class="btn-action btn-view-detail" title="Ver Detalle">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
                     ${item.state === 'COMPLETED' ? `
                     <button class="btn-action btn-action-danger btn-cancel-sale" title="Cancelar Venta">
                         <span class="material-symbols-outlined">cancel</span>
@@ -50,6 +102,8 @@ async function initSalesPage() {
                 </div>
             `,
             setupEvents: (tr, item) => {
+                const btnView = tr.querySelector('.btn-view-detail');
+                if (btnView) btnView.addEventListener('click', () => handleShowSaleDetail(item));
                 const btnCancel = tr.querySelector('.btn-cancel-sale');
                 if (btnCancel) btnCancel.addEventListener('click', () => handleCancelSale(item));
             }

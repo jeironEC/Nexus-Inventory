@@ -4,9 +4,10 @@ import { toast } from '../components/Toast.js';
 import { formatCurrency, formatDate, formatFullName } from '../utils/helpers.js';
 import { serviceProvider } from '../services/ServiceProvider.js';
 import { showModal, setupTableColumnToggles } from '../utils/base_page.js';
-import { create, clearChildren, renderHTML } from '../utils/dom.js';
+import { create, clearChildren, parseHTML, renderHTML } from '../utils/dom.js';
 import { getFilterValues, initFilterListeners, loadFilterSelects } from '../utils/filter_utils.js';
 import { DEFAULT_PAGINATION_LIMIT } from '../utils/const.js';
+import { TemplateLoader } from '../utils/TemplateLoader.js';
 import { TablePagination } from '../components/Pagination.js';
 import { Table } from '../components/Table.js';
 
@@ -30,6 +31,51 @@ const TABLE_COLUMNS = [
     { label: 'Eliminado por', type: 'audit', value: (item) => item.deleted_by?.first_name ? formatFullName(item.deleted_by) : (item.deleted_by?.email || '-') }
 ];
 
+// Muestra el modal con el detalle de una devolución de venta
+async function handleShowSaleReturnDetail(sr) {
+    const existingModal = document.getElementById('modal-sale-return-detail');
+    if (existingModal) existingModal.remove();
+
+    const templateHtml = await TemplateLoader.load('sale_return_detail');
+    const container = create('div');
+    container.appendChild(parseHTML(templateHtml));
+    document.body.appendChild(container.firstElementChild);
+
+    document.getElementById('sale-return-detail-id').textContent = `#${sr.id}`;
+    document.getElementById('sale-return-detail-sale').textContent = sr.sale ? (sr.sale.id ? `Venta #${sr.sale.id}` : 'Venta desconocida') : `Venta #${sr.sale_id || 'Desconocida'}`;
+    document.getElementById('sale-return-detail-date').textContent = formatDate(sr.created_at, 'dd/mm/yyyy HH:mm');
+    document.getElementById('sale-return-detail-reason').textContent = sr.reason || '-';
+    document.getElementById('sale-return-detail-total').textContent = formatCurrency(sr.total_amount || 0);
+
+    const stateEl = document.getElementById('sale-return-detail-state');
+    stateEl.className = sr.state === 'COMPLETED' ? 'badge badge-success' : 'badge badge-danger';
+    stateEl.textContent = sr.state === 'COMPLETED' ? 'Completada' : 'Cancelada';
+
+    const tbody = document.getElementById('sale-return-detail-tbody');
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner spinner-sm"></div></td></tr>';
+
+    window.modal.show('modal-sale-return-detail');
+
+    try {
+        const response = await serviceProvider.saleReturns.getDetailsSaleReturnById(sr.id);
+        if (response.success && response.data) {
+            const items = response.data.results || response.data;
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.product?.name || 'Producto desconocido'}</td>
+                    <td>${item.quantity}</td>
+                    <td>${formatCurrency(item.unit_price)}</td>
+                    <td>${formatCurrency(item.subtotal)}</td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar detalles</td></tr>';
+        }
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error de conexión</td></tr>';
+    }
+}
+
 // Inicializa la página de devoluciones de ventas
 async function initSaleReturnsPage() {
     if (window.sidebar) {
@@ -44,6 +90,9 @@ async function initSaleReturnsPage() {
         actions: {
             customHtml: (item) => `
                 <div class="table-actions">
+                    <button class="btn-action btn-view-detail" title="Ver Detalle">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
                     ${item.state === 'COMPLETED' ? `
                     <button class="btn-action btn-action-danger btn-cancel-sr" title="Anular Devolución">
                         <span class="material-symbols-outlined">cancel</span>
@@ -52,6 +101,8 @@ async function initSaleReturnsPage() {
                 </div>
             `,
             setupEvents: (tr, item) => {
+                const btnView = tr.querySelector('.btn-view-detail');
+                if (btnView) btnView.addEventListener('click', () => handleShowSaleReturnDetail(item));
                 const btnCancel = tr.querySelector('.btn-cancel-sr');
                 if (btnCancel) {
                     btnCancel.addEventListener('click', () => handleCancelSaleReturn(item));

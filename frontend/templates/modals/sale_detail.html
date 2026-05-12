@@ -1,0 +1,33 @@
+<div class="modal-backdrop" id="modal-sale-detail" style="display:none;">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Detalle de Venta</h3>
+            <button class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-summary">
+                <p><strong>ID:</strong> <span id="sale-detail-id"></span></p>
+                <p><strong>Cliente:</strong> <span id="sale-detail-customer"></span></p>
+                <p><strong>Fecha:</strong> <span id="sale-detail-date"></span></p>
+                <p><strong>Método de Pago:</strong> <span id="sale-detail-payment"></span></p>
+                <p><strong>Descuento:</strong> <span id="sale-detail-discount"></span></p>
+                <p><strong>Subtotal:</strong> <span id="sale-detail-subtotal-summary"></span></p>
+                <p><strong>Impuesto:</strong> <span id="sale-detail-tax"></span></p>
+                <p><strong>Total:</strong> <span id="sale-detail-total"></span></p>
+                <p><strong>Estado:</strong> <span id="sale-detail-state"></span></p>
+            </div>
+            <table class="table detail-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unit.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="sale-detail-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

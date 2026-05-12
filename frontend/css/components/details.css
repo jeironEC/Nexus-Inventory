@@ -230,3 +230,34 @@
     font-size: 20px;
     font-weight: 700;
 }
+
+/* ========================================
+ * MODAL DETAIL SUMMARY & TABLE
+ * ======================================== */
+
+.detail-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px 16px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(4, 85, 191, 0.2);
+    border-radius: var(--radius-lg);
+}
+
+.detail-summary p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(206, 232, 242, 0.7);
+    line-height: 1.6;
+}
+
+.detail-summary strong {
+    color: var(--white);
+    font-weight: 600;
+}
+
+.detail-table {
+    margin-bottom: 0;
+}

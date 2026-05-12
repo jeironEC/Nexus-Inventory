@@ -1,0 +1,29 @@
+<div class="modal-backdrop" id="modal-purchase-detail" style="display:none;">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Detalle de Compra</h3>
+            <button class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-summary">
+                <p><strong>ID:</strong> <span id="purchase-detail-id"></span></p>
+                <p><strong>Proveedor:</strong> <span id="purchase-detail-supplier"></span></p>
+                <p><strong>Fecha:</strong> <span id="purchase-detail-date"></span></p>
+                <p><strong>Total:</strong> <span id="purchase-detail-total"></span></p>
+                <p><strong>Estado:</strong> <span id="purchase-detail-state"></span></p>
+            </div>
+            <table class="table detail-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Costo Unit.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-detail-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

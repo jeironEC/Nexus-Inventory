@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos de Inventario - Nexus Inventory</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components/sidebar.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
+
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/Nexus_Inventory_Logo.png?v=3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <main class="main-content">
+            <div id="page-header-container"></div>
+
+            <div class="page-body section-stack">
+                <div class="stats-grid mb-4">
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">swap_horiz</span>
+                        <div class="card-kpi-value" data-kpi="total_movements">0</div>
+                        <div class="card-kpi-label">Total Movimientos</div>
+                    </div>
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">add_circle</span>
+                        <div class="card-kpi-value" data-kpi="total_entries">0</div>
+                        <div class="card-kpi-label">Entradas</div>
+                    </div>
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">remove_circle</span>
+                        <div class="card-kpi-value" data-kpi="total_exits">0</div>
+                        <div class="card-kpi-label">Salidas</div>
+                    </div>
+                    <div class="card-kpi">
+                        <span class="material-symbols-outlined card-kpi-icon">calculate</span>
+                        <div class="card-kpi-value" data-kpi="net_quantity">0</div>
+                        <div class="card-kpi-label">Cantidad Neta</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Filtros</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Movimiento</label>
+                                <select class="form-input form-select" id="inventory-movement-filter-movement-type">
+                                    <option value="">Todos</option>
+                                    <option value="IN">Entrada</option>
+                                    <option value="OUT">Salida</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Producto</label>
+                                <select class="form-input form-select" id="inventory-movement-filter-product-id">
+                                    <option value="">Todos los productos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Usuario</label>
+                                <select class="form-input form-select" id="inventory-movement-filter-user-id">
+                                    <option value="">Todos los usuarios</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-input" id="inventory-movement-filter-date-from">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-input" id="inventory-movement-filter-date-to">
+                            </div>
+                            <div class="filter-actions">
+                                <button class="btn btn-secondary w-full" id="btn-apply-filters">
+                                    <span class="material-symbols-outlined">filter_list</span>
+                                    Aplicar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination">
+                        <button class="pagination-btn" aria-label="Página anterior" disabled>
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn" aria-label="Página siguiente">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                        <span class="pagination-info">Mostrando registros</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="/js/components/Modal.js"></script>
+    <script type="module" src="/js/components/Sidebar.js"></script>
+    <script type="module" src="/js/components/PageHeader.js"></script>
+
+    <script type="module" src="/js/pages/inventory_movements.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+</body>
+</html>

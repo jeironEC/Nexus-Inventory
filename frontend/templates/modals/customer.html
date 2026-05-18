@@ -10,25 +10,25 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label class="form-label">NIF *</label>
-                            <input type="text" name="nif" class="form-input" required>
+                            <input type="text" name="nif" class="form-input" required pattern="^(?:[0-9]{8}[A-Z]|[A-Z][0-9]{7}[A-Z0-9])$" title="NIF español: 12345678A o B12345678">
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Nombre *</label>
-                                <input type="text" name="first_name" class="form-input" required>
+								<label class="form-label">Nombre *</label>
+								<input type="text" name="first_name" class="form-input" required minlength="2" maxlength="50">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Apellido *</label>
-                                <input type="text" name="last_name" class="form-input" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
+								<input type="text" name="last_name" class="form-input" required minlength="2" maxlength="50">
+							</div>
+						</div>
+						<div class="form-group">
                             <label class="form-label">Email *</label>
                             <input type="email" name="email" class="form-input" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Teléfono *</label>
-                            <input type="tel" name="number_phone" class="form-input" required>
+                            <input type="tel" name="number_phone" class="form-input" required value="+34" pattern="^\+34[0-9 ]{6,}$" title="Debe comenzar con +34 seguido del número">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Dirección</label>

@@ -28,7 +28,7 @@ const COLUMNS = {
             value: (item) => {
                 return item.movement_type === 'IN'
                     ? ReportHelper.createBadge('Entrada', 'success')
-                    : ReportHelper.createBadge('Salida', 'info');
+                    : ReportHelper.createBadge('Salida', 'danger');
             }
         },
         { label: 'Cantidad', value: (item) => item.quantity || 0 },

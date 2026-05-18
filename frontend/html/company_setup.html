@@ -90,6 +90,8 @@
                                     placeholder="B12345678"
                                     required
                                     autocomplete="off"
+                                    pattern="^(?:[0-9]{8}[A-Z]|[A-Z][0-9]{7}[A-Z0-9])$"
+        							title="NIF español: 8 dígitos + 1 letra (12345678A) o 1 letra + 7 dígitos + 1 letra (B12345678)"
                                 >
                             </div>
                             <div class="form-group">
@@ -101,6 +103,8 @@
                                     class="form-input"
                                     placeholder="Mi Empresa S.L."
                                     required
+                                    minlength="2"
+            						maxlength="100"
                                 >
                             </div>
                         </div>
@@ -109,13 +113,15 @@
                         <div class="form-group">
                             <label for="address" class="form-label">Dirección *</label>
                             <input
-                                type="text"
-                                id="address"
-                                name="address"
-                                class="form-input"
-                                placeholder="Calle Ejemplo 123, Madrid"
-                                required
-                            >
+								type="text"
+								id="address"
+								name="address"
+								class="form-input"
+								placeholder="Calle Ejemplo 123, Barcelona"
+								required
+								minlength="5"
+								maxlength="200"
+							>
                         </div>
 
                         <!-- Fila 2: Teléfono y Email -->
@@ -129,6 +135,9 @@
                                     class="form-input"
                                     placeholder="+34 600 000 000"
                                     required
+                                    value="+34"
+									pattern="^\+34[0-9 ]{6,}$"
+									title="Debe comenzar con +34 seguido del número"
                                 >
                             </div>
                             <div class="form-group">

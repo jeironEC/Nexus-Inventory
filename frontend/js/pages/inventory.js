@@ -2,6 +2,7 @@
 
 import { formatCurrency, formatDate, formatFullName } from '../utils/helpers.js';
 import { Table } from '../components/Table.js';
+import { toast } from '../components/Toast.js';
 import { serviceProvider } from '../services/ServiceProvider.js';
 import { getFilterValues, initFilterListeners, loadFilterSelects } from '../utils/filter_utils.js';
 import { DEFAULT_PAGINATION_LIMIT } from '../utils/const.js';
@@ -87,9 +88,13 @@ async function loadInventoryData() {
 
             paginator.init();
             inventoryTable.setData(paginator.getCurrentPageData());
-        }
+        } else {
+		    toast.show(response.message || 'Error al cargar inventario', 'error');
+		    inventoryTable.setData([]);
+		}
     } catch (error) {
-        inventoryTable.showError('No se pudo cargar la información de inventario. ' + (error.message || ''));
+        toast.show('No se pudo cargar la información de inventario. ' + (error.message || ''), 'error');
+        inventoryTable.setData([]);
     }
 }
 

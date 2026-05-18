@@ -1121,7 +1121,16 @@ class InvoiceReportViewSet(ReportFilterMixin, viewsets.ViewSet):
         else:
             data = list(
                 qs_filtered.values(
-                    "id", "number_invoice", "created_at", "state", "pdf_generated"
+                    "id",
+                    "number_invoice",
+                    "created_at",
+                    "state",
+                    "pdf_generated",
+                    "sale__customer__first_name",
+                    "sale__customer__last_name",
+                    "sale__total_amount",
+                    "purchase__supplier__name",
+                    "purchase__total_amount",
                 )
             )
 

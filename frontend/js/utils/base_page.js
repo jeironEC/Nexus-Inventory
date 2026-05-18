@@ -107,9 +107,12 @@ export async function loadData(config) {
 
             paginator.init();
             renderFn(paginator.getCurrentPageData());
+        } else {
+            toast.show(response.message || 'Error al cargar datos', 'error');
+            renderFn([]);
         }
     } catch (error) {
-        window.modal.showAlert('Error de carga', 'No se pudieron cargar los datos. ' + (error.message || ''), 'error');
+         toast.show('No se pudieron cargar los datos. ' + (error.message || ''), 'error');
     }
 }
 

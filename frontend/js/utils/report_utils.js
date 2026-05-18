@@ -2,6 +2,7 @@
 
 import { ReportHelper } from '../components/ReportHelper.js';
 import { ReportTable } from '../components/ReportTable.js';
+import { toast } from '../components/Toast.js';
 
 // Crea una página de reporte configurando filtros y tabla
 export function createReportPage(config) {
@@ -108,10 +109,12 @@ export function createReportPage(config) {
                     reportTable.setData(processedData, config.columns);
                 }
             } else {
-                reportTable.showError(response.message || 'Error loading data');
+                toast.show(response.message || 'Error al cargar datos', 'error');
+            	reportTable.setData([], config.columns);
             }
         } catch (error) {
-            reportTable.showError(error.message || error.toString() || 'Error al cargar datos');
+            toast.show(error.message || error.toString() || 'Error al cargar datos', 'error');
+        	reportTable.setData([], config.columns);
         }
     }
 
@@ -126,7 +129,7 @@ export function createReportPage(config) {
         reportTable = new ReportTable({
             selector: '#report-table',
             defaultColumns: defaultCols,
-            emptyMessage: 'No records available for selected filters'
+            emptyMessage: 'No se encontraron registros'
         });
 
         initReport();

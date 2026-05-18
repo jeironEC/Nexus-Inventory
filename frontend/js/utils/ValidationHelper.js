@@ -31,6 +31,10 @@ export const ValidationHelper = {
             error = 'Formato de email inválido';
         } else if (input.minLength > 0 && value && value.length < input.minLength) {
             error = `Mínimo ${input.minLength} caracteres`;
+        } else if (input.maxLength > 0 && value && value.length > input.maxLength) {
+            error = `Máximo ${input.maxLength} caracteres`;
+        } else if (input.pattern && value && !new RegExp(`^(?:${input.pattern})$`).test(value)) {
+            error = input.title || 'Formato inválido';
         }
 
         // Validaciones personalizadas vía data-validate
@@ -38,6 +42,10 @@ export const ValidationHelper = {
             for (const rule of rules) {
                 if (rule === 'number' && isNaN(value)) {
                     error = 'Debe ser un número';
+                } else if (rule === 'nif' && !/^(?:[0-9]{8}[A-Z]|[A-Z][0-9]{7}[A-Z0-9])$/.test(value)) {
+                    error = 'Formato de NIF inválido';
+                } else if (rule === 'phone' && !/^\+34[0-9 ]{6,}$/.test(value)) {
+                    error = 'Debe comenzar con +34 seguido del número';
                 }
             }
         }

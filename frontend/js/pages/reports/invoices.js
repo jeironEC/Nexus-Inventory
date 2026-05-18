@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from '../../utils/helpers.js';
 import { ReportHelper } from '../../components/ReportHelper.js';
 import { ReportTable } from '../../components/ReportTable.js';
 import { initFilterListeners } from '../../utils/filter_utils.js';
+import { toast } from '../../components/Toast.js';
 
 let reportTable;
 
@@ -61,10 +62,12 @@ async function loadReportData() {
             const data = Array.isArray(response.data.data) ? response.data.data : [];
             reportTable.setData(data, COLUMNS);
         } else {
-            reportTable.showError(response.message || 'Error al cargar datos');
+            toast.show(response.message || 'Error al cargar datos', 'error');
+            reportTable.setData([]);
         }
     } catch (error) {
-        reportTable.showError('Error de conexión con el servidor');
+        toast.show('Error de conexión con el servidor', 'error');
+        reportTable.setData([]);
     }
 }
 

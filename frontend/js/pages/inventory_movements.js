@@ -1,10 +1,12 @@
-import { formatDate, formatFullName } from '../utils/helpers.js';
+import { toast } from '../components/Toast.js';
+import { formatCurrency, formatDate, formatFullName } from '../utils/helpers.js';
 import { serviceProvider } from '../services/ServiceProvider.js';
-import { create } from '../utils/dom.js';
+import { create, parseHTML } from '../utils/dom.js';
 import { getFilterValues, initFilterListeners, loadFilterSelects } from '../utils/filter_utils.js';
 import { DEFAULT_PAGINATION_LIMIT } from '../utils/const.js';
 import { TablePagination } from '../components/Pagination.js';
 import { Table } from '../components/Table.js';
+import { TemplateLoader } from '../utils/TemplateLoader.js';
 import { setupTableColumnToggles } from '../utils/base_page.js';
 
 let movementTable;
@@ -12,7 +14,6 @@ let movementTable;
 // Inicializa los KPIs con valores por defecto
 function initKpis() {
     const kpis = document.querySelectorAll('.card-kpi');
-
     if (kpis.length === 0) return;
 
     const defaults = [
@@ -24,10 +25,8 @@ function initKpis() {
 
     kpis.forEach((kpi, index) => {
         const valueEl = kpi.querySelector('.card-kpi-value');
-
         if (valueEl && defaults[index]) {
             const parts = defaults[index].split('\n');
-
             valueEl.innerHTML = `
                 ${parts[0]}
                 ${parts[1] ? `<div class="kpi-detail">${parts[1]}</div>` : ''}
@@ -67,6 +66,42 @@ const TABLE_COLUMNS = [
     { label: 'Fecha', type: 'normal', value: (item) => item.created_at ? formatDate(item.created_at, 'dd/mm/yyyy HH:mm') : '-' }
 ];
 
+// Muestra el modal con el detalle de un movimiento
+async function handleShowMovementDetail(movement) {
+    const existingModal = document.getElementById('modal-inventory-movement-detail');
+    if (existingModal) existingModal.remove();
+
+    const templateHtml = await TemplateLoader.load('inventory_movement_detail');
+    const container = create('div');
+    container.appendChild(parseHTML(templateHtml));
+    document.body.appendChild(container.firstElementChild);
+
+    document.getElementById('inventory-movement-detail-id').textContent = `#${movement.id}`;
+    document.getElementById('inventory-movement-detail-product').textContent = movement.product?.name || 'Desconocido';
+
+    const typeEl = document.getElementById('inventory-movement-detail-type');
+    const isIn = movement.movement_type === 'IN';
+    typeEl.className = isIn ? 'badge badge-success' : 'badge badge-danger';
+    typeEl.textContent = isIn ? 'Entrada' : 'Salida';
+
+    document.getElementById('inventory-movement-detail-quantity').textContent = movement.quantity;
+
+    const sourceMap = {
+        'COMPRA': 'Compra',
+        'VENTA': 'Venta',
+        'DEVOLUCION_VENTA': 'Devol. Venta',
+        'DEVOLUCION_COMPRA': 'Devol. Compra',
+        'MANUAL': 'Manual'
+    };
+    const sourceText = sourceMap[movement.source] || movement.source || 'Desconocido';
+    document.getElementById('inventory-movement-detail-source').textContent = sourceText;
+
+    document.getElementById('inventory-movement-detail-user').textContent = movement.user?.first_name ? formatFullName(movement.user) : (movement.user?.email || '-');
+    document.getElementById('inventory-movement-detail-date').textContent = formatDate(movement.created_at, 'dd/mm/yyyy HH:mm');
+
+    window.modal.show('modal-inventory-movement-detail');
+}
+
 // Inicializa la página
 async function initInventoryMovementsPage() {
     if (window.sidebar) {
@@ -79,7 +114,20 @@ async function initInventoryMovementsPage() {
 
     movementTable = new Table({
         selector: '.table',
-        columns: TABLE_COLUMNS
+        columns: TABLE_COLUMNS,
+        actions: {
+            customHtml: () => `
+                <div class="table-actions">
+                    <button class="btn-action btn-view-detail" title="Ver Detalle">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                </div>
+            `,
+            setupEvents: (tr, item) => {
+                const btnView = tr.querySelector('.btn-view-detail');
+                if (btnView) btnView.addEventListener('click', () => handleShowMovementDetail(item));
+            }
+        }
     });
 
     setupTableColumnToggles();
@@ -91,7 +139,6 @@ async function initInventoryMovementsPage() {
     });
 
     initKpis();
-
     await loadMovementsData();
 
     initFilterListeners('.card', async () => {
@@ -118,16 +165,19 @@ async function loadMovementsData() {
 
             paginator.init();
             movementTable.setData(paginator.getCurrentPageData());
+        } else {
+            toast.show(response.message || 'Error al cargar movimientos', 'error');
+            movementTable.setData([]);
         }
     } catch (error) {
-        movementTable.showError('No se pudo cargar el historial de movimientos. ' + (error.message || ''));
+        toast.show('No se pudo cargar el historial de movimientos. ' + (error.message || ''), 'error');
+        movementTable.setData([]);
     }
 }
 
 // Actualiza los KPIs de la página
 function updateKpis(items) {
     const kpis = document.querySelectorAll('.card-kpi');
-
     if (kpis.length === 0) return;
 
     let purchasesIn = 0;
@@ -140,17 +190,11 @@ function updateKpis(items) {
         const src = (item.source || '').toUpperCase();
 
         if (item.movement_type === 'IN') {
-            if (src === 'COMPRA') {
-                purchasesIn += qty;
-            } else if (src === 'DEVOLUCION_VENTA') {
-                saleReturnIn += qty;
-            }
+            if (src === 'COMPRA') purchasesIn += qty;
+            else if (src === 'DEVOLUCION_VENTA') saleReturnIn += qty;
         } else {
-            if (src === 'VENTA') {
-                salesOut += qty;
-            } else if (src === 'DEVOLUCION_COMPRA') {
-                purchaseReturnOut += qty;
-            }
+            if (src === 'VENTA') salesOut += qty;
+            else if (src === 'DEVOLUCION_COMPRA') purchaseReturnOut += qty;
         }
     });
 
@@ -158,8 +202,8 @@ function updateKpis(items) {
     const totalExits = salesOut + purchaseReturnOut;
     const netQuantity = totalEntries - totalExits;
 
-    const entriesBreakdown = `(${purchasesIn} compras, ${saleReturnIn} devoluciones)`;
-    const exitsBreakdown = `(${salesOut} ventas, ${purchaseReturnOut} devoluciones)`;
+    const entriesBreakdown = `(${purchasesIn} compras, ${saleReturnIn} dev.)`;
+    const exitsBreakdown = `(${salesOut} ventas, ${purchaseReturnOut} dev.)`;
 
     const values = [
         { value: items.length.toString(), detail: '' },

@@ -32,6 +32,8 @@ services:
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: db
       DATABASE_PORT: "5432"
+      NEXUS_ADMIN_EMAIL: admin@nexusinventory.com
+      NEXUS_ADMIN_PASSWORD: Admin123!
     volumes:
       - ./backend:/app
     depends_on:
@@ -40,7 +42,7 @@ services:
     networks:
       - nexus_net
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/api/health/ || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/v1/health/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

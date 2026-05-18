@@ -47,10 +47,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if value is None:
             return value
         request = self.context.get("request")
-
-        if not request or not getattr(request, "user", None):
+        if (
+            not request
+            or not hasattr(request, "user")
+            or not request.user
+            or not request.user.is_authenticated
+        ):
             return value
-
         if isinstance(value, int):
             from nexus_inventory_backend.db.models import Role
 
@@ -62,6 +65,10 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         else:
             role_name = value.name if hasattr(value, "name") else None
 
-        if role_name == "admin" and not request.user.role.name == "admin":
+        if (
+            role_name
+            and role_name.lower() == "admin"
+            and not request.user.role.name.lower() == "admin"
+        ):
             raise serializers.ValidationError("You cannot assign admin role.")
         return value

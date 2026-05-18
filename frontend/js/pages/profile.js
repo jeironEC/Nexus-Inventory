@@ -22,7 +22,8 @@ async function initProfilePage() {
         window.pageHeader.init('Mi Perfil');
     }
 
-    await Promise.all([loadUserProfile(), loadRoles()]);
+    await loadRoles();
+    await loadUserProfile();
     document.getElementById('form-profile-info')?.addEventListener('submit', handleProfileUpdate);
 }
 
@@ -120,7 +121,11 @@ function populateProfile(userData) {
     document.getElementById('profile-nif').value = userData.nif || '';
 
     if (roleId) {
-        document.getElementById('profile-role-select').value = roleId;
+        const select = document.getElementById('profile-role-select');
+		select.value = roleId;
+		if (select._choices) {
+		    select._choices.setChoiceByValue(String(roleId));
+		}
     }
 
     const form = document.getElementById('form-profile-info');

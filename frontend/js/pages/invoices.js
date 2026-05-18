@@ -118,9 +118,13 @@ async function loadInvoicesData() {
 
             paginator.init();
             invoiceTable.setData(paginator.getCurrentPageData());
-        }
+        } else {
+        	toast.show(response.message || 'Error al cargar facturas', 'error');
+        	invoiceTable.setData([]);
+    	}
     } catch (error) {
-        invoiceTable.showError('No se pudo cargar la información de facturas. ' + (error.message || ''));
+        toast.show('No se pudo cargar la información de facturas. ' + (error.message || ''), 'error');
+        invoiceTable.setData([]);
     }
 }
 

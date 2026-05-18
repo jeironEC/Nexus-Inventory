@@ -4,9 +4,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.db.models import Case, CharField, Exists, OuterRef, Value, When
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from nexus_inventory_backend.db.models import Inventory, InventoryMovement
+from nexus_inventory_backend.db.models import (
+    Inventory,
+    InventoryMovement,
+    PurchaseDetail,
+    PurchaseReturnDetail,
+    SaleDetail,
+    SaleReturnDetail,
+)
 
 from api.serializers.inventory import InventorySerializer
 from api.serializers.inventory_movement import InventoryMovementSerializer
@@ -92,6 +100,40 @@ class InventoryMovementViewSet(
 
     queryset = (
         InventoryMovement.objects.select_related("product", "user")
+        .annotate(
+            source=Case(
+                When(
+                    Exists(
+                        SaleDetail.objects.filter(inventory_movement=OuterRef("pk"))
+                    ),
+                    then=Value("VENTA"),
+                ),
+                When(
+                    Exists(
+                        PurchaseDetail.objects.filter(inventory_movement=OuterRef("pk"))
+                    ),
+                    then=Value("COMPRA"),
+                ),
+                When(
+                    Exists(
+                        SaleReturnDetail.objects.filter(
+                            inventory_movement=OuterRef("pk")
+                        )
+                    ),
+                    then=Value("DEVOLUCION_VENTA"),
+                ),
+                When(
+                    Exists(
+                        PurchaseReturnDetail.objects.filter(
+                            inventory_movement=OuterRef("pk")
+                        )
+                    ),
+                    then=Value("DEVOLUCION_COMPRA"),
+                ),
+                default=Value("MANUAL"),
+                output_field=CharField(),
+            )
+        )
         .all()
         .order_by("-created_at")
     )

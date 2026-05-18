@@ -3,6 +3,7 @@
 import { serviceProvider } from '../services/ServiceProvider.js';
 import { authService } from '../services/AuthService.js';
 import { setButtonLoading } from '../utils/helpers.js';
+import { ValidationHelper } from '../utils/ValidationHelper.js';
 
 // Inicializa la configuración inicial de la empresa
 async function initCompanySetup() {
@@ -23,8 +24,7 @@ async function handleCompanySetupSubmit(e) {
     const form = e.target;
     const btn = document.getElementById('btn-company-submit');
 
-    if (!form.checkValidity()) {
-        form.reportValidity();
+    if (!ValidationHelper.validateForm(form)) {
         return;
     }
 

@@ -156,9 +156,13 @@ async function loadPurchaseReturnsData() {
 
             paginator.init();
             purchaseReturnTable.setData(paginator.getCurrentPageData());
-        }
+        } else {
+		    toast.show(response.message || 'Error al cargar devoluciones', 'error');
+		    purchaseReturnTable.setData([]);
+		}
     } catch (error) {
-        purchaseReturnTable.showError('No se pudo cargar la información de devoluciones. ' + (error.message || ''));
+        toast.show('No se pudo cargar la información de devoluciones. ' + (error.message || ''), 'error');
+        purchaseReturnTable.setData([]);
     }
 }
 

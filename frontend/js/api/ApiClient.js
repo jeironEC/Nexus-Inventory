@@ -262,6 +262,11 @@ export class ApiClient {
             'not found.': 'Lo sentimos, el recurso no existe.',
             'method "post" not allowed.': 'No se permite enviar datos en esta sección.',
             'method "get" not allowed.': 'No se permite consultar datos en esta sección.',
+            'email not found.': 'No se encontró ningún usuario con ese correo.',
+            'only administrators are allowed this action.': 'Solo los administradores pueden realizar esta acción.',
+            'email validate.': 'Correo verificado.',
+            'expired or invalid token.': 'El enlace ha expirado o no es válido.',
+            'user not found.': 'Usuario no encontrado.',
         };
 
         if (!data) {

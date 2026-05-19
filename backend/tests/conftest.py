@@ -318,7 +318,7 @@ def invoice_sale(db, sale, admin_user):
     return Invoice.objects.create(
         company_id=sale.company.pk,
         sale=sale,
-        number_invoice=f"SINV-{sale.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
+        number_invoice=f"SINV-{uuid.uuid4().hex[:6].upper()}-{sale.pk:08d}",
         invoice_type=InvoiceType.SALE,
         state=InvoiceState.ISSUED,
         created_by=admin_user,
@@ -330,7 +330,7 @@ def invoice_purchase(db, purchase, admin_user):
     return Invoice.objects.create(
         company_id=purchase.company.pk,
         purchase=purchase,
-        number_invoice=f"PINV-{purchase.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
+        number_invoice=f"PINV-{uuid.uuid4().hex[:6].upper()}-{purchase.pk:08d}",
         invoice_type=InvoiceType.PURCHASE,
         state=InvoiceState.ISSUED,
         created_by=admin_user,

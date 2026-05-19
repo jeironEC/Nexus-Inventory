@@ -125,7 +125,7 @@ def _create_movement_and_update_inventory(product, quantity, movement_type, user
 def _create_invoice(sale_or_purchase, invoice_type, user):
     """Crea una factura asociada a una venta o compra."""
     if invoice_type == InvoiceType.SALE:
-        number = f"SINV-{sale_or_purchase.pk:08d}-{uuid.uuid4().hex[:6].upper()}"
+        number = f"SINV-{uuid.uuid4().hex[:6].upper()}-{sale_or_purchase.pk:08d}"
         return Invoice.objects.create(
             sale=sale_or_purchase,
             company=sale_or_purchase.company,
@@ -135,7 +135,7 @@ def _create_invoice(sale_or_purchase, invoice_type, user):
             created_by=user,
         )
     else:
-        number = f"PINV-{sale_or_purchase.pk:08d}-{uuid.uuid4().hex[:6].upper()}"
+        number = f"PINV-{uuid.uuid4().hex[:6].upper()}-{sale_or_purchase.pk:08d}"
         return Invoice.objects.create(
             purchase=sale_or_purchase,
             company=sale_or_purchase.company,
@@ -241,14 +241,7 @@ def create_purchase(details_data, user, supplier, company=None):
             subtotal=quantity * unit_cost,
         )
 
-    Invoice.objects.create(
-        purchase=purchase,
-        company=purchase.company,
-        invoice_type=InvoiceType.PURCHASE,
-        number_invoice=f"PINV-{purchase.pk:08d}-{uuid.uuid4().hex[:6].upper()}",
-        state=InvoiceState.ISSUED,
-        created_by=user,
-    )
+    _create_invoice(purchase, InvoiceType.PURCHASE, user)
 
     return purchase
 
